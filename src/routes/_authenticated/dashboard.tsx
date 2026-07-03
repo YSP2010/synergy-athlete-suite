@@ -99,6 +99,7 @@ function DashboardPage() {
         gym_days: profile?.gym_days ?? [],
         sport_days: profile?.sport_days ?? [],
         match_days: profile?.match_days ?? [],
+        sport: profile?.sport ?? null,
       };
 
       // Match-Hardness pro Weekday (nur diese Woche)

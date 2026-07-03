@@ -10,6 +10,7 @@ import {
   HeartPulse,
   Settings,
   LogOut,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,13 +29,14 @@ const NAV: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, shortLabel: "Home" },
   { to: "/plan", label: "Wochenplan", icon: CalendarDays, shortLabel: "Plan" },
   { to: "/checkin", label: "Check-in", icon: HeartPulse, shortLabel: "Check" },
+  { to: "/gym", label: "Gym-Log", icon: Dumbbell, shortLabel: "Gym" },
+  { to: "/sport", label: "Sport-Log", icon: Trophy, shortLabel: "Sport" },
   { to: "/nutrition", label: "Ernährung", icon: Utensils, shortLabel: "Food" },
   { to: "/scan", label: "Scanner", icon: Camera, shortLabel: "Scan" },
-  { to: "/gym", label: "Gym-Log", icon: Dumbbell, shortLabel: "Gym" },
   { to: "/journal", label: "Tagebuch", icon: BookOpen, shortLabel: "Diary" },
 ];
 
-const MOBILE_NAV = NAV.slice(0, 5);
+const MOBILE_NAV = [NAV[0], NAV[1], NAV[3], NAV[4], NAV[5]];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const loc = useLocation();

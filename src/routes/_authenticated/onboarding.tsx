@@ -202,6 +202,7 @@ function OnboardingPage() {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="football">Fußball</SelectItem>
+                  <SelectItem value="tennis">Tennis</SelectItem>
                   <SelectItem value="basketball">Basketball</SelectItem>
                   <SelectItem value="handball">Handball</SelectItem>
                   <SelectItem value="running">Laufen</SelectItem>

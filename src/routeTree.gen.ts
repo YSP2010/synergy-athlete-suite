@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSportRouteImport } from './routes/_authenticated/sport'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
 import { Route as AuthenticatedPlanRouteImport } from './routes/_authenticated/plan'
@@ -21,6 +22,8 @@ import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedGymRouteImport } from './routes/_authenticated/gym'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCheckinRouteImport } from './routes/_authenticated/checkin'
+import { Route as AuthenticatedSportIdRouteImport } from './routes/_authenticated/sport.$id'
+import { Route as AuthenticatedGymIdRouteImport } from './routes/_authenticated/gym.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -35,6 +38,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSportRoute = AuthenticatedSportRouteImport.update({
+  id: '/sport',
+  path: '/sport',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
@@ -81,32 +89,48 @@ const AuthenticatedCheckinRoute = AuthenticatedCheckinRouteImport.update({
   path: '/checkin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSportIdRoute = AuthenticatedSportIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedSportRoute,
+} as any)
+const AuthenticatedGymIdRoute = AuthenticatedGymIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedGymRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/gym': typeof AuthenticatedGymRoute
+  '/gym': typeof AuthenticatedGymRouteWithChildren
   '/journal': typeof AuthenticatedJournalRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/sport': typeof AuthenticatedSportRouteWithChildren
+  '/gym/$id': typeof AuthenticatedGymIdRoute
+  '/sport/$id': typeof AuthenticatedSportIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/gym': typeof AuthenticatedGymRoute
+  '/gym': typeof AuthenticatedGymRouteWithChildren
   '/journal': typeof AuthenticatedJournalRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/sport': typeof AuthenticatedSportRouteWithChildren
+  '/gym/$id': typeof AuthenticatedGymIdRoute
+  '/sport/$id': typeof AuthenticatedSportIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,13 +139,16 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/checkin': typeof AuthenticatedCheckinRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/gym': typeof AuthenticatedGymRoute
+  '/_authenticated/gym': typeof AuthenticatedGymRouteWithChildren
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/plan': typeof AuthenticatedPlanRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/sport': typeof AuthenticatedSportRouteWithChildren
+  '/_authenticated/gym/$id': typeof AuthenticatedGymIdRoute
+  '/_authenticated/sport/$id': typeof AuthenticatedSportIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,6 +164,9 @@ export interface FileRouteTypes {
     | '/plan'
     | '/scan'
     | '/settings'
+    | '/sport'
+    | '/gym/$id'
+    | '/sport/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -150,6 +180,9 @@ export interface FileRouteTypes {
     | '/plan'
     | '/scan'
     | '/settings'
+    | '/sport'
+    | '/gym/$id'
+    | '/sport/$id'
   id:
     | '__root__'
     | '/'
@@ -164,6 +197,9 @@ export interface FileRouteTypes {
     | '/_authenticated/plan'
     | '/_authenticated/scan'
     | '/_authenticated/settings'
+    | '/_authenticated/sport'
+    | '/_authenticated/gym/$id'
+    | '/_authenticated/sport/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -194,6 +230,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/sport': {
+      id: '/_authenticated/sport'
+      path: '/sport'
+      fullPath: '/sport'
+      preLoaderRoute: typeof AuthenticatedSportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
@@ -258,31 +301,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCheckinRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sport/$id': {
+      id: '/_authenticated/sport/$id'
+      path: '/$id'
+      fullPath: '/sport/$id'
+      preLoaderRoute: typeof AuthenticatedSportIdRouteImport
+      parentRoute: typeof AuthenticatedSportRoute
+    }
+    '/_authenticated/gym/$id': {
+      id: '/_authenticated/gym/$id'
+      path: '/$id'
+      fullPath: '/gym/$id'
+      preLoaderRoute: typeof AuthenticatedGymIdRouteImport
+      parentRoute: typeof AuthenticatedGymRoute
+    }
   }
 }
+
+interface AuthenticatedGymRouteChildren {
+  AuthenticatedGymIdRoute: typeof AuthenticatedGymIdRoute
+}
+
+const AuthenticatedGymRouteChildren: AuthenticatedGymRouteChildren = {
+  AuthenticatedGymIdRoute: AuthenticatedGymIdRoute,
+}
+
+const AuthenticatedGymRouteWithChildren =
+  AuthenticatedGymRoute._addFileChildren(AuthenticatedGymRouteChildren)
+
+interface AuthenticatedSportRouteChildren {
+  AuthenticatedSportIdRoute: typeof AuthenticatedSportIdRoute
+}
+
+const AuthenticatedSportRouteChildren: AuthenticatedSportRouteChildren = {
+  AuthenticatedSportIdRoute: AuthenticatedSportIdRoute,
+}
+
+const AuthenticatedSportRouteWithChildren =
+  AuthenticatedSportRoute._addFileChildren(AuthenticatedSportRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCheckinRoute: typeof AuthenticatedCheckinRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedGymRoute: typeof AuthenticatedGymRoute
+  AuthenticatedGymRoute: typeof AuthenticatedGymRouteWithChildren
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlanRoute: typeof AuthenticatedPlanRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSportRoute: typeof AuthenticatedSportRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCheckinRoute: AuthenticatedCheckinRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedGymRoute: AuthenticatedGymRoute,
+  AuthenticatedGymRoute: AuthenticatedGymRouteWithChildren,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlanRoute: AuthenticatedPlanRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSportRoute: AuthenticatedSportRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
