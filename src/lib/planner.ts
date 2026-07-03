@@ -296,9 +296,9 @@ export function generateWeekPlan(
       slots.push({
         date: iso,
         dow,
-        label: "Fußballtraining",
+        label: sportTrainingLabel(profile.sport),
         kind: "sport",
-        detail: "Technik & Kondition",
+        detail: sportTrainingDetail(profile.sport),
       });
       continue;
     }
