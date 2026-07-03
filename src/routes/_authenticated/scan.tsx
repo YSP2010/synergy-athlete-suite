@@ -1,0 +1,24 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Camera } from "lucide-react";
+
+export const Route = createFileRoute("/_authenticated/scan")({
+  head: () => ({ meta: [{ title: "Food-Scanner" }] }),
+  component: () => (
+    <div className="mx-auto max-w-md py-16 text-center">
+      <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-neon-soft text-neon">
+        <Camera className="h-7 w-7" />
+      </div>
+      <h1 className="font-display text-2xl font-bold">Food-Scanner</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Kommt in Etappe 4: Foto der Nährwerttabelle → KI berechnet Health-Score (0–10) und
+        Plan-Fit-Score für dein Ziel.
+      </p>
+      <Link
+        to="/dashboard"
+        className="mt-6 inline-block rounded-lg bg-neon px-4 py-2 text-sm font-semibold text-neon-foreground glow"
+      >
+        Zum Dashboard
+      </Link>
+    </div>
+  ),
+});
