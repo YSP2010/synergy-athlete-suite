@@ -29,6 +29,44 @@ export interface AthleteProfile {
   gym_days: number[]; // ISO 0=Mo
   sport_days: number[];
   match_days: number[];
+  sport?: string | null;
+}
+
+export const SPORT_LABELS: Record<string, string> = {
+  football: "Fußball",
+  tennis: "Tennis",
+  basketball: "Basketball",
+  handball: "Handball",
+  running: "Laufen",
+  other: "Sport",
+};
+
+export function sportName(sport?: string | null): string {
+  if (!sport) return "Sport";
+  return SPORT_LABELS[sport] ?? "Sport";
+}
+
+export function sportTrainingLabel(sport?: string | null): string {
+  const n = sportName(sport);
+  if (sport === "running") return "Lauftraining";
+  if (sport === "other") return "Sport-Training";
+  return `${n}training`;
+}
+
+export function sportTrainingDetail(sport?: string | null): string {
+  switch (sport) {
+    case "tennis":
+      return "Technik, Aufschlag & Bewegung";
+    case "basketball":
+    case "handball":
+      return "Technik, Wurf & Ausdauer";
+    case "running":
+      return "Ausdauer & Tempo";
+    case "football":
+      return "Technik & Kondition";
+    default:
+      return "Training";
+  }
 }
 
 export interface DailyStat {
