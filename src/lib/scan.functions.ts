@@ -131,7 +131,7 @@ export const analyzeFoodScan = createServerFn({ method: "POST" })
         user_id: userId,
         image_path: data.imagePath,
         product_name: extracted.name,
-        extracted: extracted as unknown as Record<string, unknown>,
+        extracted: JSON.parse(JSON.stringify(extracted)),
         health_score: extracted.health_score,
         plan_fit_score: extracted.plan_fit_score,
         reasoning: extracted.reasoning,
