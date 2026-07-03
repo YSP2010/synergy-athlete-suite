@@ -155,19 +155,24 @@ function NutritionPage() {
     mutationFn: async () => {
       if (!data) return;
       if (!form.name.trim()) throw new Error("Name fehlt");
+      const kcal = Math.max(0, Number(form.kcal) || 0);
+      const protein = Math.max(0, Number(form.protein_g) || 0);
+      const carbs = Math.max(0, Number(form.carbs_g) || 0);
+      const fat = Math.max(0, Number(form.fat_g) || 0);
       const { error } = await supabase.from("nutrition_logs").insert({
         user_id: data.uid,
         date: dateIso,
         meal: form.meal,
         name: form.name.trim(),
-        kcal: Number(form.kcal) || 0,
-        protein_g: Number(form.protein_g) || 0,
-        carbs_g: Number(form.carbs_g) || 0,
-        fat_g: Number(form.fat_g) || 0,
+        kcal,
+        protein_g: protein,
+        carbs_g: carbs,
+        fat_g: fat,
         source: "manual",
       });
       if (error) throw error;
     },
+
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["nutrition", dateIso] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
@@ -369,11 +374,21 @@ function NumCol({ label, v, on }: { label: string; v: string; on: (v: string) =>
       <Label className="text-[10px] uppercase text-muted-foreground">{label}</Label>
       <Input
         type="number"
+        min={0}
+        step="any"
+        inputMode="decimal"
         className="mt-1 tabular"
         value={v}
-        onChange={(e) => on(e.target.value)}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (val === "" || Number(val) >= 0) on(val);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault();
+        }}
         placeholder="0"
       />
     </div>
   );
 }
+
