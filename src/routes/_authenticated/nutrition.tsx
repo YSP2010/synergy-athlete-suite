@@ -374,11 +374,21 @@ function NumCol({ label, v, on }: { label: string; v: string; on: (v: string) =>
       <Label className="text-[10px] uppercase text-muted-foreground">{label}</Label>
       <Input
         type="number"
+        min={0}
+        step="any"
+        inputMode="decimal"
         className="mt-1 tabular"
         value={v}
-        onChange={(e) => on(e.target.value)}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (val === "" || Number(val) >= 0) on(val);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault();
+        }}
         placeholder="0"
       />
     </div>
   );
 }
+
