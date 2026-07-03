@@ -105,6 +105,7 @@ function PlanPage() {
     gym_days: profile?.gym_days ?? [],
     sport_days: profile?.sport_days ?? [],
     match_days: profile?.match_days ?? [],
+    sport: profile?.sport ?? null,
   };
 
   const hardnessMap: Record<number, MatchHardness> = {};
