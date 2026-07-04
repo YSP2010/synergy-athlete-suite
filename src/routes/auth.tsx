@@ -21,6 +21,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const nav = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [role, setRole] = useState<"athlete" | "coach">("athlete");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -31,15 +32,18 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { name },
+            data: { name, role },
           },
         });
         if (error) throw error;
+        if (data.user) {
+          await supabase.from("profiles").update({ role, name }).eq("id", data.user.id);
+        }
         toast.success("Konto erstellt");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -103,10 +107,37 @@ function AuthPage() {
 
           <form onSubmit={submit} className="space-y-3">
             {mode === "signup" && (
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-              </div>
+              <>
+                <div>
+                  <Label>Ich bin…</Label>
+                  <div className="mt-1 grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setRole("athlete")}
+                      className={`rounded-lg border p-3 text-left text-sm transition ${
+                        role === "athlete" ? "border-neon bg-neon-soft text-neon" : "border-border bg-elevated"
+                      }`}
+                    >
+                      <div className="font-semibold">Athlet</div>
+                      <div className="text-xs text-muted-foreground">Trainiere & tracke</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRole("coach")}
+                      className={`rounded-lg border p-3 text-left text-sm transition ${
+                        role === "coach" ? "border-neon bg-neon-soft text-neon" : "border-border bg-elevated"
+                      }`}
+                    >
+                      <div className="font-semibold">Trainer</div>
+                      <div className="text-xs text-muted-foreground">Lade Spieler ein</div>
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+                </div>
+              </>
             )}
             <div>
               <Label htmlFor="email">E-Mail</Label>

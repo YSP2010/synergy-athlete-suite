@@ -14,6 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          chat_id: string
+          created_at: string
+          id: string
+          message: string
+          sender_id: string
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string
+          id?: string
+          message: string
+          sender_id: string
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_participants: {
+        Row: {
+          chat_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          chat_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          chat_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_participants_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chats: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          team_id: string | null
+          type: Database["public"]["Enums"]["chat_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          team_id?: string | null
+          type: Database["public"]["Enums"]["chat_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          team_id?: string | null
+          type?: Database["public"]["Enums"]["chat_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_stats: {
         Row: {
           created_at: string
@@ -237,6 +330,7 @@ export type Database = {
           name: string | null
           onboarded: boolean
           position: string | null
+          role: Database["public"]["Enums"]["user_role"]
           sex: Database["public"]["Enums"]["sex_type"] | null
           sport: string | null
           sport_days: number[] | null
@@ -256,6 +350,7 @@ export type Database = {
           name?: string | null
           onboarded?: boolean
           position?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           sex?: Database["public"]["Enums"]["sex_type"] | null
           sport?: string | null
           sport_days?: number[] | null
@@ -275,11 +370,77 @@ export type Database = {
           name?: string | null
           onboarded?: boolean
           position?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           sex?: Database["public"]["Enums"]["sex_type"] | null
           sport?: string | null
           sport_days?: number[] | null
           updated_at?: string
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          id: string
+          invited_at: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["team_member_status"]
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          invited_at?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["team_member_status"]
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          invited_at?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["team_member_status"]
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          coach_id: string
+          coach_only_chat: boolean
+          created_at: string
+          id: string
+          name: string
+          team_chat_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          coach_only_chat?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          team_chat_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          coach_only_chat?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          team_chat_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -396,9 +557,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      coach_can_view_athlete: { Args: { _user_id: string }; Returns: boolean }
+      find_profile_by_email: {
+        Args: { _email: string }
+        Returns: {
+          id: string
+          name: string
+          role: Database["public"]["Enums"]["user_role"]
+        }[]
+      }
+      is_chat_participant: { Args: { _chat_id: string }; Returns: boolean }
+      is_coach_of_team: { Args: { _team_id: string }; Returns: boolean }
+      is_team_member: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      chat_type: "direct" | "team"
       goal_type: "muscle_gain" | "maintain" | "recomp" | "performance"
       gym_session_type:
         | "push"
@@ -416,6 +592,8 @@ export type Database = {
       session_status: "planned" | "done" | "skipped"
       sex_type: "male" | "female" | "other"
       sport_kind: "training" | "match"
+      team_member_status: "pending" | "active" | "declined"
+      user_role: "athlete" | "coach"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -543,6 +721,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      chat_type: ["direct", "team"],
       goal_type: ["muscle_gain", "maintain", "recomp", "performance"],
       gym_session_type: [
         "push",
@@ -561,6 +740,8 @@ export const Constants = {
       session_status: ["planned", "done", "skipped"],
       sex_type: ["male", "female", "other"],
       sport_kind: ["training", "match"],
+      team_member_status: ["pending", "active", "declined"],
+      user_role: ["athlete", "coach"],
     },
   },
 } as const

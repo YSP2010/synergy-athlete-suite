@@ -25,9 +25,16 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
     if (!u.user) return null;
     const { data } = await supabase
       .from("profiles")
-      .select("onboarded")
+      .select("onboarded, role")
       .eq("id", u.user.id)
       .maybeSingle();
+    if (data?.role === "coach") {
+      // Coaches skip athlete onboarding entirely.
+      if (!data.onboarded) {
+        await supabase.from("profiles").update({ onboarded: true }).eq("id", u.user.id);
+      }
+      throw redirect({ to: "/team" });
+    }
     if (data?.onboarded) throw redirect({ to: "/dashboard" });
     return null;
   },
