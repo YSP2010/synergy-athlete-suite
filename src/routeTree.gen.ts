@@ -25,6 +25,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCheckinRouteImport } from './routes/_authenticated/checkin'
 import { Route as AuthenticatedSportIdRouteImport } from './routes/_authenticated/sport.$id'
 import { Route as AuthenticatedGymIdRouteImport } from './routes/_authenticated/gym.$id'
+import { Route as AuthenticatedAthletesIdRouteImport } from './routes/_authenticated/athletes.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -105,6 +106,11 @@ const AuthenticatedGymIdRoute = AuthenticatedGymIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AuthenticatedGymRoute,
 } as any)
+const AuthenticatedAthletesIdRoute = AuthenticatedAthletesIdRouteImport.update({
+  id: '/athletes/$id',
+  path: '/athletes/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
+  '/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
 }
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
+  '/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
 }
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/sport': typeof AuthenticatedSportRouteWithChildren
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/_authenticated/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/_authenticated/gym/$id': typeof AuthenticatedGymIdRoute
   '/_authenticated/sport/$id': typeof AuthenticatedSportIdRoute
 }
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sport'
     | '/team'
+    | '/athletes/$id'
     | '/gym/$id'
     | '/sport/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sport'
     | '/team'
+    | '/athletes/$id'
     | '/gym/$id'
     | '/sport/$id'
   id:
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/sport'
     | '/_authenticated/team'
+    | '/_authenticated/athletes/$id'
     | '/_authenticated/gym/$id'
     | '/_authenticated/sport/$id'
   fileRoutesById: FileRoutesById
@@ -334,6 +346,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGymIdRouteImport
       parentRoute: typeof AuthenticatedGymRoute
     }
+    '/_authenticated/athletes/$id': {
+      id: '/_authenticated/athletes/$id'
+      path: '/athletes/$id'
+      fullPath: '/athletes/$id'
+      preLoaderRoute: typeof AuthenticatedAthletesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -371,6 +390,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSportRoute: typeof AuthenticatedSportRouteWithChildren
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedAthletesIdRoute: typeof AuthenticatedAthletesIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -385,6 +405,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSportRoute: AuthenticatedSportRouteWithChildren,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedAthletesIdRoute: AuthenticatedAthletesIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
