@@ -20,6 +20,7 @@ import { Route as AuthenticatedPlanRouteImport } from './routes/_authenticated/p
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNutritionRouteImport } from './routes/_authenticated/nutrition'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
+import { Route as AuthenticatedInvitesRouteImport } from './routes/_authenticated/invites'
 import { Route as AuthenticatedGymRouteImport } from './routes/_authenticated/gym'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCheckinRouteImport } from './routes/_authenticated/checkin'
@@ -83,6 +84,11 @@ const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
   path: '/journal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedInvitesRoute = AuthenticatedInvitesRouteImport.update({
+  id: '/invites',
+  path: '/invites',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedGymRoute = AuthenticatedGymRouteImport.update({
   id: '/gym',
   path: '/gym',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/gym': typeof AuthenticatedGymRouteWithChildren
+  '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/gym': typeof AuthenticatedGymRouteWithChildren
+  '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/_authenticated/checkin': typeof AuthenticatedCheckinRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/gym': typeof AuthenticatedGymRouteWithChildren
+  '/_authenticated/invites': typeof AuthenticatedInvitesRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/checkin'
     | '/dashboard'
     | '/gym'
+    | '/invites'
     | '/journal'
     | '/nutrition'
     | '/onboarding'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/checkin'
     | '/dashboard'
     | '/gym'
+    | '/invites'
     | '/journal'
     | '/nutrition'
     | '/onboarding'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/_authenticated/checkin'
     | '/_authenticated/dashboard'
     | '/_authenticated/gym'
+    | '/_authenticated/invites'
     | '/_authenticated/journal'
     | '/_authenticated/nutrition'
     | '/_authenticated/onboarding'
@@ -335,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJournalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/invites': {
+      id: '/_authenticated/invites'
+      path: '/invites'
+      fullPath: '/invites'
+      preLoaderRoute: typeof AuthenticatedInvitesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/gym': {
       id: '/_authenticated/gym'
       path: '/gym'
@@ -432,6 +451,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCheckinRoute: typeof AuthenticatedCheckinRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedGymRoute: typeof AuthenticatedGymRouteWithChildren
+  AuthenticatedInvitesRoute: typeof AuthenticatedInvitesRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
@@ -448,6 +468,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCheckinRoute: AuthenticatedCheckinRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedGymRoute: AuthenticatedGymRouteWithChildren,
+  AuthenticatedInvitesRoute: AuthenticatedInvitesRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
