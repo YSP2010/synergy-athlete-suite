@@ -45,7 +45,6 @@ const ATHLETE_NAV: NavItem[] = [
 const COACH_NAV: NavItem[] = [
   { to: "/team", label: "Teams", icon: Users, shortLabel: "Teams" },
   { to: "/chat", label: "Chat", icon: MessageSquare, shortLabel: "Chat" },
-  { to: "/dashboard", label: "Mein Dashboard", icon: LayoutDashboard, shortLabel: "Home" },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
