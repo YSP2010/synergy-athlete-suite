@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSportRouteImport } from './routes/_authenticated/sport'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
@@ -38,6 +39,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSportRoute = AuthenticatedSportRouteImport.update({
   id: '/sport',
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
+  '/team': typeof AuthenticatedTeamRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
 }
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
+  '/team': typeof AuthenticatedTeamRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
 }
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/sport': typeof AuthenticatedSportRouteWithChildren
+  '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/gym/$id': typeof AuthenticatedGymIdRoute
   '/_authenticated/sport/$id': typeof AuthenticatedSportIdRoute
 }
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/scan'
     | '/settings'
     | '/sport'
+    | '/team'
     | '/gym/$id'
     | '/sport/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/scan'
     | '/settings'
     | '/sport'
+    | '/team'
     | '/gym/$id'
     | '/sport/$id'
   id:
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/_authenticated/scan'
     | '/_authenticated/settings'
     | '/_authenticated/sport'
+    | '/_authenticated/team'
     | '/_authenticated/gym/$id'
     | '/_authenticated/sport/$id'
   fileRoutesById: FileRoutesById
@@ -230,6 +242,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/team': {
+      id: '/_authenticated/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof AuthenticatedTeamRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sport': {
       id: '/_authenticated/sport'
@@ -351,6 +370,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSportRoute: typeof AuthenticatedSportRouteWithChildren
+  AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -364,6 +384,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSportRoute: AuthenticatedSportRouteWithChildren,
+  AuthenticatedTeamRoute: AuthenticatedTeamRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
