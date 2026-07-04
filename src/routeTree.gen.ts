@@ -26,6 +26,7 @@ import { Route as AuthenticatedCheckinRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedSportIdRouteImport } from './routes/_authenticated/sport.$id'
 import { Route as AuthenticatedGymIdRouteImport } from './routes/_authenticated/gym.$id'
+import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
 import { Route as AuthenticatedAthletesIdRouteImport } from './routes/_authenticated/athletes.$id'
 
 const AuthRoute = AuthRouteImport.update({
@@ -112,6 +113,11 @@ const AuthenticatedGymIdRoute = AuthenticatedGymIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AuthenticatedGymRoute,
 } as any)
+const AuthenticatedChatIdRoute = AuthenticatedChatIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedChatRoute,
+} as any)
 const AuthenticatedAthletesIdRoute = AuthenticatedAthletesIdRouteImport.update({
   id: '/athletes/$id',
   path: '/athletes/$id',
@@ -121,7 +127,7 @@ const AuthenticatedAthletesIdRoute = AuthenticatedAthletesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/chat': typeof AuthenticatedChatRoute
+  '/chat': typeof AuthenticatedChatRouteWithChildren
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/gym': typeof AuthenticatedGymRouteWithChildren
@@ -134,13 +140,14 @@ export interface FileRoutesByFullPath {
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
   '/athletes/$id': typeof AuthenticatedAthletesIdRoute
+  '/chat/$id': typeof AuthenticatedChatIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/chat': typeof AuthenticatedChatRoute
+  '/chat': typeof AuthenticatedChatRouteWithChildren
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/gym': typeof AuthenticatedGymRouteWithChildren
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
   '/athletes/$id': typeof AuthenticatedAthletesIdRoute
+  '/chat/$id': typeof AuthenticatedChatIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
 }
@@ -161,7 +169,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/chat': typeof AuthenticatedChatRoute
+  '/_authenticated/chat': typeof AuthenticatedChatRouteWithChildren
   '/_authenticated/checkin': typeof AuthenticatedCheckinRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/gym': typeof AuthenticatedGymRouteWithChildren
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/_authenticated/sport': typeof AuthenticatedSportRouteWithChildren
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/athletes/$id': typeof AuthenticatedAthletesIdRoute
+  '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/gym/$id': typeof AuthenticatedGymIdRoute
   '/_authenticated/sport/$id': typeof AuthenticatedSportIdRoute
 }
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/sport'
     | '/team'
     | '/athletes/$id'
+    | '/chat/$id'
     | '/gym/$id'
     | '/sport/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/sport'
     | '/team'
     | '/athletes/$id'
+    | '/chat/$id'
     | '/gym/$id'
     | '/sport/$id'
   id:
@@ -234,6 +245,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sport'
     | '/_authenticated/team'
     | '/_authenticated/athletes/$id'
+    | '/_authenticated/chat/$id'
     | '/_authenticated/gym/$id'
     | '/_authenticated/sport/$id'
   fileRoutesById: FileRoutesById
@@ -365,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGymIdRouteImport
       parentRoute: typeof AuthenticatedGymRoute
     }
+    '/_authenticated/chat/$id': {
+      id: '/_authenticated/chat/$id'
+      path: '/$id'
+      fullPath: '/chat/$id'
+      preLoaderRoute: typeof AuthenticatedChatIdRouteImport
+      parentRoute: typeof AuthenticatedChatRoute
+    }
     '/_authenticated/athletes/$id': {
       id: '/_authenticated/athletes/$id'
       path: '/athletes/$id'
@@ -374,6 +393,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedChatRouteChildren {
+  AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
+}
+
+const AuthenticatedChatRouteChildren: AuthenticatedChatRouteChildren = {
+  AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
+}
+
+const AuthenticatedChatRouteWithChildren =
+  AuthenticatedChatRoute._addFileChildren(AuthenticatedChatRouteChildren)
 
 interface AuthenticatedGymRouteChildren {
   AuthenticatedGymIdRoute: typeof AuthenticatedGymIdRoute
@@ -398,7 +428,7 @@ const AuthenticatedSportRouteWithChildren =
   AuthenticatedSportRoute._addFileChildren(AuthenticatedSportRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+  AuthenticatedChatRoute: typeof AuthenticatedChatRouteWithChildren
   AuthenticatedCheckinRoute: typeof AuthenticatedCheckinRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedGymRoute: typeof AuthenticatedGymRouteWithChildren
@@ -414,7 +444,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedChatRoute: AuthenticatedChatRoute,
+  AuthenticatedChatRoute: AuthenticatedChatRouteWithChildren,
   AuthenticatedCheckinRoute: AuthenticatedCheckinRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedGymRoute: AuthenticatedGymRouteWithChildren,
