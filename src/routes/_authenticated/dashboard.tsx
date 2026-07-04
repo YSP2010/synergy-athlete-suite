@@ -29,9 +29,10 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
     if (!u.user) return null;
     const { data } = await supabase
       .from("profiles")
-      .select("onboarded")
+      .select("onboarded, role")
       .eq("id", u.user.id)
       .maybeSingle();
+    if (data?.role === "coach") throw redirect({ to: "/team" });
     if (!data?.onboarded) throw redirect({ to: "/onboarding" });
     return null;
   },
