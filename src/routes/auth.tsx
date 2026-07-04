@@ -21,6 +21,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const nav = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [role, setRole] = useState<"athlete" | "coach">("athlete");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -31,15 +32,18 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { name },
+            data: { name, role },
           },
         });
         if (error) throw error;
+        if (data.user) {
+          await supabase.from("profiles").update({ role, name }).eq("id", data.user.id);
+        }
         toast.success("Konto erstellt");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
