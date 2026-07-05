@@ -316,3 +316,4 @@ export const generateProgressInsight = createServerFn({ method: "POST" })
 
     return { id: ins.data.id as string, insight: result, metrics, periodStart, periodEnd };
   });
+
