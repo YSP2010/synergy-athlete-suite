@@ -308,6 +308,17 @@ function GymDetailPage() {
   );
 }
 
+// Sätze/Wdh werden während der Eingabe als number|null gehalten (wie kg/RPE),
+// damit das Feld beim Leeren/Neu-Eintippen nicht sofort auf "0" zurückspringt.
+// Vorher wurde hier direkt `v ?? 0` gesetzt -> jedes Löschen des Feldes hat den
+// Wert augenblicklich wieder auf 0 gesetzt, wodurch sich Sätze/Wiederholungen
+// praktisch nicht bearbeiten ließen. Beim Speichern wird auf eine gültige Zahl
+// zurückgefallen (DB-Spalten sind NOT NULL).
+type ExerciseDraft = Omit<Exercise, "sets" | "reps"> & {
+  sets: number | null;
+  reps: number | null;
+};
+
 function ExerciseRow({
   ex,
   onSave,
@@ -317,7 +328,7 @@ function ExerciseRow({
   onSave: (next: Exercise) => void;
   onDelete: () => void;
 }) {
-  const [local, setLocal] = useState<Exercise>(ex);
+  const [local, setLocal] = useState<ExerciseDraft>(ex);
   useEffect(() => setLocal(ex), [ex]);
   const dirty =
     local.name !== ex.name ||
@@ -325,6 +336,14 @@ function ExerciseRow({
     local.reps !== ex.reps ||
     local.weight_kg !== ex.weight_kg ||
     local.rpe !== ex.rpe;
+
+  function save() {
+    onSave({
+      ...local,
+      sets: local.sets ?? 0,
+      reps: local.reps ?? 0,
+    });
+  }
 
   return (
     <div className="card-elevated p-3">
@@ -347,12 +366,12 @@ function ExerciseRow({
         <NumField
           label="Sätze"
           value={local.sets}
-          onChange={(v) => setLocal({ ...local, sets: v ?? 0 })}
+          onChange={(v) => setLocal({ ...local, sets: v })}
         />
         <NumField
           label="Wdh"
           value={local.reps}
-          onChange={(v) => setLocal({ ...local, reps: v ?? 0 })}
+          onChange={(v) => setLocal({ ...local, reps: v })}
         />
         <NumField
           label="kg"
@@ -373,7 +392,7 @@ function ExerciseRow({
           <Button
             size="sm"
             className="bg-neon text-neon-foreground hover:bg-neon/90"
-            onClick={() => onSave(local)}
+            onClick={save}
           >
             Speichern
           </Button>
@@ -410,3 +429,4 @@ function NumField({
     </div>
   );
 }
+
