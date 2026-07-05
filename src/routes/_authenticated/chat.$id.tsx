@@ -6,11 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Users, User, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { humanError } from "@/lib/errors";
+import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/chat/$id")({
   head: () => ({ meta: [{ title: "Chat – Hybrid Athlete" }] }),
   component: ChatRoom,
 });
+
+interface ChatParticipantRow {
+  user_id: string;
+  profiles: Pick<Tables<"profiles">, "name"> | null;
+}
+
+interface MessageRow extends Tables<"chat_messages"> {
+  profiles: Pick<Tables<"profiles">, "name"> | null;
+}
 
 function ChatRoom() {
   const { id } = Route.useParams();
@@ -39,7 +50,7 @@ function ChatRoom() {
       const { data } = await supabase.from("chat_participants")
         .select("user_id, profiles!chat_participants_user_id_fkey(name)")
         .eq("chat_id", id).neq("user_id", me!.id);
-      return data ?? [];
+      return (data ?? []) as ChatParticipantRow[];
     },
   });
 
@@ -50,7 +61,7 @@ function ChatRoom() {
         .select("*, profiles!chat_messages_sender_id_fkey(name)")
         .eq("chat_id", id).order("created_at");
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as MessageRow[];
     },
   });
 
@@ -66,10 +77,10 @@ function ChatRoom() {
             .select("name")
             .eq("id", row.sender_id)
             .maybeSingle();
-          qc.setQueryData<any[]>(["messages", id], (old) => {
+          qc.setQueryData<MessageRow[]>(["messages", id], (old) => {
             const list = old ?? [];
             if (list.some((m) => m.id === row.id)) return list;
-            return [...list, { ...row, profiles: prof ?? { name: null } }];
+            return [...list, { ...row, profiles: prof ?? { name: null } } as MessageRow];
           });
         }
       )
@@ -87,7 +98,7 @@ function ChatRoom() {
     const { error } = await supabase.from("chat_messages").insert({ chat_id: id, sender_id: me.id, message: msg });
     if (error) {
       // Text im Feld belassen, damit der Nutzer erneut senden kann.
-      toast.error(error.message);
+      toast.error(humanError(error));
       return;
     }
     setText("");
@@ -95,7 +106,7 @@ function ChatRoom() {
 
   const title = chat?.type === "team"
     ? chat?.teams?.name ?? "Team-Chat"
-    : others?.map((o: any) => o.profiles?.name ?? "Unbekannt").join(", ") || "Direkt-Chat";
+    : others?.map((o) => o.profiles?.name ?? "Unbekannt").join(", ") || "Direkt-Chat";
 
   return (
     <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-2xl flex-col">
@@ -116,7 +127,7 @@ function ChatRoom() {
         aria-label="Chat-Nachrichten"
         className="flex-1 space-y-2 overflow-y-auto rounded-lg border border-border bg-background/40 p-3"
       >
-        {(messages ?? []).map((m: any) => {
+        {(messages ?? []).map((m) => {
           const mine = m.sender_id === me?.id;
           return (
             <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
