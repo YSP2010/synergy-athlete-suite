@@ -20,6 +20,9 @@ export type SportKind = "training" | "match";
 export type Intensity = "low" | "mid" | "high";
 export type MatchHardness = "easy" | "normal" | "hard";
 
+/** Gym-Einheiten mit hoher Systembelastung (für 48h-Regel & Recovery-Ersatz). */
+export const HARD_GYM_TYPES: GymType[] = ["push", "pull", "legs", "upper", "lower", "full"];
+
 export interface AthleteProfile {
   sex: Sex | null;
   height_cm: number | null;
@@ -255,6 +258,8 @@ export interface PlannedSlot {
   detail: string;
   warning?: string;
   hardness?: MatchHardness;
+  /** Nur bei kind === "gym": zugrundeliegender Session-Typ (für Regel-Logik). */
+  sessionType?: GymType;
 }
 
 /**
@@ -311,6 +316,7 @@ export function generateWeekPlan(
         label: labelForGym(type),
         kind: "gym",
         detail: gymDetail(type),
+        sessionType: type,
       });
       continue;
     }
@@ -331,11 +337,12 @@ export function generateWeekPlan(
         const j = i - back;
         if (j < 0) continue;
         const prev = slots[j];
-        if (prev.kind === "gym" && (prev.label.includes("Bein") || prev.detail.includes("Bein"))) {
+        if (prev.kind === "gym" && (prev.sessionType === "legs" || prev.sessionType === "lower")) {
           slots[j] = {
             ...prev,
             label: "Light Upper / Mobility",
             detail: "Beine schonen – kein Legs 48h vor Spiel",
+            sessionType: "mobility",
             warning: "Ursprünglich Beintraining – wegen Spiel verschoben",
           };
         }
@@ -357,8 +364,8 @@ export function generateWeekPlan(
 
   // 4) Recovery niedrig → nächste harte Einheit → Active Recovery
   if (recoveryScore !== null && recoveryScore < 50) {
-    const idx = slots.findIndex((s) =>
-      s.kind === "gym" && ["legs", "lower", "full", "push", "pull", "upper"].some((t) => s.detail.toLowerCase().includes(t.slice(0, 3)) || s.label.toLowerCase().includes("bein") || s.label.toLowerCase().includes("push") || s.label.toLowerCase().includes("pull")),
+    const idx = slots.findIndex(
+      (s) => s.kind === "gym" && s.sessionType !== undefined && HARD_GYM_TYPES.includes(s.sessionType),
     );
     if (idx !== -1) {
       slots[idx] = {
@@ -366,6 +373,7 @@ export function generateWeekPlan(
         label: "Active Recovery",
         kind: "recovery",
         detail: "Mobility, Stretching, Zone-1 20 min",
+        sessionType: undefined,
         warning: "Recovery-Score niedrig – harte Einheit ersetzt",
       };
     }
