@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toISODate } from "@/lib/dates";
 import { sportName, type Goal } from "@/lib/planner";
 import { toast } from "sonner";
+import { humanError } from "@/lib/errors";
 import {
   Camera,
   Upload,
@@ -157,7 +158,7 @@ function ScanPage() {
       setPreviewUrl(URL.createObjectURL(file));
       toast.success("Bild hochgeladen. Jetzt analysieren.");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload fehlgeschlagen");
+      toast.error(humanError(e));
     } finally {
       setUploading(false);
     }
@@ -173,7 +174,7 @@ function ScanPage() {
       qc.invalidateQueries({ queryKey: ["scans"] });
       toast.success("Analyse fertig");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Analyse fehlgeschlagen");
+      toast.error(humanError(e));
     } finally {
       setAnalyzing(false);
     }
@@ -205,7 +206,7 @@ function ScanPage() {
       toast.success("Zur heutigen Ernährung hinzugefügt");
       nav({ to: "/nutrition" });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const reset = () => {
@@ -495,4 +496,3 @@ function ScoreBadge({
     </span>
   );
 }
-
