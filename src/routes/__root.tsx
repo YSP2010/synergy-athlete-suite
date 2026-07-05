@@ -74,15 +74,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#0a0a0b" },
-      { title: "Hybrid Athlete – Fußball + Gym Planner" },
+      { title: "Yannik's Hybrid Athlete – Performance Planner" },
       {
         name: "description",
         content:
-          "Plane Fußball und Gym in einem Wochenplan: Recovery-Score, Makros, KI-Food-Scanner.",
+          "Plane Fußball & Gym-Training, Regeneration und Ernährung in einer App. Dynamische Wochenplanung, Recovery-Score, Makro-Tracking und KI-Food-Scanner.",
       },
-      { property: "og:site_name", content: "Hybrid Athlete" },
+      { property: "og:title", content: "Yannik's Hybrid Athlete – Performance Planner" },
+      {
+        property: "og:description",
+        content:
+          "Fußball + Gym clever kombinieren. Recovery-Score, Wochenplan, Makros, Food-Scanner.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Yannik's Hybrid Athlete – Performance Planner" },
+      {
+        name: "twitter:description",
+        content:
+          "Fußball + Gym clever kombinieren. Recovery-Score, Wochenplan, Makros, Food-Scanner.",
+      },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
