@@ -20,8 +20,11 @@ import {
   Check,
   History as HistoryIcon,
   Dumbbell,
+  SearchX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { parseISODate } from "@/lib/dates";
+import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/gym/$id")({
   head: () => ({ meta: [{ title: "Gym-Session – Hybrid Athlete" }] }),
@@ -55,7 +58,7 @@ function GymDetailPage() {
   const qc = useQueryClient();
   const nav = useNavigate();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["gym", id],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
@@ -110,7 +113,7 @@ function GymDetailPage() {
         toast.success("Gespeichert");
       }
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const addExercise = useMutation({
@@ -139,7 +142,7 @@ function GymDetailPage() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["gym", id] }),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const updateExercise = useMutation({
@@ -157,7 +160,7 @@ function GymDetailPage() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["gym", id] }),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const deleteExercise = useMutation({
@@ -166,16 +169,39 @@ function GymDetailPage() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["gym", id] }),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const [newName, setNewName] = useState("");
+
+  if (!isLoading && (isError || !data)) {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <div className="card-elevated flex flex-col items-center gap-3 p-8">
+          <div className="grid h-11 w-11 place-items-center rounded-full bg-danger/10 text-danger">
+            <SearchX className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="font-display text-lg font-semibold">Nicht gefunden</div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Diese Gym-Session existiert nicht mehr oder du hast keinen Zugriff darauf.
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/gym">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Zurück zum Gym-Log
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading || !data || !meta) {
     return <div className="py-20 text-center text-muted-foreground">Lade…</div>;
   }
 
-  const d = new Date(data.workout.date);
+  const d = parseISODate(data.workout.date);
 
   return (
     <div className="space-y-5 pb-8">
@@ -429,4 +455,3 @@ function NumField({
     </div>
   );
 }
-
