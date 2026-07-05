@@ -89,9 +89,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Yannik's Hybrid Athlete – Performance Planner" },
-      { name: "description", content: "Hybrid Athlete Hub plans and tracks training and nutrition for athletes balancing soccer and gym." },
-      { property: "og:description", content: "Hybrid Athlete Hub plans and tracks training and nutrition for athletes balancing soccer and gym." },
-      { name: "twitter:description", content: "Hybrid Athlete Hub plans and tracks training and nutrition for athletes balancing soccer and gym." },
+      {
+        name: "twitter:description",
+        content:
+          "Fußball + Gym clever kombinieren. Recovery-Score, Wochenplan, Makros, Food-Scanner.",
+      },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png" },
     ],
@@ -147,3 +149,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
