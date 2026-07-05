@@ -5,6 +5,7 @@ import {
   ageFrom,
   addDays,
   isoDow,
+  parseISODate,
   startOfWeek,
   toISODate,
   WEEKDAY_LONG,
@@ -98,7 +99,7 @@ function DashboardPage() {
       const matchHardness: Record<number, "easy" | "normal" | "hard"> = {};
       for (const s of sport) {
         if (s.kind === "match" && s.date >= toISODate(weekStart)) {
-          const d = new Date(s.date);
+          const d = parseISODate(s.date);
           matchHardness[isoDow(d)] = (s.match_hardness ?? "normal") as never;
         }
       }
@@ -172,7 +173,8 @@ function DashboardPage() {
         const parsed = JSON.parse(row.content) as { summary?: string };
         const summary = String(parsed.summary ?? "").trim();
         return summary ? { summary } : null;
-      } catch {
+      } catch (err) {
+        console.warn("Insight-Content unlesbar:", err);
         return null;
       }
     },
@@ -422,4 +424,3 @@ function QuickAction({
     </Link>
   );
 }
-
