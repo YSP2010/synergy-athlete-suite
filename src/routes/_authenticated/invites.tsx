@@ -6,11 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Check, X, MailOpen, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { leaveTeamChat } from "@/lib/team";
+import { humanError } from "@/lib/errors";
+import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/invites")({
   head: () => ({ meta: [{ title: "Einladungen – Hybrid Athlete" }] }),
   component: InvitesPage,
 });
+
+interface InviteRow extends Tables<"team_members"> {
+  teams: (Pick<Tables<"teams">, "name" | "coach_id" | "team_chat_id"> & {
+    profiles: Pick<Tables<"profiles">, "name"> | null;
+  }) | null;
+}
 
 function InvitesPage() {
   const qc = useQueryClient();
@@ -25,7 +33,7 @@ function InvitesPage() {
         .select("*, teams(name, coach_id, team_chat_id, profiles!teams_coach_id_fkey(name))")
         .eq("user_id", u.user.id);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as InviteRow[];
     },
   });
 
@@ -46,7 +54,7 @@ function InvitesPage() {
       qc.invalidateQueries({ queryKey: ["my-invites"] });
       toast.success(v.status === "active" ? "Team beigetreten" : "Einladung abgelehnt");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const [confirmLeave, setConfirmLeave] = useState<string | null>(null);
@@ -66,7 +74,7 @@ function InvitesPage() {
       qc.invalidateQueries({ queryKey: ["chats"] });
       toast.success("Team verlassen");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const pending = (invites ?? []).filter((i) => i.status === "pending");
@@ -82,7 +90,7 @@ function InvitesPage() {
       <section className="card-elevated p-4">
         <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold"><MailOpen className="h-4 w-4" /> Offene Einladungen</h2>
         <ul className="divide-y divide-border">
-          {pending.map((i: any) => (
+          {pending.map((i) => (
             <li key={i.id} className="flex items-center justify-between py-2">
               <div>
                 <div className="font-medium">{i.teams?.name}</div>
@@ -105,7 +113,7 @@ function InvitesPage() {
       <section className="card-elevated p-4">
         <h2 className="mb-3 text-sm font-semibold">Meine Teams</h2>
         <ul className="divide-y divide-border">
-          {active.map((i: any) => (
+          {active.map((i) => (
             <li key={i.id} className="flex items-center justify-between py-2">
               <div>
                 <div className="font-medium">{i.teams?.name}</div>
@@ -138,5 +146,3 @@ function InvitesPage() {
     </div>
   );
 }
-
-
