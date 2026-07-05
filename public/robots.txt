@@ -2,5 +2,18 @@ User-agent: *
 Allow: /
 Disallow: /dashboard
 Disallow: /auth
+Disallow: /chat
+Disallow: /team
+Disallow: /invites
+Disallow: /onboarding
+Disallow: /checkin
+Disallow: /gym
+Disallow: /sport
+Disallow: /nutrition
+Disallow: /scan
+Disallow: /journal
+Disallow: /settings
+Disallow: /plan
+Disallow: /athletes
 
-Sitemap: https://https://synergy-athlete-suite.lovable.app/sitemap.xml
+Sitemap: https://synergy-athlete-suite.lovable.app/sitemap.xml

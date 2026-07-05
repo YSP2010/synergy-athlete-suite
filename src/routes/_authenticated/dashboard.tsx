@@ -37,7 +37,13 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
     return null;
   },
   head: () => ({
-    meta: [{ title: "Dashboard – Hybrid Athlete" }],
+    meta: [
+      { title: "Dashboard – Hybrid Athlete" },
+      { name: "description", content: "Dein täglicher Recovery-Score, Makros und Wochenplan." },
+      { name: "robots", content: "noindex, follow" },
+      { property: "og:title", content: "Dashboard – Hybrid Athlete" },
+      { property: "og:description", content: "Dein täglicher Recovery-Score, Makros und Wochenplan." },
+    ],
   }),
   component: DashboardPage,
 });
