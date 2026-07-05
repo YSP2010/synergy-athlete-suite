@@ -21,13 +21,27 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Trainingsplaner für Hybrid-Athleten – Fußball + Gym | Hybrid Athlete" },
+      { title: "Hybrid Athlete – Fußball + Gym Trainingsplaner" },
       {
         name: "description",
         content:
-          "Kombiniere Fußball, Krafttraining, Ernährung und Recovery in einem Plan. Dynamische Wochenplanung, Recovery-Score, Makro-Berechnung mit Carbo-Loading und KI-Food-Scanner.",
+          "Fußball und Krafttraining smart kombinieren: Wochenplan, Recovery-Score, Makros und KI-Food-Scanner.",
+      },
+      { property: "og:title", content: "Hybrid Athlete – Fußball + Gym Trainingsplaner" },
+      {
+        property: "og:description",
+        content:
+          "Wochenplan, Recovery-Score, Makros und KI-Food-Scanner für Hybrid-Athlet:innen.",
+      },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/" },
+      { name: "twitter:title", content: "Hybrid Athlete – Fußball + Gym Trainingsplaner" },
+      {
+        name: "twitter:description",
+        content:
+          "Wochenplan, Recovery-Score, Makros und KI-Food-Scanner für Hybrid-Athlet:innen.",
       },
     ],
+    links: [{ rel: "canonical", href: "https://synergy-athlete-suite.lovable.app/" }],
     scripts: [
       {
         type: "application/ld+json",
