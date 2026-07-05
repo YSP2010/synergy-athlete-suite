@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Check, X, MailOpen } from "lucide-react";
+import { Check, X, MailOpen, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { leaveTeamChat } from "@/lib/team";
 
 export const Route = createFileRoute("/_authenticated/invites")({
   head: () => ({ meta: [{ title: "Einladungen – Hybrid Athlete" }] }),
@@ -47,6 +49,26 @@ function InvitesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [confirmLeave, setConfirmLeave] = useState<string | null>(null);
+
+  const leaveTeam = useMutation({
+    mutationFn: async (i: { id: string; team_chat_id: string | null }) => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Nicht angemeldet");
+      const { error } = await supabase.from("team_members").delete().eq("id", i.id);
+      if (error) throw error;
+      // Chat-Zugriff im Team-Chat aufräumen, falls vorhanden.
+      await leaveTeamChat(i.team_chat_id, u.user.id);
+    },
+    onSuccess: () => {
+      setConfirmLeave(null);
+      qc.invalidateQueries({ queryKey: ["my-invites"] });
+      qc.invalidateQueries({ queryKey: ["chats"] });
+      toast.success("Team verlassen");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const pending = (invites ?? []).filter((i) => i.status === "pending");
   const active = (invites ?? []).filter((i) => i.status === "active");
 
@@ -84,9 +106,30 @@ function InvitesPage() {
         <h2 className="mb-3 text-sm font-semibold">Meine Teams</h2>
         <ul className="divide-y divide-border">
           {active.map((i: any) => (
-            <li key={i.id} className="py-2">
-              <div className="font-medium">{i.teams?.name}</div>
-              <div className="text-xs text-muted-foreground">Trainer: {i.teams?.profiles?.name ?? "?"}</div>
+            <li key={i.id} className="flex items-center justify-between py-2">
+              <div>
+                <div className="font-medium">{i.teams?.name}</div>
+                <div className="text-xs text-muted-foreground">Trainer: {i.teams?.profiles?.name ?? "?"}</div>
+              </div>
+              {confirmLeave === i.id ? (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    disabled={leaveTeam.isPending}
+                    onClick={() => leaveTeam.mutate({ id: i.id, team_chat_id: i.teams?.team_chat_id ?? null })}
+                  >
+                    Wirklich verlassen
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setConfirmLeave(null)}>
+                    Abbrechen
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" variant="outline" onClick={() => setConfirmLeave(i.id)}>
+                  <LogOut className="mr-1 h-4 w-4" /> Team verlassen
+                </Button>
+              )}
             </li>
           ))}
           {active.length === 0 && <li className="py-2 text-sm text-muted-foreground">Noch in keinem Team.</li>}
@@ -95,4 +138,5 @@ function InvitesPage() {
     </div>
   );
 }
+
 
