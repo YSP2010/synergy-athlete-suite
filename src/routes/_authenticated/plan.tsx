@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { humanError } from "@/lib/errors";
 
 /** Auswahl-Optionen für manuelle Slot-Overrides. */
 const OVERRIDE_OPTIONS: {
@@ -166,7 +167,7 @@ function PlanPage() {
       qc.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Spielhärte aktualisiert – Plan neu berechnet");
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(humanError(e)),
   });
 
   const overrideSlot = useMutation({
@@ -206,7 +207,7 @@ function PlanPage() {
       qc.invalidateQueries({ queryKey: ["plan"] });
       toast.success("Plan angepasst");
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(humanError(e)),
   });
 
   const toggleLock = useMutation({
@@ -249,7 +250,7 @@ function PlanPage() {
       qc.invalidateQueries({ queryKey: ["plan"] });
       toast.success(vars.locked ? "Woche gesperrt" : "Woche entsperrt");
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(humanError(e)),
   });
 
   if (isError)
@@ -455,3 +456,4 @@ function SlotDot({ kind }: { kind: string }) {
   };
   return <span className={cn("h-2.5 w-2.5 rounded-full", c[kind])} />;
 }
+
