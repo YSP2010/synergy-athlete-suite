@@ -55,3 +55,10 @@ export function ageFrom(birth: string | null | undefined): number | null {
   if (m < 0 || (m === 0 && now.getDate() < b.getDate())) a--;
   return a;
 }
+
+/** Parst "YYYY-MM-DD" in LOKALER Zeitzone. new Date("YYYY-MM-DD") wäre UTC und
+ *  verschiebt den Tag westlich von UTC – daher nie direkt für Datums-Strings nutzen. */
+export function parseISODate(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+}
