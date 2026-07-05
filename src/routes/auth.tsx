@@ -26,12 +26,15 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
       if (mode === "signup") {
+        // Rolle & Name gehen als user metadata mit; der DB-Trigger handle_new_user
+        // legt das Profil mit korrekter Rolle an (kein clientseitiges Update mehr).
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -41,8 +44,11 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        if (data.user) {
-          await supabase.from("profiles").update({ role, name }).eq("id", data.user.id);
+        // Keine Session → E-Mail-Bestätigung erforderlich
+        if (!data.session) {
+          setConfirmEmail(true);
+          toast.success("Konto erstellt – bitte E-Mail bestätigen");
+          return;
         }
         toast.success("Konto erstellt");
       } else {
@@ -72,6 +78,33 @@ function AuthPage() {
     nav({ to: "/dashboard", replace: true });
   }
 
+  if (confirmEmail) {
+    return (
+      <div className="min-h-screen grid place-items-center px-4 py-10">
+        <div className="w-full max-w-md card-elevated p-8 text-center">
+          <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-xl bg-neon text-neon-foreground glow">
+            <Zap className="h-6 w-6" strokeWidth={2.5} />
+          </div>
+          <h1 className="font-display text-xl font-bold">Bitte E-Mail bestätigen</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Wir haben dir eine Bestätigungs-Mail an <span className="font-medium text-foreground">{email}</span>{" "}
+            geschickt. Öffne den Link darin, um dein Konto zu aktivieren und dich anzumelden.
+          </p>
+          <Button
+            variant="outline"
+            className="mt-6 w-full"
+            onClick={() => {
+              setConfirmEmail(false);
+              setMode("login");
+            }}
+          >
+            Zurück zur Anmeldung
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen grid place-items-center px-4 py-10">
       <div className="w-full max-w-md">
@@ -88,16 +121,20 @@ function AuthPage() {
         <div className="card-elevated p-6">
           <div className="mb-4 flex gap-1 rounded-lg bg-elevated p-1">
             <button
+              type="button"
               onClick={() => setMode("login")}
-              className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
+              aria-pressed={mode === "login"}
+              className={`flex-1 rounded-md py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-elevated ${
                 mode === "login" ? "bg-neon text-neon-foreground" : "text-muted-foreground"
               }`}
             >
               Anmelden
             </button>
             <button
+              type="button"
               onClick={() => setMode("signup")}
-              className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
+              aria-pressed={mode === "signup"}
+              className={`flex-1 rounded-md py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-elevated ${
                 mode === "signup" ? "bg-neon text-neon-foreground" : "text-muted-foreground"
               }`}
             >
@@ -109,12 +146,14 @@ function AuthPage() {
             {mode === "signup" && (
               <>
                 <div>
-                  <Label>Ich bin…</Label>
-                  <div className="mt-1 grid grid-cols-2 gap-2">
+                  <Label id="role-label">Ich bin…</Label>
+                  <div role="radiogroup" aria-labelledby="role-label" className="mt-1 grid grid-cols-2 gap-2">
                     <button
                       type="button"
+                      role="radio"
+                      aria-checked={role === "athlete"}
                       onClick={() => setRole("athlete")}
-                      className={`rounded-lg border p-3 text-left text-sm transition ${
+                      className={`rounded-lg border p-3 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-elevated ${
                         role === "athlete" ? "border-neon bg-neon-soft text-neon" : "border-border bg-elevated"
                       }`}
                     >
@@ -123,8 +162,10 @@ function AuthPage() {
                     </button>
                     <button
                       type="button"
+                      role="radio"
+                      aria-checked={role === "coach"}
                       onClick={() => setRole("coach")}
-                      className={`rounded-lg border p-3 text-left text-sm transition ${
+                      className={`rounded-lg border p-3 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-elevated ${
                         role === "coach" ? "border-neon bg-neon-soft text-neon" : "border-border bg-elevated"
                       }`}
                     >
