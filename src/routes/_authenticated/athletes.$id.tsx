@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Lock, Dumbbell, Trophy, HeartPulse, CalendarDays, CalendarRange } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toISODate, today, startOfWeek, addDays, isoDow, WEEKDAY_LONG } from "@/lib/dates";
+import { toISODate, today, startOfWeek, addDays, isoDow, parseISODate, WEEKDAY_LONG } from "@/lib/dates";
 import {
   applyOverrides,
   calcRecovery,
@@ -23,6 +23,18 @@ interface PlannerPlan {
   overrides?: Record<string, SlotOverride>;
   snapshot?: PlannedSlot[];
 }
+
+/** Zeile der Wochenliste (Gym- und Sport-Einträge zusammengeführt). */
+type WeekRow = {
+  id: string;
+  date: string;
+  status?: string | null;
+  k: "gym" | "sport";
+  session_type?: string | null;
+  kind?: string | null;
+  match_hardness?: string | null;
+  intensity?: string | null;
+};
 
 export const Route = createFileRoute("/_authenticated/athletes/$id")({
   head: () => ({ meta: [{ title: "Athlet – Hybrid Athlete" }] }),
@@ -155,7 +167,7 @@ function AthleteView() {
     const hardnessMap: Record<number, MatchHardnessType> = {};
     for (const s of sport ?? []) {
       if (s.kind === "match") {
-        hardnessMap[isoDow(new Date(s.date))] = (s.match_hardness ?? "normal") as MatchHardnessType;
+        hardnessMap[isoDow(parseISODate(s.date))] = (s.match_hardness ?? "normal") as MatchHardnessType;
       }
     }
     planSlots = applyOverrides(
@@ -215,9 +227,9 @@ function AthleteView() {
       <section className="card-elevated p-4">
         <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><CalendarDays className="h-4 w-4" /> Diese Woche</div>
         <div className="space-y-2">
-          {[...(gym ?? []).map((g) => ({ ...g, k: "gym" as const })), ...(sport ?? []).map((s) => ({ ...s, k: "sport" as const }))]
+          {([...(gym ?? []).map((g) => ({ ...g, k: "gym" as const })), ...(sport ?? []).map((s) => ({ ...s, k: "sport" as const }))] as WeekRow[])
             .sort((a, b) => a.date.localeCompare(b.date))
-            .map((r: any) => (
+            .map((r) => (
               <div key={`${r.k}-${r.id}`} className="flex items-center justify-between rounded-lg bg-elevated px-3 py-2 text-sm">
                 <div>
                   <div className="font-medium">
@@ -296,3 +308,4 @@ function StatCard({ icon, label, value, detail }: { icon: React.ReactNode; label
     </div>
   );
 }
+
