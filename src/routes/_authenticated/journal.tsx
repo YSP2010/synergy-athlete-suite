@@ -24,7 +24,8 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-import { toISODate, addDays, WEEKDAY_LONG, isoDow } from "@/lib/dates";
+import { toISODate, addDays, parseISODate, WEEKDAY_LONG, isoDow } from "@/lib/dates";
+import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/journal")({
   head: () => ({ meta: [{ title: "Tagebuch – Hybrid Athlete" }] }),
@@ -163,7 +164,7 @@ function JournalPage() {
       qc.invalidateQueries({ queryKey: ["journal-meta"] });
       toast.success("Eintrag gelöscht");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   // Export lädt bewusst ALLE Einträge frisch (nicht nur die paginierten Seiten).
@@ -354,7 +355,7 @@ function bestStreak(dates: Set<string>): number {
   let run = 0;
   let prev: string | null = null;
   for (const d of sorted) {
-    if (prev && toISODate(addDays(new Date(prev), 1)) === d) run++;
+    if (prev && toISODate(addDays(parseISODate(prev), 1)) === d) run++;
     else run = 1;
     best = Math.max(best, run);
     prev = d;
@@ -391,7 +392,7 @@ function EntryCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const d = new Date(entry.date);
+  const d = parseISODate(entry.date);
   const mood = MOODS.find((m) => m.v === entry.mood);
   return (
     <article className="card-elevated p-4">
@@ -508,7 +509,7 @@ function EntryForm({
       toast.success(entry ? "Eintrag aktualisiert" : "Eintrag gespeichert");
       onSaved();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   return (
@@ -628,4 +629,3 @@ function EntryForm({
     </div>
   );
 }
-
