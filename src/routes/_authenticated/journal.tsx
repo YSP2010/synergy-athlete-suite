@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +22,7 @@ import {
   Tag as TagIcon,
   Pencil,
   X,
+  Loader2,
 } from "lucide-react";
 import { toISODate, addDays, WEEKDAY_LONG, isoDow } from "@/lib/dates";
 
@@ -36,6 +42,8 @@ interface Entry {
   updated_at: string;
 }
 
+const PAGE_SIZE = 20;
+
 const MOODS = [
   { v: 1, emoji: "😞", label: "mies" },
   { v: 2, emoji: "😕", label: "ok" },
@@ -51,26 +59,60 @@ function JournalPage() {
   const [editing, setEditing] = useState<Entry | null>(null);
   const [showForm, setShowForm] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  // Paginierte Hauptliste (mit content) – 20 Einträge pro Seite.
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["journal"],
-    queryFn: async () => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("no user");
+      const from = pageParam * PAGE_SIZE;
       const { data: rows, error } = await supabase
         .from("journal_entries")
         .select("*")
         .eq("user_id", u.user.id)
         .order("date", { ascending: false })
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(from, from + PAGE_SIZE - 1);
       if (error) throw error;
       return { uid: u.user.id, rows: (rows ?? []) as Entry[] };
+    },
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.rows.length === PAGE_SIZE ? allPages.length : undefined,
+  });
+
+  const uid = data?.pages[0]?.uid ?? "";
+  const loadedEntries = useMemo(
+    () => (data?.pages ?? []).flatMap((p) => p.rows),
+    [data],
+  );
+
+  // Leichtgewichtige Meta-Query über ALLE Einträge (nur date + tags, kein content)
+  // für Streak-Berechnung und Tag-Übersicht – unabhängig von der Pagination.
+  const { data: metaRows } = useQuery({
+    queryKey: ["journal-meta"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("no user");
+      const { data: rows, error } = await supabase
+        .from("journal_entries")
+        .select("date,tags")
+        .eq("user_id", u.user.id)
+        .order("date", { ascending: false });
+      if (error) throw error;
+      return (rows ?? []) as { date: string; tags: string[] | null }[];
     },
   });
 
   const filtered = useMemo(() => {
-    if (!data) return [];
     const q = search.trim().toLowerCase();
-    return data.rows.filter((e) => {
+    return loadedEntries.filter((e) => {
       if (activeTag && !(e.tags ?? []).includes(activeTag)) return false;
       if (!q) return true;
       return (
@@ -79,22 +121,23 @@ function JournalPage() {
         (e.tags ?? []).some((t) => t.toLowerCase().includes(q))
       );
     });
-  }, [data, search, activeTag]);
+  }, [loadedEntries, search, activeTag]);
 
   const allTags = useMemo(() => {
-    if (!data) return [] as { tag: string; count: number }[];
     const m = new Map<string, number>();
-    data.rows.forEach((e) =>
+    (metaRows ?? []).forEach((e) =>
       (e.tags ?? []).forEach((t) => m.set(t, (m.get(t) ?? 0) + 1)),
     );
     return [...m.entries()]
       .map(([tag, count]) => ({ tag, count }))
       .sort((a, b) => b.count - a.count);
-  }, [data]);
+  }, [metaRows]);
+
+  const totalCount = metaRows?.length ?? 0;
 
   const streak = useMemo(() => {
-    if (!data || !data.rows.length) return { current: 0, best: 0 };
-    const dates = new Set(data.rows.map((r) => r.date));
+    if (!metaRows || !metaRows.length) return { current: 0, best: 0 };
+    const dates = new Set(metaRows.map((r) => r.date));
     let current = 0;
     let cursor = new Date();
     // if no entry today, streak may still be counted from yesterday only if today is empty and it's not yet late — simple: require today for current
@@ -108,7 +151,7 @@ function JournalPage() {
       cursor = addDays(cursor, -1);
     }
     return { current, best: Math.max(current, bestStreak(dates)) };
-  }, [data]);
+  }, [metaRows]);
 
   const del = useMutation({
     mutationFn: async (id: string) => {
@@ -117,14 +160,24 @@ function JournalPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["journal"] });
+      qc.invalidateQueries({ queryKey: ["journal-meta"] });
       toast.success("Eintrag gelöscht");
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  function exportJson() {
-    if (!data) return;
-    const blob = new Blob([JSON.stringify(data.rows, null, 2)], {
+  // Export lädt bewusst ALLE Einträge frisch (nicht nur die paginierten Seiten).
+  async function exportJson() {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return;
+    const { data: rows } = await supabase
+      .from("journal_entries")
+      .select("*")
+      .eq("user_id", u.user.id)
+      .order("date", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (!rows?.length) return;
+    const blob = new Blob([JSON.stringify(rows, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -149,7 +202,7 @@ function JournalPage() {
             variant="outline"
             size="sm"
             onClick={exportJson}
-            disabled={!data?.rows.length}
+            disabled={totalCount === 0}
           >
             <Download className="mr-1.5 h-3.5 w-3.5" /> Export
           </Button>
@@ -175,7 +228,7 @@ function JournalPage() {
         <StatCard
           icon={<BookOpen className="h-4 w-4" />}
           label="Einträge gesamt"
-          value={String(data?.rows.length ?? 0)}
+          value={String(totalCount)}
         />
         <StatCard
           icon={<Flame className="h-4 w-4" />}
@@ -186,7 +239,7 @@ function JournalPage() {
 
       {showForm && (
         <EntryForm
-          uid={data?.uid ?? ""}
+          uid={uid}
           entry={editing}
           onClose={() => {
             setShowForm(false);
@@ -194,6 +247,7 @@ function JournalPage() {
           }}
           onSaved={() => {
             qc.invalidateQueries({ queryKey: ["journal"] });
+            qc.invalidateQueries({ queryKey: ["journal-meta"] });
             setShowForm(false);
             setEditing(null);
           }}
@@ -221,6 +275,11 @@ function JournalPage() {
             </button>
           )}
         </div>
+        {search && hasNextPage && (
+          <div className="mt-2 border-t border-border pt-2 text-[11px] text-muted-foreground">
+            Durchsucht die geladenen Einträge – ggf. weiter laden für ältere Treffer.
+          </div>
+        )}
         {allTags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5 border-t border-border pt-3">
             {allTags.slice(0, 20).map(({ tag, count }) => (
@@ -248,10 +307,10 @@ function JournalPage() {
             <BookOpen className="h-6 w-6" />
           </div>
           <div className="font-display font-semibold">
-            {data?.rows.length ? "Keine Treffer" : "Noch keine Einträge"}
+            {loadedEntries.length ? "Keine Treffer" : "Noch keine Einträge"}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {data?.rows.length
+            {loadedEntries.length
               ? "Passe Suche oder Tag-Filter an."
               : "Halte deinen ersten Tag fest — Training, Schlaf, Stimmung."}
           </p>
@@ -271,6 +330,18 @@ function JournalPage() {
               }}
             />
           ))}
+          {hasNextPage && (
+            <div className="pt-1 text-center">
+              <Button
+                variant="outline"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Mehr laden
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -557,3 +628,4 @@ function EntryForm({
     </div>
   );
 }
+
