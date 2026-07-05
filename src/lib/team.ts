@@ -6,44 +6,16 @@ export async function findProfileByEmail(email: string) {
   return (data?.[0] ?? null) as { id: string; name: string | null; role: "athlete" | "coach" } | null;
 }
 
-/** Get or create a direct chat between auth user and target user. */
+/**
+ * Get or create a direct chat between auth user and target user.
+ * Läuft atomar in einer SECURITY-DEFINER-RPC, um Race Conditions und
+ * verwaiste Chats (Chat ohne beide Teilnehmer) zu vermeiden.
+ */
 export async function getOrCreateDirectChat(otherUserId: string): Promise<string> {
-  const { data: userRes } = await supabase.auth.getUser();
-  const me = userRes.user?.id;
-  if (!me) throw new Error("Nicht angemeldet");
-
-  // find existing direct chat both participate in
-  const { data: mine } = await supabase
-    .from("chat_participants")
-    .select("chat_id, chats!inner(id, type)")
-    .eq("user_id", me);
-  const candidateIds = (mine ?? [])
-    .filter((r: any) => r.chats?.type === "direct")
-    .map((r: any) => r.chat_id as string);
-
-  if (candidateIds.length) {
-    const { data: theirs } = await supabase
-      .from("chat_participants")
-      .select("chat_id")
-      .eq("user_id", otherUserId)
-      .in("chat_id", candidateIds);
-    const match = theirs?.[0]?.chat_id;
-    if (match) return match;
-  }
-
-  const { data: chat, error } = await supabase
-    .from("chats")
-    .insert({ type: "direct", created_by: me })
-    .select("id")
-    .single();
+  const { data, error } = await supabase.rpc("get_or_create_direct_chat", {
+    _other_user_id: otherUserId,
+  });
   if (error) throw error;
-
-  const { error: pErr } = await supabase
-    .from("chat_participants")
-    .insert([
-      { chat_id: chat.id, user_id: me },
-      { chat_id: chat.id, user_id: otherUserId },
-    ]);
-  if (pErr) throw pErr;
-  return chat.id;
+  if (!data) throw new Error("Chat konnte nicht erstellt werden");
+  return data as string;
 }
