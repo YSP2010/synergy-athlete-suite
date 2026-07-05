@@ -49,7 +49,9 @@ const GOAL_LABELS: Record<Goal, string> = {
 };
 
 /** Kurzer Kontext-String (Ziel + Sportart) fuers Scanner-Prompt. Max 500 Zeichen. */
-function buildGoalContext(profile: { goal?: Goal | null; sport?: string | null } | null | undefined): string | undefined {
+function buildGoalContext(
+  profile: { goal?: Goal | null; sport?: string | null } | null | undefined,
+): string | undefined {
   if (!profile) return undefined;
   const parts: string[] = [];
   if (profile.goal && GOAL_LABELS[profile.goal]) parts.push(`Ziel: ${GOAL_LABELS[profile.goal]}.`);
@@ -94,7 +96,9 @@ function ScanPage() {
       if (!u.user) throw new Error("no user");
       const { data, error } = await supabase
         .from("food_scans")
-        .select("id,image_path,product_name,health_score,plan_fit_score,reasoning,extracted,created_at")
+        .select(
+          "id,image_path,product_name,health_score,plan_fit_score,reasoning,extracted,created_at",
+        )
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -233,12 +237,7 @@ function ScanPage() {
             onFile={onFile}
             disabled={uploading}
           />
-          <UploadCard
-            label="Bild hochladen"
-            icon={Upload}
-            onFile={onFile}
-            disabled={uploading}
-          />
+          <UploadCard label="Bild hochladen" icon={Upload} onFile={onFile} disabled={uploading} />
         </div>
       )}
 
@@ -269,7 +268,12 @@ function ScanPage() {
                   </>
                 )}
               </Button>
-              <Button variant="secondary" onClick={reset} disabled={analyzing} aria-label="Bild verwerfen">
+              <Button
+                variant="secondary"
+                onClick={reset}
+                disabled={analyzing}
+                aria-label="Bild verwerfen"
+              >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
@@ -305,7 +309,8 @@ function ScanPage() {
                   <div className="font-display text-sm font-semibold">{s.product_name}</div>
                   {s.extracted && (
                     <div className="text-[11px] text-muted-foreground tabular">
-                      {s.extracted.kcal} kcal · P {s.extracted.protein_g}g · C {s.extracted.carbs_g}g · F {s.extracted.fat_g}g
+                      {s.extracted.kcal} kcal · P {s.extracted.protein_g}g · C {s.extracted.carbs_g}
+                      g · F {s.extracted.fat_g}g
                     </div>
                   )}
                   {s.reasoning && (
@@ -386,13 +391,14 @@ function ResultCard({
     <div className="space-y-3">
       <div>
         <div className="font-display text-lg font-semibold">{ex.name}</div>
-        {ex.portion_desc && (
-          <div className="text-xs text-muted-foreground">{ex.portion_desc}</div>
-        )}
+        {ex.portion_desc && <div className="text-xs text-muted-foreground">{ex.portion_desc}</div>}
       </div>
 
       <div>
-        <label htmlFor="meal-select" className="mb-1 block text-[10px] uppercase tracking-widest text-muted-foreground">
+        <label
+          htmlFor="meal-select"
+          className="mb-1 block text-[10px] uppercase tracking-widest text-muted-foreground"
+        >
           Mahlzeit
         </label>
         <select
@@ -424,7 +430,10 @@ function ResultCard({
       {ex.tags?.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {ex.tags.map((t) => (
-            <span key={t} className="rounded-full bg-elevated px-2 py-0.5 text-[10px] text-muted-foreground">
+            <span
+              key={t}
+              className="rounded-full bg-elevated px-2 py-0.5 text-[10px] text-muted-foreground"
+            >
               {t}
             </span>
           ))}

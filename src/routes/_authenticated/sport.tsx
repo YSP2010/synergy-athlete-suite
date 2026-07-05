@@ -92,7 +92,9 @@ function SportListPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={newKind} onValueChange={(v) => setNewKind(v as Kind)}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="training">Training</SelectItem>
               <SelectItem value="match">Spiel / Wettkampf</SelectItem>
@@ -160,7 +162,11 @@ function SportListPage() {
                           : "bg-elevated text-muted-foreground")
                     }
                   >
-                    {r.status === "done" ? "Fertig" : r.status === "skipped" ? "Übersprungen" : "Offen"}
+                    {r.status === "done"
+                      ? "Fertig"
+                      : r.status === "skipped"
+                        ? "Übersprungen"
+                        : "Offen"}
                   </span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>

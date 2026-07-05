@@ -77,8 +77,9 @@ function Landing() {
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
             Wer gleichzeitig Fußball spielt und im Gym Kraft aufbaut, jongliert Spieltage, Beintage,
-            Regeneration und Ernährung. Der Hybrid Athlete Performance Planner bringt all das in einen
-            intelligenten Wochenplan – damit du hart trainierst, ohne am Spieltag platt zu sein.
+            Regeneration und Ernährung. Der Hybrid Athlete Performance Planner bringt all das in
+            einen intelligenten Wochenplan – damit du hart trainierst, ohne am Spieltag platt zu
+            sein.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
@@ -108,11 +109,11 @@ function Landing() {
             Fußball und Krafttraining clever verbinden
           </h2>
           <p className="mb-8 max-w-3xl text-sm text-muted-foreground">
-            Ein reiner Gym-Plan ignoriert deine Spieltage, ein reiner Fußball-Plan lässt Muskelaufbau
-            liegen. Wir kombinieren beides: Der Planer verteilt Push-, Pull- und Beintage automatisch so
-            um deine Matches herum, dass deine Beine am Spieltag frisch sind. Harte Einheiten werden vor
-            wichtigen Spielen zurückgefahren, Regenerationstage dann eingeplant, wenn dein Körper sie
-            wirklich braucht.
+            Ein reiner Gym-Plan ignoriert deine Spieltage, ein reiner Fußball-Plan lässt
+            Muskelaufbau liegen. Wir kombinieren beides: Der Planer verteilt Push-, Pull- und
+            Beintage automatisch so um deine Matches herum, dass deine Beine am Spieltag frisch
+            sind. Harte Einheiten werden vor wichtigen Spielen zurückgefahren, Regenerationstage
+            dann eingeplant, wenn dein Körper sie wirklich braucht.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Feature
@@ -150,30 +151,35 @@ function Landing() {
 
         {/* Why */}
         <section className="mx-auto max-w-5xl px-4 pb-16">
-          <h2 className="mb-3 font-display text-2xl font-bold">Warum Recovery über den Trainingsplan entscheidet</h2>
+          <h2 className="mb-3 font-display text-2xl font-bold">
+            Warum Recovery über den Trainingsplan entscheidet
+          </h2>
           <p className="max-w-3xl text-sm text-muted-foreground">
             Muskeln wachsen nicht im Training, sondern in der Erholung. Für Hybrid-Athleten ist das
             besonders heikel: Ein intensives Beintraining am Freitag und ein hartes Spiel am Sonntag
-            überlagern sich – die Beine sind noch nicht regeneriert, das Verletzungsrisiko steigt und die
-            Leistung sinkt. Deshalb bewertet der Planer deinen Recovery-Status täglich anhand von
-            Schlafdauer, Schlafqualität, Muskelkater, Stress und der Trainingslast der letzten 72 Stunden.
-            Ist der Score niedrig, schlägt die App aktiv vor, die nächste harte Einheit gegen leichte
-            Mobility-Arbeit zu tauschen. So trainierst du periodisiert statt permanent im roten Bereich –
-            und kommst ausgeruht in dein nächstes Spiel.
+            überlagern sich – die Beine sind noch nicht regeneriert, das Verletzungsrisiko steigt
+            und die Leistung sinkt. Deshalb bewertet der Planer deinen Recovery-Status täglich
+            anhand von Schlafdauer, Schlafqualität, Muskelkater, Stress und der Trainingslast der
+            letzten 72 Stunden. Ist der Score niedrig, schlägt die App aktiv vor, die nächste harte
+            Einheit gegen leichte Mobility-Arbeit zu tauschen. So trainierst du periodisiert statt
+            permanent im roten Bereich – und kommst ausgeruht in dein nächstes Spiel.
           </p>
         </section>
 
         {/* Nutrition */}
         <section className="mx-auto max-w-5xl px-4 pb-16">
-          <h2 className="mb-3 font-display text-2xl font-bold">Ernährung, die zum Spieltag passt</h2>
+          <h2 className="mb-3 font-display text-2xl font-bold">
+            Ernährung, die zum Spieltag passt
+          </h2>
           <p className="max-w-3xl text-sm text-muted-foreground">
-            An einem lockeren Ruhetag brauchst du andere Kohlenhydratmengen als am Tag vor einem harten
-            Match. Der Planer berechnet deinen Kalorienbedarf über die Mifflin-St-Jeor-Formel, passt den
-            Aktivitätsfaktor an dein tatsächliches Tagestraining an und hebt vor harten Spielen die
-            Kohlenhydrate auf bis zu 7,5 g pro Kilogramm Körpergewicht an (Carbo-Loading), während Fett
-            leicht reduziert wird. Protein bleibt konstant hoch bei rund 2 g pro Kilo, um deine Muskulatur
-            zwischen den Belastungen zu schützen. Mit dem KI-Food-Scanner trackst du Mahlzeiten in Sekunden
-            und siehst sofort, ob sie zu deinem Tagesziel passen.
+            An einem lockeren Ruhetag brauchst du andere Kohlenhydratmengen als am Tag vor einem
+            harten Match. Der Planer berechnet deinen Kalorienbedarf über die
+            Mifflin-St-Jeor-Formel, passt den Aktivitätsfaktor an dein tatsächliches Tagestraining
+            an und hebt vor harten Spielen die Kohlenhydrate auf bis zu 7,5 g pro Kilogramm
+            Körpergewicht an (Carbo-Loading), während Fett leicht reduziert wird. Protein bleibt
+            konstant hoch bei rund 2 g pro Kilo, um deine Muskulatur zwischen den Belastungen zu
+            schützen. Mit dem KI-Food-Scanner trackst du Mahlzeiten in Sekunden und siehst sofort,
+            ob sie zu deinem Tagesziel passen.
           </p>
           <div className="mt-8">
             <Link
@@ -206,15 +212,7 @@ function Landing() {
   );
 }
 
-function Feature({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: typeof Zap;
-  title: string;
-  text: string;
-}) {
+function Feature({ icon: Icon, title, text }: { icon: typeof Zap; title: string; text: string }) {
   return (
     <div className="card-elevated p-5">
       <div className="mb-3 grid h-10 w-10 place-items-center rounded-lg bg-neon-soft text-neon">

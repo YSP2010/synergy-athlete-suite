@@ -88,10 +88,14 @@ function GymListPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={newType} onValueChange={(v) => setNewType(v as GymType)}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {Object.entries(GYM_LABEL).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -149,7 +153,11 @@ function GymListPage() {
                           : "bg-elevated text-muted-foreground")
                     }
                   >
-                    {r.status === "done" ? "Fertig" : r.status === "skipped" ? "Übersprungen" : "Offen"}
+                    {r.status === "done"
+                      ? "Fertig"
+                      : r.status === "skipped"
+                        ? "Übersprungen"
+                        : "Offen"}
                   </span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
@@ -163,8 +171,8 @@ function GymListPage() {
         <div className="mb-1 flex items-center gap-1.5 font-semibold text-foreground">
           <Timer className="h-3.5 w-3.5" /> Tipp
         </div>
-        Trag RPE (1–10) pro Übung ein – der Recovery-Score nutzt deine Trainingsbelastung
-        der letzten 72h.
+        Trag RPE (1–10) pro Übung ein – der Recovery-Score nutzt deine Trainingsbelastung der
+        letzten 72h.
       </div>
     </div>
   );

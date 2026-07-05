@@ -59,7 +59,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return "athlete" as const;
-      const { data } = await supabase.from("profiles").select("role").eq("id", u.user.id).maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", u.user.id)
+        .maybeSingle();
       return (data?.role ?? "athlete") as "athlete" | "coach";
     },
   });
@@ -70,7 +74,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const MOBILE_NAV =
     role === "coach"
       ? COACH_NAV
-      : [findNav("/dashboard"), findNav("/plan"), findNav("/gym"), findNav("/nutrition"), findNav("/chat")];
+      : [
+          findNav("/dashboard"),
+          findNav("/plan"),
+          findNav("/gym"),
+          findNav("/nutrition"),
+          findNav("/chat"),
+        ];
 
   async function signOut() {
     await qc.cancelQueries();
@@ -95,7 +105,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <div className="leading-tight">
             <div className="font-display text-sm font-semibold">Hybrid</div>
-            <div className="text-xs text-muted-foreground">{role === "coach" ? "Coach" : "Athlete"}</div>
+            <div className="text-xs text-muted-foreground">
+              {role === "coach" ? "Coach" : "Athlete"}
+            </div>
           </div>
         </div>
         <nav className="flex flex-col gap-1">
@@ -103,22 +115,36 @@ export function AppShell({ children }: { children: ReactNode }) {
             const active = loc.pathname.startsWith(n.to);
             const Icon = n.icon;
             return (
-              <Link key={n.to} to={n.to}
+              <Link
+                key={n.to}
+                to={n.to}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                  active ? "bg-neon-soft text-neon" : "text-muted-foreground hover:bg-elevated hover:text-foreground",
-                )}>
-                <Icon className="h-4 w-4" />{n.label}
+                  active
+                    ? "bg-neon-soft text-neon"
+                    : "text-muted-foreground hover:bg-elevated hover:text-foreground",
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {n.label}
               </Link>
             );
           })}
         </nav>
         <div className="mt-auto flex flex-col gap-1">
-          <Link to="/settings" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-elevated hover:text-foreground">
-            <Settings className="h-4 w-4" />Einstellungen
+          <Link
+            to="/settings"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-elevated hover:text-foreground"
+          >
+            <Settings className="h-4 w-4" />
+            Einstellungen
           </Link>
-          <button onClick={signOut} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-elevated hover:text-foreground">
-            <LogOut className="h-4 w-4" />Abmelden
+          <button
+            onClick={signOut}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-elevated hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            Abmelden
           </button>
         </div>
       </aside>
@@ -127,17 +153,28 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-8 md:px-8">{children}</div>
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 backdrop-blur md:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        <div className="grid" style={{ gridTemplateColumns: `repeat(${MOBILE_NAV.length}, minmax(0, 1fr))` }}>
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 backdrop-blur md:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <div
+          className="grid"
+          style={{ gridTemplateColumns: `repeat(${MOBILE_NAV.length}, minmax(0, 1fr))` }}
+        >
           {MOBILE_NAV.map((n) => {
             const active = loc.pathname.startsWith(n.to);
             const Icon = n.icon;
             return (
-              <Link key={n.to} to={n.to}
-                className={cn("flex flex-col items-center justify-center gap-1 py-2 text-xs font-medium",
-                  active ? "text-neon" : "text-muted-foreground")}>
-                <Icon className="h-5 w-5" />{n.shortLabel ?? n.label}
+              <Link
+                key={n.to}
+                to={n.to}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 py-2 text-xs font-medium",
+                  active ? "text-neon" : "text-muted-foreground",
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                {n.shortLabel ?? n.label}
               </Link>
             );
           })}

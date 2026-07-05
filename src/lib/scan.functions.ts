@@ -68,11 +68,14 @@ export const analyzeFoodScan = createServerFn({ method: "POST" })
       .gte("created_at", since);
     if (cntErr) throw new Error(cntErr.message);
     if ((count ?? 0) >= 20)
-      throw new Error("Scan-Limit erreicht (max. 20 pro 24 Stunden). Bitte später erneut versuchen.");
+      throw new Error(
+        "Scan-Limit erreicht (max. 20 pro 24 Stunden). Bitte später erneut versuchen.",
+      );
 
     // Bild aus Storage laden (RLS: nur eigenes)
     const dl = await supabase.storage.from("food-scans").download(data.imagePath);
-    if (dl.error || !dl.data) throw new Error(`Bild nicht gefunden: ${dl.error?.message ?? "unknown"}`);
+    if (dl.error || !dl.data)
+      throw new Error(`Bild nicht gefunden: ${dl.error?.message ?? "unknown"}`);
     const buf = new Uint8Array(await dl.data.arrayBuffer());
     let bin = "";
     for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
@@ -111,8 +114,10 @@ export const analyzeFoodScan = createServerFn({ method: "POST" })
       }),
     });
 
-    if (gwRes.status === 429) throw new Error("AI-Limit erreicht. Bitte kurz warten und erneut versuchen.");
-    if (gwRes.status === 402) throw new Error("AI-Guthaben aufgebraucht. Bitte im Workspace-Billing aufladen.");
+    if (gwRes.status === 429)
+      throw new Error("AI-Limit erreicht. Bitte kurz warten und erneut versuchen.");
+    if (gwRes.status === 402)
+      throw new Error("AI-Guthaben aufgebraucht. Bitte im Workspace-Billing aufladen.");
     if (!gwRes.ok) {
       const t = await gwRes.text().catch(() => "");
       throw new Error(`AI-Fehler ${gwRes.status}: ${t.slice(0, 200)}`);
@@ -131,7 +136,8 @@ export const analyzeFoodScan = createServerFn({ method: "POST" })
     }
 
     // Normalisieren / clampen
-    const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, Number(n) || 0));
+    const clamp = (n: number, min: number, max: number) =>
+      Math.max(min, Math.min(max, Number(n) || 0));
     const extracted: Extracted = {
       name: String(parsed.name ?? "Unbekannt").slice(0, 120),
       portion_desc: parsed.portion_desc ? String(parsed.portion_desc).slice(0, 120) : null,
@@ -142,7 +148,9 @@ export const analyzeFoodScan = createServerFn({ method: "POST" })
       health_score: Number(clamp(parsed.health_score, 0, 10).toFixed(1)),
       plan_fit_score: Number(clamp(parsed.plan_fit_score, 0, 10).toFixed(1)),
       reasoning: String(parsed.reasoning ?? "").slice(0, 400),
-      tags: Array.isArray(parsed.tags) ? parsed.tags.slice(0, 5).map((t) => String(t).slice(0, 30)) : [],
+      tags: Array.isArray(parsed.tags)
+        ? parsed.tags.slice(0, 5).map((t) => String(t).slice(0, 30))
+        : [],
     };
 
     const ins = await supabase

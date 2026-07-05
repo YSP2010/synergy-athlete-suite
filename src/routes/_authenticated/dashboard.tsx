@@ -22,7 +22,14 @@ import {
 import { RecoveryRing } from "@/components/dashboard/RecoveryRing";
 import { MacroRings } from "@/components/dashboard/MacroRings";
 import { QueryError } from "@/components/ui/query-error";
-import { AlertTriangle, CalendarDays, ChevronRight, HeartPulse, TrendingUp, Utensils } from "lucide-react";
+import {
+  AlertTriangle,
+  CalendarDays,
+  ChevronRight,
+  HeartPulse,
+  TrendingUp,
+  Utensils,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -90,7 +97,10 @@ function DashboardPage() {
       const sport = (sportRes.data ?? []) as SportSession[];
       const gym = (gymRes.data ?? []) as GymSession[];
 
-      const recent = { sport: sport.filter((s) => s.date < todayIso && s.date >= threeDaysAgo), gym: gym.filter((g) => g.date < todayIso && g.date >= threeDaysAgo) };
+      const recent = {
+        sport: sport.filter((s) => s.date < todayIso && s.date >= threeDaysAgo),
+        gym: gym.filter((g) => g.date < todayIso && g.date >= threeDaysAgo),
+      };
       const recovery = calcRecovery(stat, recent.sport, recent.gym);
 
       const ath = toAthleteProfile(profile);
@@ -110,8 +120,7 @@ function DashboardPage() {
 
       const todaySport = sport.find((s) => s.date === todayIso);
       const todayGym = gym.find((g) => g.date === todayIso);
-      const tomorrowMatchHard =
-        tomorrowSlot?.kind === "match" && tomorrowSlot.hardness === "hard";
+      const tomorrowMatchHard = tomorrowSlot?.kind === "match" && tomorrowSlot.hardness === "hard";
 
       const macros = calcDailyMacros(
         ath,
@@ -137,9 +146,7 @@ function DashboardPage() {
         { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 },
       );
 
-      const warnings = plan
-        .filter((p) => p.date >= todayIso && p.warning)
-        .slice(0, 3);
+      const warnings = plan.filter((p) => p.date >= todayIso && p.warning).slice(0, 3);
 
       return {
         profile,
@@ -257,7 +264,10 @@ function DashboardPage() {
 
       {/* KI-Fortschritt Teaser */}
       {latestInsight && (
-        <Link to="/insights" className="card-elevated flex items-start gap-3 p-4 transition hover:border-neon/40">
+        <Link
+          to="/insights"
+          className="card-elevated flex items-start gap-3 p-4 transition hover:border-neon/40"
+        >
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-neon-soft text-neon">
             <TrendingUp className="h-5 w-5" />
           </div>
@@ -355,8 +365,18 @@ function DashboardPage() {
 
       {/* Quick actions */}
       <div className="grid grid-cols-2 gap-3">
-        <QuickAction to="/checkin" icon={HeartPulse} label="Daily Check-in" hint={hasCheckin ? "Erledigt" : "Ausstehend"} />
-        <QuickAction to="/nutrition" icon={Utensils} label="Mahlzeit loggen" hint="Manuell oder Scan" />
+        <QuickAction
+          to="/checkin"
+          icon={HeartPulse}
+          label="Daily Check-in"
+          hint={hasCheckin ? "Erledigt" : "Ausstehend"}
+        />
+        <QuickAction
+          to="/nutrition"
+          icon={Utensils}
+          label="Mahlzeit loggen"
+          hint="Manuell oder Scan"
+        />
       </div>
     </div>
   );
@@ -381,7 +401,15 @@ function SlotBadge({ kind }: { kind: string }) {
   };
   return (
     <span className={cn("rounded-md px-2 py-1 text-[10px] font-semibold uppercase", map[kind])}>
-      {kind === "gym" ? "GYM" : kind === "match" ? "SPIEL" : kind === "sport" ? "SPORT" : kind === "recovery" ? "RECOVERY" : "REST"}
+      {kind === "gym"
+        ? "GYM"
+        : kind === "match"
+          ? "SPIEL"
+          : kind === "sport"
+            ? "SPORT"
+            : kind === "recovery"
+              ? "RECOVERY"
+              : "REST"}
     </span>
   );
 }

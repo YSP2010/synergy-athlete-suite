@@ -15,9 +15,11 @@ export const Route = createFileRoute("/_authenticated/invites")({
 });
 
 interface InviteRow extends Tables<"team_members"> {
-  teams: (Pick<Tables<"teams">, "name" | "coach_id" | "team_chat_id"> & {
-    profiles: Pick<Tables<"profiles">, "name"> | null;
-  }) | null;
+  teams:
+    | (Pick<Tables<"teams">, "name" | "coach_id" | "team_chat_id"> & {
+        profiles: Pick<Tables<"profiles">, "name"> | null;
+      })
+    | null;
 }
 
 function InvitesPage() {
@@ -38,7 +40,15 @@ function InvitesPage() {
   });
 
   const respond = useMutation({
-    mutationFn: async ({ id, status, chatId }: { id: string; status: "active" | "declined"; chatId?: string | null }) => {
+    mutationFn: async ({
+      id,
+      status,
+      chatId,
+    }: {
+      id: string;
+      status: "active" | "declined";
+      chatId?: string | null;
+    }) => {
       const { data: u } = await supabase.auth.getUser();
       const { error } = await supabase
         .from("team_members")
@@ -88,25 +98,40 @@ function InvitesPage() {
       </header>
 
       <section className="card-elevated p-4">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold"><MailOpen className="h-4 w-4" /> Offene Einladungen</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <MailOpen className="h-4 w-4" /> Offene Einladungen
+        </h2>
         <ul className="divide-y divide-border">
           {pending.map((i) => (
             <li key={i.id} className="flex items-center justify-between py-2">
               <div>
                 <div className="font-medium">{i.teams?.name}</div>
-                <div className="text-xs text-muted-foreground">Trainer: {i.teams?.profiles?.name ?? "?"}</div>
+                <div className="text-xs text-muted-foreground">
+                  Trainer: {i.teams?.profiles?.name ?? "?"}
+                </div>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" onClick={() => respond.mutate({ id: i.id, status: "active", chatId: i.teams?.team_chat_id })}>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    respond.mutate({ id: i.id, status: "active", chatId: i.teams?.team_chat_id })
+                  }
+                >
                   <Check className="mr-1 h-4 w-4" /> Annehmen
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => respond.mutate({ id: i.id, status: "declined" })}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => respond.mutate({ id: i.id, status: "declined" })}
+                >
                   <X className="mr-1 h-4 w-4" /> Ablehnen
                 </Button>
               </div>
             </li>
           ))}
-          {pending.length === 0 && <li className="py-2 text-sm text-muted-foreground">Keine offenen Einladungen.</li>}
+          {pending.length === 0 && (
+            <li className="py-2 text-sm text-muted-foreground">Keine offenen Einladungen.</li>
+          )}
         </ul>
       </section>
 
@@ -117,7 +142,9 @@ function InvitesPage() {
             <li key={i.id} className="flex items-center justify-between py-2">
               <div>
                 <div className="font-medium">{i.teams?.name}</div>
-                <div className="text-xs text-muted-foreground">Trainer: {i.teams?.profiles?.name ?? "?"}</div>
+                <div className="text-xs text-muted-foreground">
+                  Trainer: {i.teams?.profiles?.name ?? "?"}
+                </div>
               </div>
               {confirmLeave === i.id ? (
                 <div className="flex gap-2">
@@ -125,7 +152,9 @@ function InvitesPage() {
                     size="sm"
                     variant="destructive"
                     disabled={leaveTeam.isPending}
-                    onClick={() => leaveTeam.mutate({ id: i.id, team_chat_id: i.teams?.team_chat_id ?? null })}
+                    onClick={() =>
+                      leaveTeam.mutate({ id: i.id, team_chat_id: i.teams?.team_chat_id ?? null })
+                    }
                   >
                     Wirklich verlassen
                   </Button>
@@ -140,7 +169,9 @@ function InvitesPage() {
               )}
             </li>
           ))}
-          {active.length === 0 && <li className="py-2 text-sm text-muted-foreground">Noch in keinem Team.</li>}
+          {active.length === 0 && (
+            <li className="py-2 text-sm text-muted-foreground">Noch in keinem Team.</li>
+          )}
         </ul>
       </section>
     </div>

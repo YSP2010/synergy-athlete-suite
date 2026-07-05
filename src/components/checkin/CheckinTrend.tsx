@@ -66,7 +66,8 @@ export function CheckinTrend() {
           <TrendingUp className="h-3.5 w-3.5" /> Verlauf (30 Tage)
         </div>
         <p className="text-sm text-muted-foreground">
-          Noch zu wenige Check-ins für einen Trend. Trag ein paar Tage nach, um den Verlauf zu sehen.
+          Noch zu wenige Check-ins für einen Trend. Trag ein paar Tage nach, um den Verlauf zu
+          sehen.
         </p>
       </div>
     );

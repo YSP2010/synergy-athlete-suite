@@ -7,7 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Users, Plus, Mail, MessageSquare, Trash2, Loader2, Shield, Settings2 } from "lucide-react";
-import { findProfileByEmail, getOrCreateDirectChat, createTeamWithChat, leaveTeamChat } from "@/lib/team";
+import {
+  findProfileByEmail,
+  getOrCreateDirectChat,
+  createTeamWithChat,
+  leaveTeamChat,
+} from "@/lib/team";
 import { Switch } from "@/components/ui/switch";
 import { QueryError } from "@/components/ui/query-error";
 import { toISODate, today, addDays } from "@/lib/dates";
@@ -53,12 +58,20 @@ function TeamPage() {
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
-      const { data } = await supabase.from("profiles").select("role, name").eq("id", u.user.id).maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("role, name")
+        .eq("id", u.user.id)
+        .maybeSingle();
       return { id: u.user.id, ...data };
     },
   });
 
-  const { data: teams, isError: teamsError, refetch: refetchTeams } = useQuery({
+  const {
+    data: teams,
+    isError: teamsError,
+    refetch: refetchTeams,
+  } = useQuery({
     queryKey: ["teams", me?.id],
     enabled: !!me?.id,
     queryFn: async () => {
@@ -106,7 +119,9 @@ function TeamPage() {
     <div className="space-y-6">
       <header>
         <h1 className="font-display text-3xl font-bold">Deine Teams</h1>
-        <p className="text-sm text-muted-foreground">Erstelle Teams, lade Spieler ein und öffne Team-Chats.</p>
+        <p className="text-sm text-muted-foreground">
+          Erstelle Teams, lade Spieler ein und öffne Team-Chats.
+        </p>
       </header>
 
       {teamsError && <QueryError onRetry={() => refetchTeams()} />}
@@ -114,9 +129,18 @@ function TeamPage() {
       <div className="card-elevated p-4">
         <Label htmlFor="new-team-name">Neues Team erstellen</Label>
         <div className="mt-2 flex gap-2">
-          <Input id="new-team-name" value={newTeam} onChange={(e) => setNewTeam(e.target.value)} placeholder="z. B. U19 Herbst" />
+          <Input
+            id="new-team-name"
+            value={newTeam}
+            onChange={(e) => setNewTeam(e.target.value)}
+            placeholder="z. B. U19 Herbst"
+          />
           <Button onClick={() => createTeam.mutate()} disabled={createTeam.isPending}>
-            {createTeam.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            {createTeam.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
             <span className="ml-1">Erstellen</span>
           </Button>
         </div>
@@ -130,7 +154,9 @@ function TeamPage() {
                 key={t.id}
                 onClick={() => setSelected(t.id)}
                 className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition ${
-                  activeTeam?.id === t.id ? "border-neon bg-neon-soft text-neon" : "border-border bg-elevated"
+                  activeTeam?.id === t.id
+                    ? "border-neon bg-neon-soft text-neon"
+                    : "border-border bg-elevated"
                 }`}
               >
                 <div className="font-semibold">{t.name}</div>
@@ -162,9 +188,7 @@ function TeamDetail({ team }: { team: TeamRow }) {
   });
 
   // Recovery-Ampel je aktivem Mitglied: daily_stats (heute/gestern) + Load 72h.
-  const activeUserIds = (members ?? [])
-    .filter((m) => m.status === "active")
-    .map((m) => m.user_id);
+  const activeUserIds = (members ?? []).filter((m) => m.status === "active").map((m) => m.user_id);
 
   const { data: teamRecovery } = useQuery({
     queryKey: ["team-recovery", team.id, activeUserIds],
@@ -232,18 +256,16 @@ function TeamDetail({ team }: { team: TeamRow }) {
       if (!prof) throw new Error("Kein Nutzer mit dieser E-Mail gefunden");
       // Upsert statt Insert: erlaubt erneutes Einladen nach vorheriger
       // Ablehnung (UNIQUE(team_id, user_id)) durch Zurücksetzen des Status.
-      const { error } = await supabase
-        .from("team_members")
-        .upsert(
-          {
-            team_id: team.id,
-            user_id: prof.id,
-            status: "pending",
-            invited_at: new Date().toISOString(),
-            responded_at: null,
-          },
-          { onConflict: "team_id,user_id" },
-        );
+      const { error } = await supabase.from("team_members").upsert(
+        {
+          team_id: team.id,
+          user_id: prof.id,
+          status: "pending",
+          invited_at: new Date().toISOString(),
+          responded_at: null,
+        },
+        { onConflict: "team_id,user_id" },
+      );
       if (error) throw error;
       // open direct chat with player and post a hello message
       const chatId = await getOrCreateDirectChat(prof.id);
@@ -278,7 +300,10 @@ function TeamDetail({ team }: { team: TeamRow }) {
 
   const toggleLock = useMutation({
     mutationFn: async (v: boolean) => {
-      const { error } = await supabase.from("teams").update({ coach_only_chat: v }).eq("id", team.id);
+      const { error } = await supabase
+        .from("teams")
+        .update({ coach_only_chat: v })
+        .eq("id", team.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teams"] }),
@@ -310,7 +335,9 @@ function TeamDetail({ team }: { team: TeamRow }) {
         <div className="flex items-center justify-between rounded-lg bg-elevated px-3 py-2">
           <div>
             <div className="text-sm font-medium">Nur Trainer darf schreiben</div>
-            <div className="text-xs text-muted-foreground">Spieler können lesen, aber nicht antworten.</div>
+            <div className="text-xs text-muted-foreground">
+              Spieler können lesen, aber nicht antworten.
+            </div>
           </div>
           <Switch checked={!!team.coach_only_chat} onCheckedChange={(v) => toggleLock.mutate(v)} />
         </div>
@@ -327,7 +354,11 @@ function TeamDetail({ team }: { team: TeamRow }) {
             onChange={(e) => setEmail(e.target.value)}
           />
           <Button onClick={() => invite.mutate()} disabled={invite.isPending}>
-            {invite.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+            {invite.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Mail className="h-4 w-4" />
+            )}
             <span className="ml-1">Einladen</span>
           </Button>
         </div>
@@ -352,7 +383,9 @@ function TeamDetail({ team }: { team: TeamRow }) {
               <div className="flex items-center gap-2">
                 {m.status === "active" && (
                   <Button asChild size="sm" variant="outline">
-                    <Link to="/athletes/$id" params={{ id: m.user_id }}>Ansicht</Link>
+                    <Link to="/athletes/$id" params={{ id: m.user_id }}>
+                      Ansicht
+                    </Link>
                   </Button>
                 )}
                 {confirmRemove === m.id ? (
@@ -383,7 +416,9 @@ function TeamDetail({ team }: { team: TeamRow }) {
             </li>
           ))}
           {(members ?? []).length === 0 && (
-            <li className="py-4 text-sm text-muted-foreground">Noch keine Mitglieder eingeladen.</li>
+            <li className="py-4 text-sm text-muted-foreground">
+              Noch keine Mitglieder eingeladen.
+            </li>
           )}
         </ul>
       </div>
@@ -393,11 +428,7 @@ function TeamDetail({ team }: { team: TeamRow }) {
 
 // Recovery-Ampel: grün (green ≥ 75), gelb (amber ≥ 50), rot (< 50) – Schwellen
 // stammen direkt aus calcRecovery. Ohne Check-in/Daten: grauer Punkt + „–".
-function RecoveryDot({
-  rec,
-}: {
-  rec?: { score: number; level: RecoveryLevel; hasData: boolean };
-}) {
+function RecoveryDot({ rec }: { rec?: { score: number; level: RecoveryLevel; hasData: boolean } }) {
   if (!rec || !rec.hasData) {
     return (
       <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -414,4 +445,3 @@ function RecoveryDot({
     </span>
   );
 }
-

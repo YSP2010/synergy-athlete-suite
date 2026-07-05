@@ -125,69 +125,69 @@ function CheckinPage() {
       {isLoading ? (
         <div className="py-20 text-center text-muted-foreground">Lade…</div>
       ) : (
-      <div className="card-elevated space-y-5 p-5">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label>Gewicht (kg)</Label>
-            <Input
-              type="number"
-              step="0.1"
-              value={f.weight_kg}
-              onChange={(e) => setF({ ...f, weight_kg: e.target.value })}
-            />
+        <div className="card-elevated space-y-5 p-5">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Gewicht (kg)</Label>
+              <Input
+                type="number"
+                step="0.1"
+                value={f.weight_kg}
+                onChange={(e) => setF({ ...f, weight_kg: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Schlaf (Stunden)</Label>
+              <Input
+                type="number"
+                step="0.25"
+                value={f.sleep_hours}
+                onChange={(e) => setF({ ...f, sleep_hours: e.target.value })}
+              />
+            </div>
           </div>
-          <div>
-            <Label>Schlaf (Stunden)</Label>
-            <Input
-              type="number"
-              step="0.25"
-              value={f.sleep_hours}
-              onChange={(e) => setF({ ...f, sleep_hours: e.target.value })}
-            />
-          </div>
-        </div>
 
-        <ScaleRow
-          label="Schlafqualität"
-          value={f.sleep_quality}
-          onChange={(v) => setF({ ...f, sleep_quality: v })}
-          labels={SCALE_LABELS.sleep_quality}
-          goodHigh
-        />
-        <ScaleRow
-          label="Muskelkater"
-          value={f.soreness}
-          onChange={(v) => setF({ ...f, soreness: v })}
-          labels={SCALE_LABELS.soreness}
-        />
-        <ScaleRow
-          label="Stress"
-          value={f.stress}
-          onChange={(v) => setF({ ...f, stress: v })}
-          labels={SCALE_LABELS.stress}
-        />
-        <ScaleRow
-          label="Stimmung"
-          value={f.mood}
-          onChange={(v) => setF({ ...f, mood: v })}
-          labels={SCALE_LABELS.mood}
-          goodHigh
-        />
-
-        <div>
-          <Label>Notiz</Label>
-          <Textarea
-            value={f.notes}
-            onChange={(e) => setF({ ...f, notes: e.target.value })}
-            placeholder="Wie war der Tag?"
+          <ScaleRow
+            label="Schlafqualität"
+            value={f.sleep_quality}
+            onChange={(v) => setF({ ...f, sleep_quality: v })}
+            labels={SCALE_LABELS.sleep_quality}
+            goodHigh
           />
-        </div>
+          <ScaleRow
+            label="Muskelkater"
+            value={f.soreness}
+            onChange={(v) => setF({ ...f, soreness: v })}
+            labels={SCALE_LABELS.soreness}
+          />
+          <ScaleRow
+            label="Stress"
+            value={f.stress}
+            onChange={(v) => setF({ ...f, stress: v })}
+            labels={SCALE_LABELS.stress}
+          />
+          <ScaleRow
+            label="Stimmung"
+            value={f.mood}
+            onChange={(v) => setF({ ...f, mood: v })}
+            labels={SCALE_LABELS.mood}
+            goodHigh
+          />
 
-        <Button onClick={() => save.mutate()} disabled={save.isPending} className="w-full">
-          {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Speichern
-        </Button>
-      </div>
+          <div>
+            <Label>Notiz</Label>
+            <Textarea
+              value={f.notes}
+              onChange={(e) => setF({ ...f, notes: e.target.value })}
+              placeholder="Wie war der Tag?"
+            />
+          </div>
+
+          <Button onClick={() => save.mutate()} disabled={save.isPending} className="w-full">
+            {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Speichern
+          </Button>
+        </div>
       )}
 
       <CheckinTrend />
@@ -242,4 +242,3 @@ function ScaleRow({
     </div>
   );
 }
-

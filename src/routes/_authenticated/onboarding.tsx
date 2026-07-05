@@ -119,7 +119,10 @@ function OnboardingPage() {
         position: f.position || null,
         diet_style: f.diet_style || null,
         allergies: f.allergies
-          ? f.allergies.split(",").map((s) => s.trim()).filter(Boolean)
+          ? f.allergies
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
           : [],
         goal: f.goal,
         gym_days: f.gym_days,
@@ -177,7 +180,9 @@ function OnboardingPage() {
             </Field>
             <Field label="Geschlecht">
               <Select value={f.sex} onValueChange={(v) => setF({ ...f, sex: v as Sex })}>
-                <SelectTrigger><SelectValue placeholder="wählen…" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="wählen…" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="male">Männlich</SelectItem>
                   <SelectItem value="female">Weiblich</SelectItem>
@@ -210,7 +215,9 @@ function OnboardingPage() {
             <h2 className="font-display text-lg font-semibold">Deine Sportart</h2>
             <Field label="Sportart">
               <Select value={f.sport} onValueChange={(v) => setF({ ...f, sport: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="football">Fußball</SelectItem>
                   <SelectItem value="tennis">Tennis</SelectItem>
@@ -257,7 +264,9 @@ function OnboardingPage() {
             <h2 className="font-display text-lg font-semibold">Ernährung</h2>
             <Field label="Ernährungsstil">
               <Select value={f.diet_style} onValueChange={(v) => setF({ ...f, diet_style: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="omnivor">Omnivor</SelectItem>
                   <SelectItem value="vegetarisch">Vegetarisch</SelectItem>

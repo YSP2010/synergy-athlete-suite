@@ -224,8 +224,7 @@ export const generateProgressInsight = createServerFn({ method: "POST" })
     const avgKcal = daysTracked ? Math.round(kcalSum / daysTracked) : null;
     const avgProteinG = daysTracked ? round1(proteinSum / daysTracked) : null;
     const weightKg = num(profile?.weight_kg);
-    const proteinPerKg =
-      avgProteinG !== null && weightKg ? round1(avgProteinG / weightKg) : null;
+    const proteinPerKg = avgProteinG !== null && weightKg ? round1(avgProteinG / weightKg) : null;
     const proteinTargetG = weightKg ? round1(2 * weightKg) : null;
 
     const metrics: Metrics = {
@@ -270,8 +269,10 @@ export const generateProgressInsight = createServerFn({ method: "POST" })
       }),
     });
 
-    if (gwRes.status === 429) throw new Error("AI-Limit erreicht. Bitte kurz warten und erneut versuchen.");
-    if (gwRes.status === 402) throw new Error("AI-Guthaben aufgebraucht. Bitte im Workspace-Billing aufladen.");
+    if (gwRes.status === 429)
+      throw new Error("AI-Limit erreicht. Bitte kurz warten und erneut versuchen.");
+    if (gwRes.status === 402)
+      throw new Error("AI-Guthaben aufgebraucht. Bitte im Workspace-Billing aufladen.");
     if (!gwRes.ok) {
       const t = await gwRes.text().catch(() => "");
       throw new Error(`AI-Fehler ${gwRes.status}: ${t.slice(0, 200)}`);
@@ -316,4 +317,3 @@ export const generateProgressInsight = createServerFn({ method: "POST" })
 
     return { id: ins.data.id as string, insight: result, metrics, periodStart, periodEnd };
   });
-

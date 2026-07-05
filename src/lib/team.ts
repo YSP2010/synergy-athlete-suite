@@ -3,7 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 export async function findProfileByEmail(email: string) {
   const { data, error } = await supabase.rpc("find_profile_by_email", { _email: email.trim() });
   if (error) throw error;
-  return (data?.[0] ?? null) as { id: string; name: string | null; role: "athlete" | "coach" } | null;
+  return (data?.[0] ?? null) as {
+    id: string;
+    name: string | null;
+    role: "athlete" | "coach";
+  } | null;
 }
 
 /**

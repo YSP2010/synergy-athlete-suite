@@ -29,9 +29,11 @@ describe("calcRecovery", () => {
   });
 
   it("senkt den Score bei hoher Trainingslast der letzten 72h", () => {
-    const loaded = calcRecovery(goodStat, [{ date: "2026-07-04", kind: "match", intensity: "high", match_hardness: "hard" }], [
-      { date: "2026-07-04", session_type: "legs" },
-    ]);
+    const loaded = calcRecovery(
+      goodStat,
+      [{ date: "2026-07-04", kind: "match", intensity: "high", match_hardness: "hard" }],
+      [{ date: "2026-07-04", session_type: "legs" }],
+    );
     const rested = calcRecovery(goodStat, [], []);
     expect(loaded.score).toBeLessThan(rested.score);
   });

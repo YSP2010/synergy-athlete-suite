@@ -88,8 +88,9 @@ function AuthPage() {
           </div>
           <h1 className="font-display text-xl font-bold">Bitte E-Mail bestätigen</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            Wir haben dir eine Bestätigungs-Mail an <span className="font-medium text-foreground">{email}</span>{" "}
-            geschickt. Öffne den Link darin, um dein Konto zu aktivieren und dich anzumelden.
+            Wir haben dir eine Bestätigungs-Mail an{" "}
+            <span className="font-medium text-foreground">{email}</span> geschickt. Öffne den Link
+            darin, um dein Konto zu aktivieren und dich anzumelden.
           </p>
           <Button
             variant="outline"
@@ -148,14 +149,20 @@ function AuthPage() {
               <>
                 <div>
                   <Label id="role-label">Ich bin…</Label>
-                  <div role="radiogroup" aria-labelledby="role-label" className="mt-1 grid grid-cols-2 gap-2">
+                  <div
+                    role="radiogroup"
+                    aria-labelledby="role-label"
+                    className="mt-1 grid grid-cols-2 gap-2"
+                  >
                     <button
                       type="button"
                       role="radio"
                       aria-checked={role === "athlete"}
                       onClick={() => setRole("athlete")}
                       className={`rounded-lg border p-3 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-elevated ${
-                        role === "athlete" ? "border-neon bg-neon-soft text-neon" : "border-border bg-elevated"
+                        role === "athlete"
+                          ? "border-neon bg-neon-soft text-neon"
+                          : "border-border bg-elevated"
                       }`}
                     >
                       <div className="font-semibold">Athlet</div>
@@ -167,7 +174,9 @@ function AuthPage() {
                       aria-checked={role === "coach"}
                       onClick={() => setRole("coach")}
                       className={`rounded-lg border p-3 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-elevated ${
-                        role === "coach" ? "border-neon bg-neon-soft text-neon" : "border-border bg-elevated"
+                        role === "coach"
+                          ? "border-neon bg-neon-soft text-neon"
+                          : "border-border bg-elevated"
                       }`}
                     >
                       <div className="font-semibold">Trainer</div>
@@ -177,7 +186,12 @@ function AuthPage() {
                 </div>
                 <div>
                   <Label htmlFor="name">Name</Label>
-                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
                 </div>
               </>
             )}
@@ -222,7 +236,8 @@ function AuthPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Mit dem Fortfahren stimmst du der Nutzung deiner Trainings- und Ernährungsdaten zur Planung zu.
+          Mit dem Fortfahren stimmst du der Nutzung deiner Trainings- und Ernährungsdaten zur
+          Planung zu.
         </p>
       </div>
     </div>
@@ -232,8 +247,10 @@ function AuthPage() {
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" {...props}>
-      <path fill="#EA4335" d="M12 10v4h5.7c-.2 1.3-1.6 3.8-5.7 3.8-3.4 0-6.2-2.8-6.2-6.3s2.8-6.3 6.2-6.3c2 0 3.3.8 4 1.6l2.7-2.6C16.9 2.7 14.6 1.7 12 1.7 6.6 1.7 2.2 6 2.2 11.5S6.6 21.3 12 21.3c6.9 0 11.5-4.9 11.5-11.7 0-.8-.1-1.4-.2-2H12z"/>
+      <path
+        fill="#EA4335"
+        d="M12 10v4h5.7c-.2 1.3-1.6 3.8-5.7 3.8-3.4 0-6.2-2.8-6.2-6.3s2.8-6.3 6.2-6.3c2 0 3.3.8 4 1.6l2.7-2.6C16.9 2.7 14.6 1.7 12 1.7 6.6 1.7 2.2 6 2.2 11.5S6.6 21.3 12 21.3c6.9 0 11.5-4.9 11.5-11.7 0-.8-.1-1.4-.2-2H12z"
+      />
     </svg>
   );
 }
-

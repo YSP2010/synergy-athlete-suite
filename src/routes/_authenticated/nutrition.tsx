@@ -12,14 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import {
-  Plus,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Utensils,
-  Sparkles,
-} from "lucide-react";
+import { Plus, Trash2, ChevronLeft, ChevronRight, Utensils, Sparkles } from "lucide-react";
 import {
   ageFrom,
   addDays,
@@ -29,10 +22,7 @@ import {
   toISODate,
   WEEKDAY_LONG,
 } from "@/lib/dates";
-import {
-  calcDailyMacros,
-  toAthleteProfile,
-} from "@/lib/planner";
+import { calcDailyMacros, toAthleteProfile } from "@/lib/planner";
 import { MacroRings } from "@/components/dashboard/MacroRings";
 import { QueryError } from "@/components/ui/query-error";
 import { humanError } from "@/lib/errors";
@@ -214,7 +204,11 @@ function NutritionPage() {
           </div>
           <div className="font-display text-sm font-semibold">
             {d.toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" })}
-            {isToday && <span className="ml-2 rounded bg-neon-soft px-1.5 py-0.5 text-[9px] font-semibold text-neon">HEUTE</span>}
+            {isToday && (
+              <span className="ml-2 rounded bg-neon-soft px-1.5 py-0.5 text-[9px] font-semibold text-neon">
+                HEUTE
+              </span>
+            )}
           </div>
         </div>
         <button
@@ -298,7 +292,9 @@ function NutritionPage() {
                                 )}
                               </div>
                               <div className="text-[11px] text-muted-foreground tabular">
-                                {Math.round(Number(r.kcal))} kcal · P {Number(r.protein_g).toFixed(0)}g · C {Number(r.carbs_g).toFixed(0)}g · F {Number(r.fat_g).toFixed(0)}g
+                                {Math.round(Number(r.kcal))} kcal · P{" "}
+                                {Number(r.protein_g).toFixed(0)}g · C {Number(r.carbs_g).toFixed(0)}
+                                g · F {Number(r.fat_g).toFixed(0)}g
                               </div>
                             </div>
                             <button
@@ -324,11 +320,18 @@ function NutritionPage() {
             <div className="grid gap-3 sm:grid-cols-6">
               <div className="sm:col-span-2">
                 <Label className="text-xs">Mahlzeit</Label>
-                <Select value={form.meal} onValueChange={(v) => setForm({ ...form, meal: v as Meal })}>
-                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.meal}
+                  onValueChange={(v) => setForm({ ...form, meal: v as Meal })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {MEAL_ORDER.map((m) => (
-                      <SelectItem key={m} value={m}>{MEAL_LABEL[m]}</SelectItem>
+                      <SelectItem key={m} value={m}>
+                        {MEAL_LABEL[m]}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -343,8 +346,16 @@ function NutritionPage() {
                 />
               </div>
               <NumCol label="Kcal" v={form.kcal} on={(v) => setForm({ ...form, kcal: v })} />
-              <NumCol label="Protein g" v={form.protein_g} on={(v) => setForm({ ...form, protein_g: v })} />
-              <NumCol label="Carbs g" v={form.carbs_g} on={(v) => setForm({ ...form, carbs_g: v })} />
+              <NumCol
+                label="Protein g"
+                v={form.protein_g}
+                on={(v) => setForm({ ...form, protein_g: v })}
+              />
+              <NumCol
+                label="Carbs g"
+                v={form.carbs_g}
+                on={(v) => setForm({ ...form, carbs_g: v })}
+              />
               <NumCol label="Fett g" v={form.fat_g} on={(v) => setForm({ ...form, fat_g: v })} />
               <div className="sm:col-span-2 flex items-end">
                 <Button

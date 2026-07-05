@@ -77,7 +77,11 @@ function GymDetailPage() {
     },
   });
 
-  const [meta, setMeta] = useState<{ session_type: GymType; duration_min: string; notes: string } | null>(null);
+  const [meta, setMeta] = useState<{
+    session_type: GymType;
+    duration_min: string;
+    notes: string;
+  } | null>(null);
   useEffect(() => {
     if (data && !meta) {
       setMeta({
@@ -213,11 +217,14 @@ function GymDetailPage() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-2xl font-bold">
-            Gym · {GYM_LABEL[meta.session_type]}
-          </h1>
+          <h1 className="font-display text-2xl font-bold">Gym · {GYM_LABEL[meta.session_type]}</h1>
           <div className="text-xs text-muted-foreground">
-            {d.toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" })}
+            {d.toLocaleDateString("de-DE", {
+              weekday: "long",
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })}
           </div>
         </div>
       </div>
@@ -229,10 +236,14 @@ function GymDetailPage() {
             value={meta.session_type}
             onValueChange={(v) => setMeta({ ...meta, session_type: v as GymType })}
           >
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {Object.entries(GYM_LABEL).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -300,8 +311,8 @@ function GymDetailPage() {
             </Button>
           </div>
           <div className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-            <HistoryIcon className="h-3 w-3" /> Werte werden aus deiner letzten Session
-            mit dem gleichen Namen vorbelegt.
+            <HistoryIcon className="h-3 w-3" /> Werte werden aus deiner letzten Session mit dem
+            gleichen Namen vorbelegt.
           </div>
         </div>
       </div>

@@ -33,7 +33,11 @@ function SettingsPage() {
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
-      const { data } = await supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", u.user.id)
+        .maybeSingle();
       return data;
     },
   });
@@ -114,7 +118,9 @@ function SettingsPage() {
         <div>
           <Label>Ziel</Label>
           <Select value={f.goal} onValueChange={(v) => setF({ ...f, goal: v as Goal })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="muscle_gain">Muskelaufbau</SelectItem>
               <SelectItem value="maintain">Erhalten</SelectItem>
@@ -123,9 +129,21 @@ function SettingsPage() {
             </SelectContent>
           </Select>
         </div>
-        <DayPicker label="Gym-Tage" value={f.gym_days} onChange={(v) => setF({ ...f, gym_days: v })} />
-        <DayPicker label="Sport-Tage" value={f.sport_days} onChange={(v) => setF({ ...f, sport_days: v })} />
-        <DayPicker label="Spieltage" value={f.match_days} onChange={(v) => setF({ ...f, match_days: v })} />
+        <DayPicker
+          label="Gym-Tage"
+          value={f.gym_days}
+          onChange={(v) => setF({ ...f, gym_days: v })}
+        />
+        <DayPicker
+          label="Sport-Tage"
+          value={f.sport_days}
+          onChange={(v) => setF({ ...f, sport_days: v })}
+        />
+        <DayPicker
+          label="Spieltage"
+          value={f.match_days}
+          onChange={(v) => setF({ ...f, match_days: v })}
+        />
         <Button className="w-full" onClick={() => save.mutate()} disabled={save.isPending}>
           Speichern
         </Button>

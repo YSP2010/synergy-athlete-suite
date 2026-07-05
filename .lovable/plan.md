@@ -1,4 +1,3 @@
-
 # Hybrid Athlete Performance Planner
 
 Dark-Mode Dashboard (Anthrazit + Neon-Grün `#39FF14`) für Sportler mit Fußball + 3x Gym. Alles tiefgründig ausgearbeitet, aber in klar abgegrenzten Etappen gebaut. Backend via Lovable Cloud, KI via Lovable AI Gateway (Gemini für Foto-Scan).
@@ -55,21 +54,26 @@ Dark-Mode Dashboard (Anthrazit + Neon-Grün `#39FF14`) für Sportler mit Fußbal
 ## Etappen (step by step)
 
 **Etappe 1 – Fundament (dieser Build)**
+
 - Cloud + Google-Auth aktivieren, Design-Tokens, Layout-Shell, Onboarding-Wizard, Profile-Tabelle + RLS.
 - Dashboard-Skeleton mit Recovery-Ring & Makro-Ringen (echte Berechnung, Dummy-Check-in seedbar).
 - Daily Check-in + `daily_stats` + Recovery-Berechnung.
 - Wochenplaner-Ansicht (read-only Generierung) inkl. Beintraining-Sperre & Carbo-Loading-Hinweis.
 
 **Etappe 2 – Tracker**
+
 - Gym-Logger + Sport-Logger, Historie, Vorschlagslogik letzte Session, Trends-Basis.
 
 **Etappe 3 – Ernährung + Empfehlungen**
+
 - Nutrition-Log, Makro-Tracking, KI-Empfehlungen, Trends.
 
 **Etappe 4 – Food-Scanner (KI)**
+
 - Storage-Bucket, Foto-Upload, Gemini-Analyse, Scores, Übernahme in Nutrition-Log.
 
 **Etappe 5 – Tagebuch + Feinschliff**
+
 - Journal-CRUD, Verknüpfungen, Suche, Notifications/Streaks, Export.
 
 ## Nach dem Plan

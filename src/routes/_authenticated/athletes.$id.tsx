@@ -1,9 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Lock, Dumbbell, Trophy, HeartPulse, CalendarDays, CalendarRange } from "lucide-react";
+import {
+  ArrowLeft,
+  Lock,
+  Dumbbell,
+  Trophy,
+  HeartPulse,
+  CalendarDays,
+  CalendarRange,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toISODate, today, startOfWeek, addDays, isoDow, parseISODate, WEEKDAY_LONG } from "@/lib/dates";
+import {
+  toISODate,
+  today,
+  startOfWeek,
+  addDays,
+  isoDow,
+  parseISODate,
+  WEEKDAY_LONG,
+} from "@/lib/dates";
 import {
   applyOverrides,
   calcRecovery,
@@ -46,10 +62,18 @@ function AthleteView() {
   const weekStart = startOfWeek(today());
   const weekEnd = addDays(weekStart, 6);
 
-  const { data: profile, isError, isPending } = useQuery({
+  const {
+    data: profile,
+    isError,
+    isPending,
+  } = useQuery({
     queryKey: ["coach-athlete", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("*").eq("id", id).maybeSingle();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -59,8 +83,12 @@ function AthleteView() {
     queryKey: ["coach-athlete-stat", id],
     queryFn: async () => {
       const { data } = await supabase
-        .from("daily_stats").select("*").eq("user_id", id)
-        .order("date", { ascending: false }).limit(1).maybeSingle();
+        .from("daily_stats")
+        .select("*")
+        .eq("user_id", id)
+        .order("date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
       return data;
     },
   });
@@ -99,8 +127,11 @@ function AthleteView() {
     queryKey: ["coach-athlete-gym", id],
     queryFn: async () => {
       const { data } = await supabase
-        .from("workouts_gym").select("*").eq("user_id", id)
-        .gte("date", toISODate(weekStart)).lte("date", toISODate(weekEnd))
+        .from("workouts_gym")
+        .select("*")
+        .eq("user_id", id)
+        .gte("date", toISODate(weekStart))
+        .lte("date", toISODate(weekEnd))
         .order("date");
       return data ?? [];
     },
@@ -110,8 +141,11 @@ function AthleteView() {
     queryKey: ["coach-athlete-sport", id],
     queryFn: async () => {
       const { data } = await supabase
-        .from("workouts_sport").select("*").eq("user_id", id)
-        .gte("date", toISODate(weekStart)).lte("date", toISODate(weekEnd))
+        .from("workouts_sport")
+        .select("*")
+        .eq("user_id", id)
+        .gte("date", toISODate(weekStart))
+        .lte("date", toISODate(weekEnd))
         .order("date");
       return data ?? [];
     },
@@ -121,8 +155,11 @@ function AthleteView() {
     queryKey: ["coach-athlete-planner", id],
     queryFn: async () => {
       const { data } = await supabase
-        .from("weekly_planner").select("plan,locked").eq("user_id", id)
-        .eq("week_start", toISODate(weekStart)).maybeSingle();
+        .from("weekly_planner")
+        .select("plan,locked")
+        .eq("user_id", id)
+        .eq("week_start", toISODate(weekStart))
+        .maybeSingle();
       return data as unknown as { plan: PlannerPlan | null; locked: boolean | null } | null;
     },
   });
@@ -139,7 +176,12 @@ function AthleteView() {
         <p className="mt-2 text-sm text-muted-foreground">
           Du kannst diesen Athleten nur einsehen, wenn er ein aktives Mitglied deines Teams ist.
         </p>
-        <Button asChild className="mt-4" variant="outline"><Link to="/team"><ArrowLeft className="mr-2 h-4 w-4" />Zurück</Link></Button>
+        <Button asChild className="mt-4" variant="outline">
+          <Link to="/team">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Zurück
+          </Link>
+        </Button>
       </div>
     );
   }
@@ -148,9 +190,7 @@ function AthleteView() {
   // Basis, sonst reine Load-Schätzung (stat = null).
   const yesterdayIso = toISODate(addDays(today(), -1));
   const freshStat: DailyStat | null =
-    stat && (stat.date === todayIso || stat.date === yesterdayIso)
-      ? (stat as DailyStat)
-      : null;
+    stat && (stat.date === todayIso || stat.date === yesterdayIso) ? (stat as DailyStat) : null;
   const recovery = calcRecovery(freshStat, recentSport ?? [], recentGym ?? []);
 
   // Wochenplan des Athleten: bevorzugt der gesperrte Snapshot; falls keiner
@@ -167,7 +207,8 @@ function AthleteView() {
     const hardnessMap: Record<number, MatchHardnessType> = {};
     for (const s of sport ?? []) {
       if (s.kind === "match") {
-        hardnessMap[isoDow(parseISODate(s.date))] = (s.match_hardness ?? "normal") as MatchHardnessType;
+        hardnessMap[isoDow(parseISODate(s.date))] = (s.match_hardness ??
+          "normal") as MatchHardnessType;
       }
     }
     planSlots = applyOverrides(
@@ -179,7 +220,11 @@ function AthleteView() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button asChild variant="ghost" size="icon"><Link to="/team"><ArrowLeft className="h-4 w-4" /></Link></Button>
+        <Button asChild variant="ghost" size="icon">
+          <Link to="/team">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
         <div>
           <h1 className="font-display text-2xl font-bold">{profile?.name ?? "Athlet"}</h1>
           <p className="text-xs text-muted-foreground">
@@ -189,13 +234,16 @@ function AthleteView() {
       </div>
 
       <div className="rounded-lg border border-neon/20 bg-neon-soft/40 p-3 text-xs text-muted-foreground">
-        🔒 Ernährungslog, Food-Scans und Tagebuch dieses Athleten sind privat und für dich nicht sichtbar.
+        🔒 Ernährungslog, Food-Scans und Tagebuch dieses Athleten sind privat und für dich nicht
+        sichtbar.
       </div>
 
       <section className="card-elevated flex flex-col items-center gap-3 p-5 sm:flex-row sm:items-center sm:gap-6">
         <RecoveryRing score={recovery.score} level={recovery.level} size={140} />
         <div className="text-center sm:text-left">
-          <div className="text-xs uppercase tracking-widest text-muted-foreground">Recovery-Score</div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">
+            Recovery-Score
+          </div>
           <div className="mt-1 font-display text-lg font-semibold">
             {recovery.level === "green"
               ? "Bereit"
@@ -218,24 +266,56 @@ function AthleteView() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <StatCard icon={<HeartPulse className="h-4 w-4" />} label="Letzter Check-in" value={stat ? stat.date : "–"}
-          detail={stat ? `Schlaf ${stat.sleep_hours ?? "–"}h · Soreness ${stat.soreness ?? "–"}/5` : "kein Eintrag"} />
-        <StatCard icon={<Dumbbell className="h-4 w-4" />} label="Gym diese Woche" value={String(gym?.length ?? 0)} />
-        <StatCard icon={<Trophy className="h-4 w-4" />} label="Sport diese Woche" value={String(sport?.length ?? 0)} />
+        <StatCard
+          icon={<HeartPulse className="h-4 w-4" />}
+          label="Letzter Check-in"
+          value={stat ? stat.date : "–"}
+          detail={
+            stat
+              ? `Schlaf ${stat.sleep_hours ?? "–"}h · Soreness ${stat.soreness ?? "–"}/5`
+              : "kein Eintrag"
+          }
+        />
+        <StatCard
+          icon={<Dumbbell className="h-4 w-4" />}
+          label="Gym diese Woche"
+          value={String(gym?.length ?? 0)}
+        />
+        <StatCard
+          icon={<Trophy className="h-4 w-4" />}
+          label="Sport diese Woche"
+          value={String(sport?.length ?? 0)}
+        />
       </section>
 
       <section className="card-elevated p-4">
-        <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><CalendarDays className="h-4 w-4" /> Diese Woche</div>
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <CalendarDays className="h-4 w-4" /> Diese Woche
+        </div>
         <div className="space-y-2">
-          {([...(gym ?? []).map((g) => ({ ...g, k: "gym" as const })), ...(sport ?? []).map((s) => ({ ...s, k: "sport" as const }))] as WeekRow[])
+          {(
+            [
+              ...(gym ?? []).map((g) => ({ ...g, k: "gym" as const })),
+              ...(sport ?? []).map((s) => ({ ...s, k: "sport" as const })),
+            ] as WeekRow[]
+          )
             .sort((a, b) => a.date.localeCompare(b.date))
             .map((r) => (
-              <div key={`${r.k}-${r.id}`} className="flex items-center justify-between rounded-lg bg-elevated px-3 py-2 text-sm">
+              <div
+                key={`${r.k}-${r.id}`}
+                className="flex items-center justify-between rounded-lg bg-elevated px-3 py-2 text-sm"
+              >
                 <div>
                   <div className="font-medium">
-                    {r.k === "gym" ? `Gym · ${r.session_type}` : r.kind === "match" ? `Spiel (${r.match_hardness ?? "normal"})` : `Training (${r.intensity})`}
+                    {r.k === "gym"
+                      ? `Gym · ${r.session_type}`
+                      : r.kind === "match"
+                        ? `Spiel (${r.match_hardness ?? "normal"})`
+                        : `Training (${r.intensity})`}
                   </div>
-                  <div className="text-xs text-muted-foreground">{r.date} · Status {r.status}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {r.date} · Status {r.status}
+                  </div>
                 </div>
               </div>
             ))}
@@ -299,13 +379,25 @@ function MiniFactor({ label, value }: { label: string; value: string }) {
   );
 }
 
-function StatCard({ icon, label, value, detail }: { icon: React.ReactNode; label: string; value: string; detail?: string }) {
+function StatCard({
+  icon,
+  label,
+  value,
+  detail,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  detail?: string;
+}) {
   return (
     <div className="card-elevated p-4">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">{icon}{label}</div>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        {icon}
+        {label}
+      </div>
       <div className="mt-1 font-display text-2xl font-semibold">{value}</div>
       {detail && <div className="text-xs text-muted-foreground">{detail}</div>}
     </div>
   );
 }
-

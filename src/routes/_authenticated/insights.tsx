@@ -98,7 +98,8 @@ function InsightsPage() {
       <div>
         <h1 className="font-display text-3xl font-bold">Fortschritt</h1>
         <p className="text-sm text-muted-foreground">
-          KI-Auswertung der letzten 14 Tage – Recovery-Trend, Trainings-Konsistenz &amp; Ernährungs-Zieltreue.
+          KI-Auswertung der letzten 14 Tage – Recovery-Trend, Trainings-Konsistenz &amp;
+          Ernährungs-Zieltreue.
         </p>
       </div>
 

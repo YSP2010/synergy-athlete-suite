@@ -7,15 +7,7 @@ import { addDays, isoDow, toISODate } from "./dates";
 
 export type Goal = "muscle_gain" | "maintain" | "recomp" | "performance";
 export type Sex = "male" | "female" | "other";
-export type GymType =
-  | "push"
-  | "pull"
-  | "legs"
-  | "upper"
-  | "lower"
-  | "full"
-  | "light"
-  | "mobility";
+export type GymType = "push" | "pull" | "legs" | "upper" | "lower" | "full" | "light" | "mobility";
 export type SportKind = "training" | "match";
 export type Intensity = "low" | "mid" | "high";
 export type MatchHardness = "easy" | "normal" | "hard";
@@ -170,12 +162,7 @@ export function calcRecovery(
   // 0 Punkte → 1, 15+ Punkte → 0
   const loadScore = Math.max(0, Math.min(1, 1 - points / 15));
 
-  const raw =
-    sleepScore * 0.35 +
-    qScore * 0.1 +
-    sorScore * 0.2 +
-    strScore * 0.1 +
-    loadScore * 0.25;
+  const raw = sleepScore * 0.35 + qScore * 0.1 + sorScore * 0.2 + strScore * 0.1 + loadScore * 0.25;
 
   const score = Math.round(raw * 100);
   const level: RecoveryLevel = score >= 75 ? "green" : score >= 50 ? "amber" : "red";
@@ -435,7 +422,8 @@ export function generateWeekPlan(
   // 4) Recovery niedrig → erste harte Gym-Einheit → Active Recovery
   if (recoveryScore !== null && recoveryScore < 50) {
     const idx = slots.findIndex(
-      (s) => s.kind === "gym" && s.sessionType !== undefined && HARD_GYM_TYPES.includes(s.sessionType),
+      (s) =>
+        s.kind === "gym" && s.sessionType !== undefined && HARD_GYM_TYPES.includes(s.sessionType),
     );
     if (idx !== -1) {
       slots[idx] = {

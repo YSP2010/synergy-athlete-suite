@@ -31,7 +31,13 @@ export function MacroRings({
 }) {
   const items: Macro[] = [
     { label: "Kcal", current: kcal, target: kcalTarget, unit: "kcal", color: "var(--neon)" },
-    { label: "Protein", current: protein, target: proteinTarget, unit: "g", color: "var(--chart-2)" },
+    {
+      label: "Protein",
+      current: protein,
+      target: proteinTarget,
+      unit: "g",
+      color: "var(--chart-2)",
+    },
     { label: "Carbs", current: carbs, target: carbsTarget, unit: "g", color: "var(--chart-3)" },
     { label: "Fett", current: fat, target: fatTarget, unit: "g", color: "var(--chart-4)" },
   ];
@@ -55,7 +61,14 @@ function Ring({ macro, carbLoading }: { macro: Macro; carbLoading?: boolean }) {
     <div className="card-elevated flex flex-col items-center p-4">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--elevated)" strokeWidth={8} fill="none" />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke="var(--elevated)"
+            strokeWidth={8}
+            fill="none"
+          />
           <circle
             cx={size / 2}
             cy={size / 2}

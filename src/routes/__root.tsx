@@ -20,9 +20,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Nicht gefunden</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Diese Seite existiert nicht.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Diese Seite existiert nicht.</p>
         <div className="mt-6">
           <Link
             to="/"
@@ -49,9 +47,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           Etwas ist schiefgelaufen
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Bitte lade die Seite neu.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Bitte lade die Seite neu.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -94,8 +90,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Fußball + Gym clever kombinieren. Recovery-Score, Wochenplan, Makros, Food-Scanner.",
       },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png" },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -149,5 +153,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-
-

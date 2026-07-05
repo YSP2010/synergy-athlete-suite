@@ -5,13 +5,7 @@ import { Button } from "@/components/ui/button";
  * Wiederverwendbarer Fehler-Zustand fuer fehlgeschlagene Queries.
  * Zeigt eine Karte im App-Stil mit optionalem "Erneut versuchen"-Button.
  */
-export function QueryError({
-  message,
-  onRetry,
-}: {
-  message?: string;
-  onRetry?: () => void;
-}) {
+export function QueryError({ message, onRetry }: { message?: string; onRetry?: () => void }) {
   return (
     <div className="card-elevated flex flex-col items-center gap-3 p-8 text-center">
       <div className="grid h-11 w-11 place-items-center rounded-full bg-danger/10 text-danger">

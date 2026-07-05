@@ -2,13 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
-import {
-  addDays,
-  isoDow,
-  startOfWeek,
-  toISODate,
-  WEEKDAY_LONG,
-} from "@/lib/dates";
+import { addDays, isoDow, startOfWeek, toISODate, WEEKDAY_LONG } from "@/lib/dates";
 import {
   applyOverrides,
   calcRecovery,
@@ -42,15 +36,90 @@ const OVERRIDE_OPTIONS: {
   label: string;
   build: () => SlotOverride;
 }[] = [
-  { value: "push", label: "Gym · Push", build: () => ({ kind: "gym", sessionType: "push", label: "Gym · Push", detail: "Brust · Schulter · Trizeps" }) },
-  { value: "pull", label: "Gym · Pull", build: () => ({ kind: "gym", sessionType: "pull", label: "Gym · Pull", detail: "Rücken · Bizeps" }) },
-  { value: "legs", label: "Gym · Beine", build: () => ({ kind: "gym", sessionType: "legs", label: "Gym · Beine", detail: "Beine · Glutes · Core" }) },
-  { value: "upper", label: "Gym · Oberkörper", build: () => ({ kind: "gym", sessionType: "upper", label: "Gym · Oberkörper", detail: "Oberkörper leicht" }) },
-  { value: "lower", label: "Gym · Unterkörper", build: () => ({ kind: "gym", sessionType: "lower", label: "Gym · Unterkörper", detail: "Unterkörper leicht" }) },
-  { value: "full", label: "Gym · Ganzkörper", build: () => ({ kind: "gym", sessionType: "full", label: "Gym · Ganzkörper", detail: "Ganzkörper" }) },
-  { value: "mobility", label: "Mobility", build: () => ({ kind: "gym", sessionType: "mobility", label: "Mobility", detail: "Beweglichkeit & Faszien" }) },
-  { value: "recovery", label: "Active Recovery", build: () => ({ kind: "recovery", label: "Active Recovery", detail: "Mobility, Stretching, Zone-1 20 min" }) },
-  { value: "rest", label: "Ruhetag", build: () => ({ kind: "rest", label: "Ruhetag", detail: "Erholung" }) },
+  {
+    value: "push",
+    label: "Gym · Push",
+    build: () => ({
+      kind: "gym",
+      sessionType: "push",
+      label: "Gym · Push",
+      detail: "Brust · Schulter · Trizeps",
+    }),
+  },
+  {
+    value: "pull",
+    label: "Gym · Pull",
+    build: () => ({
+      kind: "gym",
+      sessionType: "pull",
+      label: "Gym · Pull",
+      detail: "Rücken · Bizeps",
+    }),
+  },
+  {
+    value: "legs",
+    label: "Gym · Beine",
+    build: () => ({
+      kind: "gym",
+      sessionType: "legs",
+      label: "Gym · Beine",
+      detail: "Beine · Glutes · Core",
+    }),
+  },
+  {
+    value: "upper",
+    label: "Gym · Oberkörper",
+    build: () => ({
+      kind: "gym",
+      sessionType: "upper",
+      label: "Gym · Oberkörper",
+      detail: "Oberkörper leicht",
+    }),
+  },
+  {
+    value: "lower",
+    label: "Gym · Unterkörper",
+    build: () => ({
+      kind: "gym",
+      sessionType: "lower",
+      label: "Gym · Unterkörper",
+      detail: "Unterkörper leicht",
+    }),
+  },
+  {
+    value: "full",
+    label: "Gym · Ganzkörper",
+    build: () => ({
+      kind: "gym",
+      sessionType: "full",
+      label: "Gym · Ganzkörper",
+      detail: "Ganzkörper",
+    }),
+  },
+  {
+    value: "mobility",
+    label: "Mobility",
+    build: () => ({
+      kind: "gym",
+      sessionType: "mobility",
+      label: "Mobility",
+      detail: "Beweglichkeit & Faszien",
+    }),
+  },
+  {
+    value: "recovery",
+    label: "Active Recovery",
+    build: () => ({
+      kind: "recovery",
+      label: "Active Recovery",
+      detail: "Mobility, Stretching, Zone-1 20 min",
+    }),
+  },
+  {
+    value: "rest",
+    label: "Ruhetag",
+    build: () => ({ kind: "rest", label: "Ruhetag", detail: "Erholung" }),
+  },
 ];
 
 /** Struktur des `weekly_planner.plan`-JSONB. */
@@ -119,32 +188,23 @@ function PlanPage() {
       const allSport = (sportRes.data ?? []) as SportSession[];
       const allGym = (gymRes.data ?? []) as GymSession[];
       // Für die Wochen-Anzeige (Härte-Auswahl etc.) nur die tatsächliche Woche.
-      const sport = allSport.filter(
-        (s) => s.date >= toISODate(weekStart) && s.date <= weekEndIso,
-      );
+      const sport = allSport.filter((s) => s.date >= toISODate(weekStart) && s.date <= weekEndIso);
       // Für den Recovery-Score: dieselbe 72h-Logik wie im Dashboard.
       const recentSport = allSport.filter((s) => s.date < todayIso && s.date >= threeDaysAgo);
       const recentGym = allGym.filter((g) => g.date < todayIso && g.date >= threeDaysAgo);
       const recovery = calcRecovery(stat, recentSport, recentGym);
-      const planner = plannerRes.data as unknown as
-        | { plan: PlannerPlan | null; locked: boolean | null }
-        | null;
+      const planner = plannerRes.data as unknown as {
+        plan: PlannerPlan | null;
+        locked: boolean | null;
+      } | null;
       return { profile, sport, uid, planner, recoveryScore: recovery.score };
     },
   });
 
   const setHardness = useMutation({
-    mutationFn: async ({
-      date,
-      hardness,
-    }: {
-      date: string;
-      hardness: MatchHardness;
-    }) => {
+    mutationFn: async ({ date, hardness }: { date: string; hardness: MatchHardness }) => {
       if (!data) return;
-      const existing = data.sport.find(
-        (s) => s.date === date && s.kind === "match",
-      );
+      const existing = data.sport.find((s) => s.date === date && s.kind === "match");
       if (existing) {
         const { error } = await supabase
           .from("workouts_sport")
@@ -171,13 +231,7 @@ function PlanPage() {
   });
 
   const overrideSlot = useMutation({
-    mutationFn: async ({
-      date,
-      override,
-    }: {
-      date: string;
-      override: SlotOverride | null;
-    }) => {
+    mutationFn: async ({ date, override }: { date: string; override: SlotOverride | null }) => {
       if (!data) return;
       const { data: row } = await supabase
         .from("weekly_planner")
@@ -211,13 +265,7 @@ function PlanPage() {
   });
 
   const toggleLock = useMutation({
-    mutationFn: async ({
-      locked,
-      slots,
-    }: {
-      locked: boolean;
-      slots: PlannedSlot[];
-    }) => {
+    mutationFn: async ({ locked, slots }: { locked: boolean; slots: PlannedSlot[] }) => {
       if (!data) return;
       const { data: row } = await supabase
         .from("weekly_planner")
@@ -319,10 +367,7 @@ function PlanPage() {
         {plan.map((slot) => (
           <div
             key={slot.date}
-            className={cn(
-              "card-elevated p-4",
-              slot.date === todayIso && "border-neon",
-            )}
+            className={cn("card-elevated p-4", slot.date === todayIso && "border-neon")}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
@@ -350,9 +395,7 @@ function PlanPage() {
                     type="button"
                     className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                     disabled={overrideSlot.isPending}
-                    onClick={() =>
-                      overrideSlot.mutate({ date: slot.date, override: null })
-                    }
+                    onClick={() => overrideSlot.mutate({ date: slot.date, override: null })}
                   >
                     <RotateCcw className="h-3 w-3" /> Zurücksetzen
                   </button>
@@ -377,7 +420,9 @@ function PlanPage() {
                       setHardness.mutate({ date: slot.date, hardness: v as MatchHardness })
                     }
                   >
-                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="easy">Locker</SelectItem>
                       <SelectItem value="normal">Normal</SelectItem>
@@ -401,7 +446,9 @@ function PlanPage() {
                       }
                     }}
                   >
-                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       {OVERRIDE_OPTIONS.map((o) => (
                         <SelectItem key={o.value} value={o.value}>
@@ -420,7 +467,9 @@ function PlanPage() {
       <div className="card-elevated p-4 text-xs text-muted-foreground">
         <div className="mb-2 font-semibold text-foreground">Wie der Plan denkt</div>
         <ul className="space-y-1">
-          <li>• Kein Beintraining in den 48h vor einem <strong>harten Spiel</strong>.</li>
+          <li>
+            • Kein Beintraining in den 48h vor einem <strong>harten Spiel</strong>.
+          </li>
           <li>• Am Vortag & Spieltag: automatisches Carbo-Loading (≈ 7–8 g/kg).</li>
           <li>• Bei niedrigem Recovery-Score wird die nächste harte Einheit zu Active Recovery.</li>
         </ul>
@@ -430,10 +479,7 @@ function PlanPage() {
 }
 
 /** Ermittelt den passenden Select-Wert für den aktuellen (ggf. überschriebenen) Slot. */
-function overrideValueFor(
-  slot: PlannedSlot,
-  overrides: Record<string, SlotOverride>,
-): string {
+function overrideValueFor(slot: PlannedSlot, overrides: Record<string, SlotOverride>): string {
   const ov = overrides[slot.date];
   const sessionType: GymType | undefined = ov?.sessionType ?? slot.sessionType;
   const kind = ov?.kind ?? slot.kind;
@@ -456,4 +502,3 @@ function SlotDot({ kind }: { kind: string }) {
   };
   return <span className={cn("h-2.5 w-2.5 rounded-full", c[kind])} />;
 }
-

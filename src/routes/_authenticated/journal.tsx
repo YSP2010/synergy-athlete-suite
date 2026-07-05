@@ -1,11 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,13 +56,7 @@ function JournalPage() {
   const [showForm, setShowForm] = useState(false);
 
   // Paginierte Hauptliste (mit content) – 20 Einträge pro Seite.
-  const {
-    data,
-    isLoading,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
+  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["journal"],
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
@@ -89,10 +78,7 @@ function JournalPage() {
   });
 
   const uid = data?.pages[0]?.uid ?? "";
-  const loadedEntries = useMemo(
-    () => (data?.pages ?? []).flatMap((p) => p.rows),
-    [data],
-  );
+  const loadedEntries = useMemo(() => (data?.pages ?? []).flatMap((p) => p.rows), [data]);
 
   // Leichtgewichtige Meta-Query über ALLE Einträge (nur date + tags, kein content)
   // für Streak-Berechnung und Tag-Übersicht – unabhängig von der Pagination.
@@ -126,9 +112,7 @@ function JournalPage() {
 
   const allTags = useMemo(() => {
     const m = new Map<string, number>();
-    (metaRows ?? []).forEach((e) =>
-      (e.tags ?? []).forEach((t) => m.set(t, (m.get(t) ?? 0) + 1)),
-    );
+    (metaRows ?? []).forEach((e) => (e.tags ?? []).forEach((t) => m.set(t, (m.get(t) ?? 0) + 1)));
     return [...m.entries()]
       .map(([tag, count]) => ({ tag, count }))
       .sort((a, b) => b.count - a.count);
@@ -199,12 +183,7 @@ function JournalPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={exportJson}
-            disabled={totalCount === 0}
-          >
+          <Button variant="outline" size="sm" onClick={exportJson} disabled={totalCount === 0}>
             <Download className="mr-1.5 h-3.5 w-3.5" /> Export
           </Button>
           <Button
@@ -363,15 +342,7 @@ function bestStreak(dates: Set<string>): number {
   return best;
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="card-elevated p-3">
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -412,10 +383,7 @@ function EntryCard({
         </div>
         <div className="flex items-center gap-1">
           {mood && (
-            <span
-              className="rounded-full bg-muted px-2 py-1 text-sm"
-              title={mood.label}
-            >
+            <span className="rounded-full bg-muted px-2 py-1 text-sm" title={mood.label}>
               {mood.emoji}
             </span>
           )}
@@ -484,8 +452,7 @@ function EntryForm({
   const save = useMutation({
     mutationFn: async () => {
       if (!uid) throw new Error("Nicht eingeloggt");
-      if (!content.trim() && !title.trim())
-        throw new Error("Titel oder Inhalt erforderlich");
+      if (!content.trim() && !title.trim()) throw new Error("Titel oder Inhalt erforderlich");
       const payload = {
         user_id: uid,
         date,
@@ -495,10 +462,7 @@ function EntryForm({
         mood,
       };
       if (entry) {
-        const { error } = await supabase
-          .from("journal_entries")
-          .update(payload)
-          .eq("id", entry.id);
+        const { error } = await supabase.from("journal_entries").update(payload).eq("id", entry.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("journal_entries").insert(payload);

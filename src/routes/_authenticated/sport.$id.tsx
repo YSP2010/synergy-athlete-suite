@@ -155,7 +155,12 @@ function SportDetailPage() {
             </h1>
           </div>
           <div className="text-xs text-muted-foreground">
-            {d.toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" })}
+            {d.toLocaleDateString("de-DE", {
+              weekday: "long",
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })}
           </div>
         </div>
       </div>
@@ -164,7 +169,9 @@ function SportDetailPage() {
         <div>
           <Label className="text-xs">Art</Label>
           <Select value={f.kind} onValueChange={(v) => setF({ ...f, kind: v as Kind })}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="training">Training</SelectItem>
               <SelectItem value="match">Spiel / Wettkampf</SelectItem>
@@ -179,7 +186,9 @@ function SportDetailPage() {
               value={f.match_hardness}
               onValueChange={(v) => setF({ ...f, match_hardness: v as Hardness })}
             >
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="easy">Locker</SelectItem>
                 <SelectItem value="normal">Normal</SelectItem>
