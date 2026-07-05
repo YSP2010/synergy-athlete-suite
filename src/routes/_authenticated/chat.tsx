@@ -3,11 +3,25 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { QueryError } from "@/components/ui/query-error";
 import { MessageSquare, Users, User } from "lucide-react";
+import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({ meta: [{ title: "Chats – Hybrid Athlete" }] }),
   component: ChatListPage,
 });
+
+interface ChatParticipantRow {
+  user_id: string;
+  profiles: Pick<Tables<"profiles">, "name"> | null;
+}
+
+type LastMessageRow = Pick<Tables<"chat_messages">, "message" | "created_at" | "sender_id">;
+
+interface ChatRow extends Tables<"chats"> {
+  teams: Pick<Tables<"teams">, "name"> | null;
+  others: ChatParticipantRow[];
+  last: LastMessageRow | null;
+}
 
 function ChatListPage() {
   const { data: chats, isError, refetch } = useQuery({
@@ -23,14 +37,14 @@ function ChatListPage() {
         .from("chats").select("*, teams(name)").in("id", ids)
         .order("created_at", { ascending: false });
       // fetch other participants + last message for each
-      const enriched = await Promise.all((chatRows ?? []).map(async (c: any) => {
+      const enriched = await Promise.all((chatRows ?? []).map(async (c): Promise<ChatRow> => {
         const [{ data: others }, { data: last }] = await Promise.all([
           supabase.from("chat_participants").select("user_id, profiles!chat_participants_user_id_fkey(name)")
             .eq("chat_id", c.id).neq("user_id", u.user!.id),
           supabase.from("chat_messages").select("message, created_at, sender_id").eq("chat_id", c.id)
             .order("created_at", { ascending: false }).limit(1).maybeSingle(),
         ]);
-        return { ...c, others: others ?? [], last };
+        return { ...c, others: (others ?? []) as ChatParticipantRow[], last };
       }));
       return enriched;
     },
@@ -46,8 +60,8 @@ function ChatListPage() {
       {isError && <QueryError onRetry={() => refetch()} />}
 
       <div className="card-elevated divide-y divide-border">
-        {(chats ?? []).map((c: any) => {
-          const title = c.type === "team" ? c.teams?.name ?? "Team-Chat" : c.others.map((o: any) => o.profiles?.name ?? "Unbekannt").join(", ") || "Direkt-Chat";
+        {(chats ?? []).map((c) => {
+          const title = c.type === "team" ? c.teams?.name ?? "Team-Chat" : c.others.map((o) => o.profiles?.name ?? "Unbekannt").join(", ") || "Direkt-Chat";
           return (
             <Link key={c.id} to="/chat/$id" params={{ id: c.id }} className="flex items-center gap-3 px-4 py-3 transition hover:bg-elevated">
               <div className="grid h-10 w-10 place-items-center rounded-full bg-neon-soft text-neon">
@@ -75,4 +89,5 @@ function ChatListPage() {
     </div>
   );
 }
+
 
