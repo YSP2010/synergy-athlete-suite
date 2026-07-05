@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Zap } from "lucide-react";
+import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -58,7 +59,7 @@ function AuthPage() {
       }
       nav({ to: "/dashboard", replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Fehler");
+      toast.error(humanError(err));
     } finally {
       setLoading(false);
     }
@@ -70,7 +71,7 @@ function AuthPage() {
       redirect_uri: window.location.origin,
     });
     if (res.error) {
-      toast.error(res.error.message);
+      toast.error(humanError(res.error));
       setLoading(false);
       return;
     }
@@ -235,3 +236,4 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
