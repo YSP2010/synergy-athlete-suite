@@ -58,7 +58,7 @@ function InvitesPage() {
       </header>
 
       <section className="card-elevated p-4">
-        <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><MailOpen className="h-4 w-4" /> Offene Einladungen</div>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold"><MailOpen className="h-4 w-4" /> Offene Einladungen</h2>
         <ul className="divide-y divide-border">
           {pending.map((i: any) => (
             <li key={i.id} className="flex items-center justify-between py-2">
@@ -81,7 +81,7 @@ function InvitesPage() {
       </section>
 
       <section className="card-elevated p-4">
-        <div className="mb-3 text-sm font-semibold">Meine Teams</div>
+        <h2 className="mb-3 text-sm font-semibold">Meine Teams</h2>
         <ul className="divide-y divide-border">
           {active.map((i: any) => (
             <li key={i.id} className="py-2">
@@ -95,3 +95,4 @@ function InvitesPage() {
     </div>
   );
 }
+
