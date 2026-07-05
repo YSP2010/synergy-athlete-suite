@@ -57,7 +57,21 @@ function ChatRoom() {
   useEffect(() => {
     const ch = supabase.channel(`chat-${id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `chat_id=eq.${id}` },
-        () => qc.invalidateQueries({ queryKey: ["messages", id] })
+        async (payload) => {
+          const row = payload.new as { id: string; sender_id: string };
+          // Neue Nachricht direkt in den Cache appenden statt komplett neu zu laden.
+          // Absender-Name nachladen (nicht im Realtime-Payload enthalten).
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("name")
+            .eq("id", row.sender_id)
+            .maybeSingle();
+          qc.setQueryData<any[]>(["messages", id], (old) => {
+            const list = old ?? [];
+            if (list.some((m) => m.id === row.id)) return list;
+            return [...list, { ...row, profiles: prof ?? { name: null } }];
+          });
+        }
       )
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -82,7 +96,7 @@ function ChatRoom() {
   return (
     <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-2xl flex-col">
       <div className="mb-3 flex items-center gap-2">
-        <Button asChild variant="ghost" size="icon"><Link to="/chat"><ArrowLeft className="h-4 w-4" /></Link></Button>
+        <Button asChild variant="ghost" size="icon" aria-label="Zurück zur Chat-Übersicht"><Link to="/chat"><ArrowLeft className="h-4 w-4" /></Link></Button>
         <div className="grid h-9 w-9 place-items-center rounded-full bg-neon-soft text-neon">
           {chat?.type === "team" ? <Users className="h-4 w-4" /> : <User className="h-4 w-4" />}
         </div>
@@ -92,7 +106,12 @@ function ChatRoom() {
         </div>
       </div>
 
-      <div className="flex-1 space-y-2 overflow-y-auto rounded-lg border border-border bg-background/40 p-3">
+      <div
+        role="log"
+        aria-live="polite"
+        aria-label="Chat-Nachrichten"
+        className="flex-1 space-y-2 overflow-y-auto rounded-lg border border-border bg-background/40 p-3"
+      >
         {(messages ?? []).map((m: any) => {
           const mine = m.sender_id === me?.id;
           return (
@@ -119,10 +138,11 @@ function ChatRoom() {
           placeholder={locked ? "Chat gesperrt" : "Nachricht schreiben…"}
           disabled={!!locked}
         />
-        <Button onClick={send} disabled={!!locked || !text.trim()}>
+        <Button onClick={send} disabled={!!locked || !text.trim()} aria-label="Nachricht senden">
           <Send className="h-4 w-4" />
         </Button>
       </div>
     </div>
   );
 }
+
