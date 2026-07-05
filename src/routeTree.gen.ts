@@ -140,7 +140,6 @@ const AuthenticatedAthletesIdRoute = AuthenticatedAthletesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/chat': typeof AuthenticatedChatRouteWithChildren
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -154,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
+  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
@@ -162,7 +162,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/chat': typeof AuthenticatedChatRouteWithChildren
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -176,6 +175,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
+  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
@@ -186,7 +186,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/_authenticated/chat': typeof AuthenticatedChatRouteWithChildren
   '/_authenticated/checkin': typeof AuthenticatedCheckinRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -200,6 +199,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/sport': typeof AuthenticatedSportRouteWithChildren
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/_authenticated/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/gym/$id': typeof AuthenticatedGymIdRoute
@@ -210,7 +210,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/guides/hybrid-training-splits'
     | '/chat'
     | '/checkin'
     | '/dashboard'
@@ -224,6 +223,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sport'
     | '/team'
+    | '/guides/hybrid-training-splits'
     | '/athletes/$id'
     | '/chat/$id'
     | '/gym/$id'
@@ -232,7 +232,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/guides/hybrid-training-splits'
     | '/chat'
     | '/checkin'
     | '/dashboard'
@@ -246,6 +245,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sport'
     | '/team'
+    | '/guides/hybrid-training-splits'
     | '/athletes/$id'
     | '/chat/$id'
     | '/gym/$id'
@@ -255,7 +255,6 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/guides/hybrid-training-splits'
     | '/_authenticated/chat'
     | '/_authenticated/checkin'
     | '/_authenticated/dashboard'
@@ -269,6 +268,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/sport'
     | '/_authenticated/team'
+    | '/guides/hybrid-training-splits'
     | '/_authenticated/athletes/$id'
     | '/_authenticated/chat/$id'
     | '/_authenticated/gym/$id'
@@ -513,3 +513,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
