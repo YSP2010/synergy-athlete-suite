@@ -14,34 +14,30 @@ const APP_JSON_LD = {
 };
 
 export const Route = createFileRoute("/")({
-  // Eingeloggte Nutzer serverseitig direkt ins Dashboard leiten.
+  // Eingeloggte Nutzer ins Dashboard leiten.
+  // WICHTIG: Der Supabase-Client hier nutzt localStorage als Session-Storage
+  // (siehe src/integrations/supabase/client.ts), das auf dem Server nicht
+  // existiert – dort liefert getSession() IMMER null, egal ob eine Session
+  // existiert. Würde man das ungeprüft im SSR-Pfad auswerten, könnte ein
+  // eingeloggter Nutzer nie zuverlässig weitergeleitet werden bzw. es käme zu
+  // Fehlverhalten beim ersten Laden. Daher: Check nur im Browser ausführen
+  // (nach der Hydration greift er sofort). Für Crawler/SSR bleibt die Seite
+  // unverändert vollständig gerendert – das ist für die SEO-Landingpage auch
+  // gewünscht.
   beforeLoad: async () => {
+    if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getSession();
     if (data.session) throw redirect({ to: "/dashboard" });
   },
   head: () => ({
     meta: [
-      { title: "Hybrid Athlete – Fußball + Gym Trainingsplaner" },
+      { title: "Trainingsplaner für Hybrid-Athleten – Fußball + Gym | Hybrid Athlete" },
       {
         name: "description",
         content:
-          "Fußball und Krafttraining smart kombinieren: Wochenplan, Recovery-Score, Makros und KI-Food-Scanner.",
-      },
-      { property: "og:title", content: "Hybrid Athlete – Fußball + Gym Trainingsplaner" },
-      {
-        property: "og:description",
-        content:
-          "Wochenplan, Recovery-Score, Makros und KI-Food-Scanner für Hybrid-Athlet:innen.",
-      },
-      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/" },
-      { name: "twitter:title", content: "Hybrid Athlete – Fußball + Gym Trainingsplaner" },
-      {
-        name: "twitter:description",
-        content:
-          "Wochenplan, Recovery-Score, Makros und KI-Food-Scanner für Hybrid-Athlet:innen.",
+          "Kombiniere Fußball, Krafttraining, Ernährung und Recovery in einem Plan. Dynamische Wochenplanung, Recovery-Score, Makro-Berechnung mit Carbo-Loading und KI-Food-Scanner.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://synergy-athlete-suite.lovable.app/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -96,6 +92,12 @@ function Landing() {
               className="rounded-lg border border-border bg-elevated px-6 py-3 text-sm font-semibold text-foreground transition hover:border-neon/40"
             >
               Trainings-Ratgeber lesen
+            </Link>
+            <Link
+              to="/guides/nutrition-for-hybrid-athletes"
+              className="rounded-lg border border-border bg-elevated px-6 py-3 text-sm font-semibold text-foreground transition hover:border-neon/40"
+            >
+              Ernährungs-Ratgeber lesen
             </Link>
           </div>
         </section>
@@ -189,7 +191,10 @@ function Landing() {
           <span>Hybrid Athlete Performance Planner</span>
           <div className="flex gap-4">
             <Link to="/guides/hybrid-training-splits" className="hover:text-foreground">
-              Ratgeber
+              Trainings-Ratgeber
+            </Link>
+            <Link to="/guides/nutrition-for-hybrid-athletes" className="hover:text-foreground">
+              Ernährungs-Ratgeber
             </Link>
             <Link to="/auth" className="hover:text-foreground">
               Anmelden
