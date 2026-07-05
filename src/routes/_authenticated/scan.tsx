@@ -4,6 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { analyzeFoodScan } from "@/lib/scan.functions";
 import { Button } from "@/components/ui/button";
+import { toISODate } from "@/lib/dates";
+import { sportName, type Goal } from "@/lib/planner";
 import { toast } from "sonner";
 import {
   Camera,
@@ -16,7 +18,7 @@ import {
   Trophy,
   History as HistoryIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/scan")({
   head: () => ({ meta: [{ title: "Food-Scanner – Hybrid Athlete" }] }),
@@ -36,6 +38,23 @@ const MEAL_LABELS: Record<MealType, string> = {
 function defaultMeal(): MealType {
   const hour = new Date().getHours();
   return hour < 10 ? "breakfast" : hour < 14 ? "lunch" : hour < 18 ? "snack" : "dinner";
+}
+
+const GOAL_LABELS: Record<Goal, string> = {
+  muscle_gain: "Muskelaufbau",
+  maintain: "Erhalten",
+  recomp: "Recomp",
+  performance: "Leistung",
+};
+
+/** Kurzer Kontext-String (Ziel + Sportart) fuers Scanner-Prompt. Max 500 Zeichen. */
+function buildGoalContext(profile: { goal?: Goal | null; sport?: string | null } | null | undefined): string | undefined {
+  if (!profile) return undefined;
+  const parts: string[] = [];
+  if (profile.goal && GOAL_LABELS[profile.goal]) parts.push(`Ziel: ${GOAL_LABELS[profile.goal]}.`);
+  if (profile.sport) parts.push(`Sportart: ${sportName(profile.sport)}.`);
+  if (!parts.length) return undefined;
+  return parts.join(" ").slice(0, 500);
 }
 
 interface Extracted {
@@ -83,6 +102,21 @@ function ScanPage() {
     },
   });
 
+  // Profil (Ziel + Sportart) fuer den goalContext im Scanner-Prompt.
+  const { data: profile } = useQuery({
+    queryKey: ["scan-profile"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("goal, sport")
+        .eq("id", u.user.id)
+        .maybeSingle();
+      return data as { goal: Goal | null; sport: string | null } | null;
+    },
+  });
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadedPath, setUploadedPath] = useState<string | null>(null);
   const [result, setResult] = useState<{ id: string; extracted: Extracted } | null>(null);
@@ -90,6 +124,13 @@ function ScanPage() {
   const [analyzing, setAnalyzing] = useState(false);
   // Mahlzeit vorbelegen nach Tageszeit, aber vom Nutzer überschreibbar.
   const [meal, setMeal] = useState<MealType>(defaultMeal());
+
+  // Object-URL der Bildvorschau beim Wechsel/Unmount wieder freigeben,
+  // um Speicherlecks im Browser zu vermeiden.
+  useEffect(() => {
+    if (!previewUrl) return;
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   async function onFile(file: File) {
     if (!file.type.startsWith("image/")) {
@@ -126,7 +167,8 @@ function ScanPage() {
     if (!uploadedPath) return;
     setAnalyzing(true);
     try {
-      const res = await analyze({ data: { imagePath: uploadedPath } });
+      const goalContext = buildGoalContext(profile);
+      const res = await analyze({ data: { imagePath: uploadedPath, goalContext } });
       setResult(res);
       qc.invalidateQueries({ queryKey: ["scans"] });
       toast.success("Analyse fertig");
@@ -142,7 +184,7 @@ function ScanPage() {
       if (!result) return;
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("no user");
-      const today = new Date().toISOString().slice(0, 10);
+      const today = toISODate(new Date());
       const { error } = await supabase.from("nutrition_logs").insert({
         user_id: u.user.id,
         date: today,
