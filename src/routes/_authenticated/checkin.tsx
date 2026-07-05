@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CheckinTrend } from "@/components/checkin/CheckinTrend";
+import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/checkin")({
   head: () => ({ meta: [{ title: "Daily Check-in – Hybrid Athlete" }] }),
@@ -97,7 +98,7 @@ function CheckinPage() {
       toast.success("Check-in gespeichert");
       nav({ to: "/dashboard" });
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(humanError(e)),
   });
 
   return (
