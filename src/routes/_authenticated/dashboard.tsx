@@ -13,14 +13,15 @@ import {
   calcRecovery,
   calcDailyMacros,
   generateWeekPlan,
-  type AthleteProfile,
+  toAthleteProfile,
   type DailyStat,
   type GymSession,
   type SportSession,
 } from "@/lib/planner";
 import { RecoveryRing } from "@/components/dashboard/RecoveryRing";
 import { MacroRings } from "@/components/dashboard/MacroRings";
-import { AlertTriangle, CalendarDays, ChevronRight, HeartPulse, Utensils } from "lucide-react";
+import { QueryError } from "@/components/ui/query-error";
+import { AlertTriangle, CalendarDays, ChevronRight, HeartPulse, TrendingUp, Utensils } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -37,19 +38,13 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
     return null;
   },
   head: () => ({
-    meta: [
-      { title: "Dashboard – Hybrid Athlete" },
-      { name: "description", content: "Dein täglicher Recovery-Score, Makros und Wochenplan." },
-      { name: "robots", content: "noindex, follow" },
-      { property: "og:title", content: "Dashboard – Hybrid Athlete" },
-      { property: "og:description", content: "Dein täglicher Recovery-Score, Makros und Wochenplan." },
-    ],
+    meta: [{ title: "Dashboard – Hybrid Athlete" }],
   }),
   component: DashboardPage,
 });
 
 function DashboardPage() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["dashboard"],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
@@ -97,17 +92,7 @@ function DashboardPage() {
       const recent = { sport: sport.filter((s) => s.date < todayIso && s.date >= threeDaysAgo), gym: gym.filter((g) => g.date < todayIso && g.date >= threeDaysAgo) };
       const recovery = calcRecovery(stat, recent.sport, recent.gym);
 
-      const ath: AthleteProfile = {
-        sex: profile?.sex ?? null,
-        height_cm: profile?.height_cm ? Number(profile.height_cm) : null,
-        weight_kg: profile?.weight_kg ? Number(profile.weight_kg) : null,
-        birth_date: profile?.birth_date ?? null,
-        goal: profile?.goal ?? "performance",
-        gym_days: profile?.gym_days ?? [],
-        sport_days: profile?.sport_days ?? [],
-        match_days: profile?.match_days ?? [],
-        sport: profile?.sport ?? null,
-      };
+      const ath = toAthleteProfile(profile);
 
       // Match-Hardness pro Weekday (nur diese Woche)
       const matchHardness: Record<number, "easy" | "normal" | "hard"> = {};
@@ -168,6 +153,38 @@ function DashboardPage() {
       };
     },
   });
+
+  // Optionaler Teaser: jüngste KI-Fortschrittsauswertung (nur summary-Feld).
+  const { data: latestInsight } = useQuery({
+    queryKey: ["dashboard-insight"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data: row } = await supabase
+        .from("progress_insights")
+        .select("content,created_at")
+        .eq("user_id", u.user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!row?.content) return null;
+      try {
+        const parsed = JSON.parse(row.content) as { summary?: string };
+        const summary = String(parsed.summary ?? "").trim();
+        return summary ? { summary } : null;
+      } catch {
+        return null;
+      }
+    },
+  });
+
+  if (isError) {
+    return (
+      <div className="py-20">
+        <QueryError onRetry={() => refetch()} />
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return <div className="py-20 text-center text-muted-foreground">Lade…</div>;
@@ -235,6 +252,22 @@ function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* KI-Fortschritt Teaser */}
+      {latestInsight && (
+        <Link to="/insights" className="card-elevated flex items-start gap-3 p-4 transition hover:border-neon/40">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-neon-soft text-neon">
+            <TrendingUp className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+              KI-Fortschritt
+            </div>
+            <p className="mt-1 line-clamp-2 text-sm text-foreground">{latestInsight.summary}</p>
+          </div>
+          <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+        </Link>
+      )}
 
       {/* Warnings */}
       {warnings.length > 0 && (
@@ -389,3 +422,4 @@ function QuickAction({
     </Link>
   );
 }
+
