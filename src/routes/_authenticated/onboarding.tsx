@@ -1,5 +1,5 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { WEEKDAY_LABELS } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { Loader2, ArrowRight, ArrowLeft } from "lucide-react";
 import type { Goal, Sex } from "@/lib/planner";
+import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   loader: async () => {
@@ -65,6 +66,8 @@ const GOAL_LABELS: Record<Goal, { title: string; desc: string }> = {
 };
 
 function OnboardingPage() {
+  const navigate = useNavigate();
+  const qc = useQueryClient();
   const [step, setStep] = useState(0);
   const [f, setF] = useState<FormState>({
     name: "",
@@ -127,11 +130,12 @@ function OnboardingPage() {
       const { error } = await supabase.from("profiles").upsert(payload);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Profil gespeichert");
-      window.location.href = "/dashboard";
+      await qc.invalidateQueries();
+      navigate({ to: "/dashboard" });
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(humanError(e)),
   });
 
   const steps = ["Basics", "Sport", "Training", "Ernährung", "Ziel"];
