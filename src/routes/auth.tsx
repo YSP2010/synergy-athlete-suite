@@ -11,8 +11,12 @@ import { Loader2, Zap } from "lucide-react";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Anmelden – Hybrid Athlete" },
+      { title: "Anmelden bei Hybrid Athlete – Performance Planner" },
       { name: "description", content: "Melde dich an und plane Training, Recovery und Ernährung." },
+      { name: "robots", content: "noindex, follow" },
+      { property: "og:title", content: "Anmelden bei Hybrid Athlete" },
+      { property: "og:description", content: "Zugang zum Performance Planner für Fußball + Gym." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/auth" },
     ],
   }),
   component: AuthPage,
@@ -113,8 +117,10 @@ function AuthPage() {
             <Zap className="h-6 w-6" strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className="font-display text-2xl font-bold leading-tight">Hybrid Athlete</h1>
-            <p className="text-sm text-muted-foreground">Performance Planner</p>
+            <h1 className="font-display text-2xl font-bold leading-tight">
+              Anmelden bei Hybrid Athlete
+            </h1>
+            <p className="text-sm text-muted-foreground">Performance Planner für Fußball + Gym</p>
           </div>
         </div>
 

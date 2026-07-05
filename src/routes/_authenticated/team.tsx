@@ -11,7 +11,15 @@ import { findProfileByEmail, getOrCreateDirectChat } from "@/lib/team";
 import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/team")({
-  head: () => ({ meta: [{ title: "Teams – Hybrid Athlete" }] }),
+  head: () => ({
+    meta: [
+      { title: "Teams – Hybrid Athlete" },
+      { name: "description", content: "Verwalte deine Teams, lade Athlet:innen ein und chatte mit ihnen." },
+      { name: "robots", content: "noindex, follow" },
+      { property: "og:title", content: "Teams – Hybrid Athlete" },
+      { property: "og:description", content: "Team-Übersicht, Einladungen und Chat für Coaches." },
+    ],
+  }),
   component: TeamPage,
 });
 
