@@ -6,6 +6,7 @@ import { generateProgressInsight } from "@/lib/insights.functions";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-error";
 import { WEEKDAY_LONG, isoDow } from "@/lib/dates";
+import { humanError } from "@/lib/errors";
 import { toast } from "sonner";
 import {
   TrendingUp,
@@ -56,7 +57,8 @@ function parseContent(content: string): ParsedInsight | null {
       nutrition: String(p.nutrition ?? ""),
       tips: Array.isArray(p.tips) ? p.tips.map(String) : [],
     };
-  } catch {
+  } catch (err) {
+    console.warn("Insight-Content unlesbar:", err);
     return null;
   }
 }
@@ -88,7 +90,7 @@ function InsightsPage() {
       qc.invalidateQueries({ queryKey: ["dashboard-insight"] });
       toast.success("Analyse erstellt");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   return (
