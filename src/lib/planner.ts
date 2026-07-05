@@ -400,15 +400,15 @@ export function generateWeekPlan(
             ...prev,
             label: "Light Upper / Mobility",
             detail: "Beine schonen – kein Legs 48h vor Spiel",
-            sessionType: "mobility",
             warning: "Ursprünglich Beintraining – wegen Spiel verschoben",
+            sessionType: "light",
           };
         }
       }
     }
   }
 
-  // 3) Carbo-Loading Hinweis am Vortag
+  // 3) Carbo-Loading Hinweis am Vortag eines harten Spiels
   for (let i = 0; i < slots.length; i++) {
     const s = slots[i];
     if (s.kind === "match" && s.hardness === "hard" && i > 0) {
@@ -420,7 +420,7 @@ export function generateWeekPlan(
     }
   }
 
-  // 4) Recovery niedrig → nächste harte Einheit → Active Recovery
+  // 4) Recovery niedrig → erste harte Gym-Einheit → Active Recovery
   if (recoveryScore !== null && recoveryScore < 50) {
     const idx = slots.findIndex(
       (s) => s.kind === "gym" && s.sessionType !== undefined && HARD_GYM_TYPES.includes(s.sessionType),
@@ -431,8 +431,8 @@ export function generateWeekPlan(
         label: "Active Recovery",
         kind: "recovery",
         detail: "Mobility, Stretching, Zone-1 20 min",
-        sessionType: undefined,
         warning: "Recovery-Score niedrig – harte Einheit ersetzt",
+        sessionType: "mobility",
       };
     }
   }
@@ -453,6 +453,7 @@ function labelForGym(t: GymType): string {
   };
   return map[t];
 }
+
 function gymDetail(t: GymType): string {
   const map: Record<GymType, string> = {
     push: "Brust · Schulter · Trizeps",
