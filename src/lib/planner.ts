@@ -35,6 +35,26 @@ export interface AthleteProfile {
   sport?: string | null;
 }
 
+/**
+ * Wandelt ein rohes `profiles`-DB-Objekt in den `AthleteProfile`-Typ um.
+ * Deckt die drei identischen Mappings aus dashboard/nutrition/plan ab.
+ * Numerische Felder kommen aus Supabase als String (NUMERIC) und werden hier
+ * defensiv nach Number konvertiert.
+ */
+export function toAthleteProfile(profile: any): AthleteProfile {
+  return {
+    sex: profile?.sex ?? null,
+    height_cm: profile?.height_cm ? Number(profile.height_cm) : null,
+    weight_kg: profile?.weight_kg ? Number(profile.weight_kg) : null,
+    birth_date: profile?.birth_date ?? null,
+    goal: profile?.goal ?? "performance",
+    gym_days: profile?.gym_days ?? [],
+    sport_days: profile?.sport_days ?? [],
+    match_days: profile?.match_days ?? [],
+    sport: profile?.sport ?? null,
+  };
+}
+
 export const SPORT_LABELS: Record<string, string> = {
   football: "Fußball",
   tennis: "Tennis",
@@ -260,6 +280,44 @@ export interface PlannedSlot {
   hardness?: MatchHardness;
   /** Nur bei kind === "gym": zugrundeliegender Session-Typ (für Regel-Logik). */
   sessionType?: GymType;
+  /** true, wenn dieser Slot durch ein manuelles Override überschrieben wurde. */
+  overridden?: boolean;
+}
+
+/**
+ * Manuelle Überschreibung eines Slots (pro Datum). Wird im
+ * `weekly_planner.plan.overrides`-JSONB persistiert und mit `applyOverrides`
+ * auf den generierten Plan angewandt.
+ */
+export interface SlotOverride {
+  kind: PlannedSlot["kind"];
+  sessionType?: GymType;
+  label: string;
+  detail?: string;
+}
+
+/**
+ * Wendet manuelle Overrides (per `slot.date`-Key) auf einen generierten Plan an.
+ * Reine Funktion – erzeugt eine neue Slot-Liste, ohne Eingaben zu mutieren.
+ * Gematchte Slots erhalten die Override-Felder gemerged + `overridden: true`.
+ */
+export function applyOverrides(
+  slots: PlannedSlot[],
+  overrides: Record<string, SlotOverride> | null | undefined,
+): PlannedSlot[] {
+  if (!overrides) return slots.map((s) => ({ ...s }));
+  return slots.map((s) => {
+    const ov = overrides[s.date];
+    if (!ov) return { ...s };
+    return {
+      ...s,
+      kind: ov.kind,
+      label: ov.label,
+      detail: ov.detail ?? s.detail,
+      sessionType: ov.sessionType,
+      overridden: true,
+    };
+  });
 }
 
 /**
