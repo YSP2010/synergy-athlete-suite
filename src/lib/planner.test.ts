@@ -19,6 +19,7 @@ describe("calcRecovery", () => {
     sleep_quality: 5,
     soreness: 1,
     stress: 1,
+    mood: 4,
   };
 
   it("gibt bei optimalen Werten ohne Last einen sehr hohen (grünen) Score", () => {
@@ -43,6 +44,7 @@ describe("calcRecovery", () => {
       sleep_quality: 1,
       soreness: 5,
       stress: 5,
+      mood: 2,
     };
     const r = calcRecovery(badStat, [], []);
     expect(r.level).toBe("red");
