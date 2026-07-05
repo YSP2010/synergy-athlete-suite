@@ -63,9 +63,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   });
 
   const NAV = role === "coach" ? COACH_NAV : ATHLETE_NAV;
-  const MOBILE_NAV = role === "coach"
-    ? COACH_NAV
-    : [ATHLETE_NAV[0], ATHLETE_NAV[1], ATHLETE_NAV[3], ATHLETE_NAV[5], ATHLETE_NAV[9]];
+  // Kern-Tabs für die mobile Bottom-Nav (benannt, statt Magic-Index-Zugriffe).
+  const findNav = (to: string) => ATHLETE_NAV.find((n) => n.to === to)!;
+  const MOBILE_NAV =
+    role === "coach"
+      ? COACH_NAV
+      : [findNav("/dashboard"), findNav("/plan"), findNav("/gym"), findNav("/nutrition"), findNav("/chat")];
 
   async function signOut() {
     await qc.cancelQueries();
@@ -77,6 +80,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-neon focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-neon-foreground"
+      >
+        Zum Inhalt
+      </a>
       <aside className="fixed inset-y-0 left-0 hidden w-60 border-r border-border bg-sidebar px-3 py-5 md:flex md:flex-col">
         <div className="mb-6 flex items-center gap-2 px-2">
           <div className="grid h-9 w-9 place-items-center rounded-lg bg-neon text-neon-foreground font-display text-lg font-bold glow">
@@ -112,19 +121,19 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="md:pl-60 pb-24 md:pb-6">
+      <main id="main-content" className="md:pl-60 pb-24 md:pb-6">
         <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-8 md:px-8">{children}</div>
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 backdrop-blur md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        <div className={cn("grid", `grid-cols-${MOBILE_NAV.length}`)} style={{ gridTemplateColumns: `repeat(${MOBILE_NAV.length}, minmax(0, 1fr))` }}>
+        <div className="grid" style={{ gridTemplateColumns: `repeat(${MOBILE_NAV.length}, minmax(0, 1fr))` }}>
           {MOBILE_NAV.map((n) => {
             const active = loc.pathname.startsWith(n.to);
             const Icon = n.icon;
             return (
               <Link key={n.to} to={n.to}
-                className={cn("flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium",
+                className={cn("flex flex-col items-center justify-center gap-1 py-2 text-xs font-medium",
                   active ? "text-neon" : "text-muted-foreground")}>
                 <Icon className="h-5 w-5" />{n.shortLabel ?? n.label}
               </Link>
@@ -135,3 +144,4 @@ export function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
