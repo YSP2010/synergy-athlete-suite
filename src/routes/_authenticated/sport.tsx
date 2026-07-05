@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Trophy, Plus, ChevronRight, CalendarDays, Flame } from "lucide-react";
-import { toISODate, WEEKDAY_LONG } from "@/lib/dates";
+import { parseISODate, toISODate, WEEKDAY_LONG } from "@/lib/dates";
 import { sportName } from "@/lib/planner";
+import { humanError } from "@/lib/errors";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/sport")({
@@ -71,7 +72,7 @@ function SportListPage() {
       qc.invalidateQueries({ queryKey: ["plan"] });
       if (id) nav({ to: "/sport/$id", params: { id } });
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(humanError(e)),
   });
 
   const sportLabel = sportName(data?.sport);
@@ -121,7 +122,7 @@ function SportListPage() {
         ) : (
           <div className="space-y-2">
             {data.rows.map((r) => {
-              const d = new Date(r.date);
+              const d = parseISODate(r.date);
               const isMatch = r.kind === "match";
               return (
                 <Link
