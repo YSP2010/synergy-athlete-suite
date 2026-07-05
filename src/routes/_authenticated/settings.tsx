@@ -17,6 +17,7 @@ import { WEEKDAY_LABELS } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { Goal } from "@/lib/planner";
 import { LogOut } from "lucide-react";
+import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Einstellungen" }] }),
@@ -80,7 +81,7 @@ function SettingsPage() {
       qc.invalidateQueries();
       toast.success("Gespeichert");
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(humanError(e)),
   });
 
   async function signOut() {
