@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import {
   addDays,
   isoDow,
@@ -9,12 +10,22 @@ import {
   WEEKDAY_LONG,
 } from "@/lib/dates";
 import {
+  applyOverrides,
+  calcRecovery,
   generateWeekPlan,
-  type AthleteProfile,
+  toAthleteProfile,
+  type DailyStat,
+  type GymSession,
+  type GymType,
   type MatchHardness,
+  type PlannedSlot,
+  type SlotOverride,
+  type SportSession,
 } from "@/lib/planner";
+import { QueryError } from "@/components/ui/query-error";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Flame } from "lucide-react";
+import { AlertTriangle, Flame, Lock, Pencil, RotateCcw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,6 +34,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+
+/** Auswahl-Optionen für manuelle Slot-Overrides. */
+const OVERRIDE_OPTIONS: {
+  value: string;
+  label: string;
+  build: () => SlotOverride;
+}[] = [
+  { value: "push", label: "Gym · Push", build: () => ({ kind: "gym", sessionType: "push", label: "Gym · Push", detail: "Brust · Schulter · Trizeps" }) },
+  { value: "pull", label: "Gym · Pull", build: () => ({ kind: "gym", sessionType: "pull", label: "Gym · Pull", detail: "Rücken · Bizeps" }) },
+  { value: "legs", label: "Gym · Beine", build: () => ({ kind: "gym", sessionType: "legs", label: "Gym · Beine", detail: "Beine · Glutes · Core" }) },
+  { value: "upper", label: "Gym · Oberkörper", build: () => ({ kind: "gym", sessionType: "upper", label: "Gym · Oberkörper", detail: "Oberkörper leicht" }) },
+  { value: "lower", label: "Gym · Unterkörper", build: () => ({ kind: "gym", sessionType: "lower", label: "Gym · Unterkörper", detail: "Unterkörper leicht" }) },
+  { value: "full", label: "Gym · Ganzkörper", build: () => ({ kind: "gym", sessionType: "full", label: "Gym · Ganzkörper", detail: "Ganzkörper" }) },
+  { value: "mobility", label: "Mobility", build: () => ({ kind: "gym", sessionType: "mobility", label: "Mobility", detail: "Beweglichkeit & Faszien" }) },
+  { value: "recovery", label: "Active Recovery", build: () => ({ kind: "recovery", label: "Active Recovery", detail: "Mobility, Stretching, Zone-1 20 min" }) },
+  { value: "rest", label: "Ruhetag", build: () => ({ kind: "rest", label: "Ruhetag", detail: "Erholung" }) },
+];
+
+/** Struktur des `weekly_planner.plan`-JSONB. */
+interface PlannerPlan {
+  overrides?: Record<string, SlotOverride>;
+  snapshot?: PlannedSlot[];
+}
 
 export const Route = createFileRoute("/_authenticated/plan")({
   head: () => ({ meta: [{ title: "Wochenplan – Hybrid Athlete" }] }),
@@ -33,25 +67,68 @@ function PlanPage() {
   const qc = useQueryClient();
   const weekStart = startOfWeek();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["plan", toISODate(weekStart)],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("no user");
       const uid = u.user.id;
-      const [profileRes, sportRes] = await Promise.all([
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayIso = toISODate(today);
+      const yesterdayIso = toISODate(addDays(today, -1));
+      const threeDaysAgo = toISODate(addDays(today, -3));
+      const weekEndIso = toISODate(addDays(weekStart, 6));
+
+      // Bereich erweitert um die letzten 3 Tage vor "heute" (für den
+      // Recovery-Score), damit generateWeekPlan – wie im Dashboard – die
+      // echte Trainingslast berücksichtigt statt (Bug) immer `null`.
+      const [profileRes, statRes, sportRes, gymRes, plannerRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
+        supabase
+          .from("daily_stats")
+          .select("*")
+          .eq("user_id", uid)
+          .in("date", [todayIso, yesterdayIso])
+          .order("date", { ascending: false })
+          .limit(1),
         supabase
           .from("workouts_sport")
           .select("id,date,kind,match_hardness,intensity,duration_min")
           .eq("user_id", uid)
-          .gte("date", toISODate(weekStart))
-          .lte("date", toISODate(addDays(weekStart, 6))),
+          .gte("date", threeDaysAgo)
+          .lte("date", weekEndIso),
+        supabase
+          .from("workouts_gym")
+          .select("date,session_type,duration_min")
+          .eq("user_id", uid)
+          .gte("date", threeDaysAgo)
+          .lte("date", weekEndIso),
+        supabase
+          .from("weekly_planner")
+          .select("plan,locked")
+          .eq("user_id", uid)
+          .eq("week_start", toISODate(weekStart))
+          .maybeSingle(),
       ]);
       if (profileRes.error) throw profileRes.error;
       const profile = profileRes.data;
-      const sport = sportRes.data ?? [];
-      return { profile, sport, uid };
+      const stat = (statRes.data?.[0] as DailyStat | undefined) ?? null;
+      const allSport = (sportRes.data ?? []) as SportSession[];
+      const allGym = (gymRes.data ?? []) as GymSession[];
+      // Für die Wochen-Anzeige (Härte-Auswahl etc.) nur die tatsächliche Woche.
+      const sport = allSport.filter(
+        (s) => s.date >= toISODate(weekStart) && s.date <= weekEndIso,
+      );
+      // Für den Recovery-Score: dieselbe 72h-Logik wie im Dashboard.
+      const recentSport = allSport.filter((s) => s.date < todayIso && s.date >= threeDaysAgo);
+      const recentGym = allGym.filter((g) => g.date < todayIso && g.date >= threeDaysAgo);
+      const recovery = calcRecovery(stat, recentSport, recentGym);
+      const planner = plannerRes.data as unknown as
+        | { plan: PlannerPlan | null; locked: boolean | null }
+        | null;
+      return { profile, sport, uid, planner, recoveryScore: recovery.score };
     },
   });
 
@@ -92,21 +169,101 @@ function PlanPage() {
     onError: (e) => toast.error(e.message),
   });
 
+  const overrideSlot = useMutation({
+    mutationFn: async ({
+      date,
+      override,
+    }: {
+      date: string;
+      override: SlotOverride | null;
+    }) => {
+      if (!data) return;
+      const { data: row } = await supabase
+        .from("weekly_planner")
+        .select("plan")
+        .eq("user_id", data.uid)
+        .eq("week_start", toISODate(weekStart))
+        .maybeSingle();
+      const current = (row?.plan as unknown as PlannerPlan | null) ?? {};
+      const overrides = { ...(current.overrides ?? {}) };
+      if (override === null) {
+        delete overrides[date];
+      } else {
+        overrides[date] = override;
+      }
+      const plan: PlannerPlan = { ...current, overrides };
+      const { error } = await supabase.from("weekly_planner").upsert(
+        {
+          user_id: data.uid,
+          week_start: toISODate(weekStart),
+          plan: plan as unknown as Json,
+        },
+        { onConflict: "user_id,week_start" },
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["plan"] });
+      toast.success("Plan angepasst");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const toggleLock = useMutation({
+    mutationFn: async ({
+      locked,
+      slots,
+    }: {
+      locked: boolean;
+      slots: PlannedSlot[];
+    }) => {
+      if (!data) return;
+      const { data: row } = await supabase
+        .from("weekly_planner")
+        .select("plan")
+        .eq("user_id", data.uid)
+        .eq("week_start", toISODate(weekStart))
+        .maybeSingle();
+      const current = (row?.plan as unknown as PlannerPlan | null) ?? {};
+      let plan: PlannerPlan;
+      if (locked) {
+        // Aktuell angezeigte (ggf. override-angewendete) Slots einfrieren.
+        plan = { ...current, snapshot: slots };
+      } else {
+        // Snapshot entfernen, Overrides beibehalten.
+        const { snapshot: _drop, ...rest } = current;
+        plan = rest;
+      }
+      const { error } = await supabase.from("weekly_planner").upsert(
+        {
+          user_id: data.uid,
+          week_start: toISODate(weekStart),
+          plan: plan as unknown as Json,
+          locked,
+        },
+        { onConflict: "user_id,week_start" },
+      );
+      if (error) throw error;
+    },
+    onSuccess: (_r, vars) => {
+      qc.invalidateQueries({ queryKey: ["plan"] });
+      toast.success(vars.locked ? "Woche gesperrt" : "Woche entsperrt");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  if (isError)
+    return (
+      <div className="py-20">
+        <QueryError onRetry={() => refetch()} />
+      </div>
+    );
+
   if (isLoading || !data)
     return <div className="py-20 text-center text-muted-foreground">Lade…</div>;
 
   const profile = data.profile;
-  const ath: AthleteProfile = {
-    sex: profile?.sex ?? null,
-    height_cm: profile?.height_cm ? Number(profile.height_cm) : null,
-    weight_kg: profile?.weight_kg ? Number(profile.weight_kg) : null,
-    birth_date: profile?.birth_date ?? null,
-    goal: profile?.goal ?? "performance",
-    gym_days: profile?.gym_days ?? [],
-    sport_days: profile?.sport_days ?? [],
-    match_days: profile?.match_days ?? [],
-    sport: profile?.sport ?? null,
-  };
+  const ath = toAthleteProfile(profile);
 
   const hardnessMap: Record<number, MatchHardness> = {};
   for (const s of data.sport) {
@@ -116,7 +273,19 @@ function PlanPage() {
     }
   }
 
-  const plan = generateWeekPlan(ath, weekStart, hardnessMap, null);
+  const planner = data.planner;
+  const locked = !!planner?.locked;
+  const overrides = planner?.plan?.overrides ?? {};
+
+  // Gesperrte Woche mit Snapshot → eingefrorene Slots direkt verwenden.
+  // Sonst: Live-Plan generieren und manuelle Overrides anwenden.
+  const plan: PlannedSlot[] =
+    locked && planner?.plan?.snapshot
+      ? planner.plan.snapshot
+      : applyOverrides(
+          generateWeekPlan(ath, weekStart, hardnessMap, data.recoveryScore),
+          overrides,
+        );
   const todayIso = toISODate(new Date());
 
   return (
@@ -127,6 +296,22 @@ function PlanPage() {
           Automatisch aus deinem Rhythmus. Setze Spielhärte, um Beintraining zu blocken und
           Carbo-Loading auszulösen.
         </p>
+      </div>
+
+      <div className="card-elevated flex items-center justify-between p-4">
+        <div>
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Lock className="h-4 w-4" /> Woche sperren
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Gesperrte Wochen werden nicht mehr automatisch neu berechnet.
+          </div>
+        </div>
+        <Switch
+          checked={locked}
+          disabled={toggleLock.isPending}
+          onCheckedChange={(v) => toggleLock.mutate({ locked: v, slots: plan })}
+        />
       </div>
 
       <div className="space-y-2">
@@ -148,11 +333,29 @@ function PlanPage() {
                     </span>
                   )}
                 </div>
-                <div className="mt-1 flex items-center gap-2">
+                <div className="mt-1 flex flex-wrap items-center gap-2">
                   <SlotDot kind={slot.kind} />
                   <div className="font-display text-base font-semibold">{slot.label}</div>
+                  {slot.overridden && (
+                    <span className="rounded bg-warn/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-warn">
+                      Manuell angepasst
+                    </span>
+                  )}
                 </div>
                 <div className="text-sm text-muted-foreground">{slot.detail}</div>
+
+                {slot.overridden && !locked && (
+                  <button
+                    type="button"
+                    className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    disabled={overrideSlot.isPending}
+                    onClick={() =>
+                      overrideSlot.mutate({ date: slot.date, override: null })
+                    }
+                  >
+                    <RotateCcw className="h-3 w-3" /> Zurücksetzen
+                  </button>
+                )}
 
                 {slot.warning && (
                   <div className="mt-2 flex items-start gap-1.5 text-xs text-warn">
@@ -182,6 +385,32 @@ function PlanPage() {
                   </Select>
                 </div>
               )}
+
+              {slot.kind !== "match" && !locked && (
+                <div className="w-36">
+                  <div className="mb-1 flex items-center gap-1 text-[10px] uppercase text-muted-foreground">
+                    <Pencil className="h-3 w-3" /> Anpassen
+                  </div>
+                  <Select
+                    value={overrideValueFor(slot, overrides)}
+                    onValueChange={(v) => {
+                      const opt = OVERRIDE_OPTIONS.find((o) => o.value === v);
+                      if (opt) {
+                        overrideSlot.mutate({ date: slot.date, override: opt.build() });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {OVERRIDE_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -197,6 +426,23 @@ function PlanPage() {
       </div>
     </div>
   );
+}
+
+/** Ermittelt den passenden Select-Wert für den aktuellen (ggf. überschriebenen) Slot. */
+function overrideValueFor(
+  slot: PlannedSlot,
+  overrides: Record<string, SlotOverride>,
+): string {
+  const ov = overrides[slot.date];
+  const sessionType: GymType | undefined = ov?.sessionType ?? slot.sessionType;
+  const kind = ov?.kind ?? slot.kind;
+  if (sessionType && OVERRIDE_OPTIONS.some((o) => o.value === sessionType)) {
+    return sessionType;
+  }
+  if (kind === "recovery") return "recovery";
+  if (kind === "rest") return "rest";
+  // Fallback (z. B. sport-Tage ohne passende Option): erste Option.
+  return OVERRIDE_OPTIONS[0].value;
 }
 
 function SlotDot({ kind }: { kind: string }) {
