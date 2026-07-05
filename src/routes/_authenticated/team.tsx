@@ -98,9 +98,9 @@ function TeamPage() {
       </header>
 
       <div className="card-elevated p-4">
-        <Label>Neues Team erstellen</Label>
+        <Label htmlFor="new-team-name">Neues Team erstellen</Label>
         <div className="mt-2 flex gap-2">
-          <Input value={newTeam} onChange={(e) => setNewTeam(e.target.value)} placeholder="z. B. U19 Herbst" />
+          <Input id="new-team-name" value={newTeam} onChange={(e) => setNewTeam(e.target.value)} placeholder="z. B. U19 Herbst" />
           <Button onClick={() => createTeam.mutate()} disabled={createTeam.isPending}>
             {createTeam.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             <span className="ml-1">Erstellen</span>
@@ -206,9 +206,9 @@ function TeamDetail({ team }: { team: any }) {
       </div>
 
       <div className="card-elevated p-4">
-        <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-medium">
           <Settings2 className="h-4 w-4" /> Team-Chat Einstellungen
-        </div>
+        </h2>
         <div className="flex items-center justify-between rounded-lg bg-elevated px-3 py-2">
           <div>
             <div className="text-sm font-medium">Nur Trainer darf schreiben</div>
@@ -219,9 +219,10 @@ function TeamDetail({ team }: { team: any }) {
       </div>
 
       <div className="card-elevated p-4">
-        <Label>Spieler per E-Mail einladen</Label>
+        <Label htmlFor="invite-email">Spieler per E-Mail einladen</Label>
         <div className="mt-2 flex gap-2">
           <Input
+            id="invite-email"
             value={email}
             type="email"
             placeholder="spieler@example.com"
@@ -235,9 +236,9 @@ function TeamDetail({ team }: { team: any }) {
       </div>
 
       <div className="card-elevated p-4">
-        <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-medium">
           <Users className="h-4 w-4" /> Mitglieder
-        </div>
+        </h2>
         <ul className="divide-y divide-border">
           {(members ?? []).map((m: any) => (
             <li key={m.id} className="flex items-center justify-between py-2">
