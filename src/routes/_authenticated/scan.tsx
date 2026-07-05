@@ -23,6 +23,21 @@ export const Route = createFileRoute("/_authenticated/scan")({
   component: ScanPage,
 });
 
+type MealType = "breakfast" | "lunch" | "dinner" | "snack";
+
+const MEAL_LABELS: Record<MealType, string> = {
+  breakfast: "Frühstück",
+  lunch: "Mittagessen",
+  dinner: "Abendessen",
+  snack: "Snack",
+};
+
+/** Sinnvoller Default nach Tageszeit – vom Nutzer im Select überschreibbar. */
+function defaultMeal(): MealType {
+  const hour = new Date().getHours();
+  return hour < 10 ? "breakfast" : hour < 14 ? "lunch" : hour < 18 ? "snack" : "dinner";
+}
+
 interface Extracted {
   name: string;
   portion_desc: string | null;
@@ -73,6 +88,8 @@ function ScanPage() {
   const [result, setResult] = useState<{ id: string; extracted: Extracted } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  // Mahlzeit vorbelegen nach Tageszeit, aber vom Nutzer überschreibbar.
+  const [meal, setMeal] = useState<MealType>(defaultMeal());
 
   async function onFile(file: File) {
     if (!file.type.startsWith("image/")) {
@@ -126,9 +143,6 @@ function ScanPage() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("no user");
       const today = new Date().toISOString().slice(0, 10);
-      const hour = new Date().getHours();
-      const meal =
-        hour < 10 ? "breakfast" : hour < 14 ? "lunch" : hour < 18 ? "snack" : "dinner";
       const { error } = await supabase.from("nutrition_logs").insert({
         user_id: u.user.id,
         date: today,
@@ -212,13 +226,15 @@ function ScanPage() {
                   </>
                 )}
               </Button>
-              <Button variant="secondary" onClick={reset} disabled={analyzing}>
+              <Button variant="secondary" onClick={reset} disabled={analyzing} aria-label="Bild verwerfen">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           ) : (
             <ResultCard
               ex={result.extracted}
+              meal={meal}
+              onMealChange={setMeal}
               onAdd={() => addToLog.mutate()}
               onReset={reset}
               adding={addToLog.isPending}
@@ -310,11 +326,15 @@ function UploadCard({
 
 function ResultCard({
   ex,
+  meal,
+  onMealChange,
   onAdd,
   onReset,
   adding,
 }: {
   ex: Extracted;
+  meal: MealType;
+  onMealChange: (m: MealType) => void;
   onAdd: () => void;
   onReset: () => void;
   adding: boolean;
@@ -326,6 +346,24 @@ function ResultCard({
         {ex.portion_desc && (
           <div className="text-xs text-muted-foreground">{ex.portion_desc}</div>
         )}
+      </div>
+
+      <div>
+        <label htmlFor="meal-select" className="mb-1 block text-[10px] uppercase tracking-widest text-muted-foreground">
+          Mahlzeit
+        </label>
+        <select
+          id="meal-select"
+          value={meal}
+          onChange={(e) => onMealChange(e.target.value as MealType)}
+          className="w-full rounded-lg border border-border bg-elevated px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          {(Object.keys(MEAL_LABELS) as MealType[]).map((m) => (
+            <option key={m} value={m}>
+              {MEAL_LABELS[m]}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-4 gap-2">
@@ -415,3 +453,4 @@ function ScoreBadge({
     </span>
   );
 }
+
