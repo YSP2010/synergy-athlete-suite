@@ -566,6 +566,10 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"]
         }[]
       }
+      get_or_create_direct_chat: {
+        Args: { _other_user_id: string }
+        Returns: string
+      }
       is_chat_participant: { Args: { _chat_id: string }; Returns: boolean }
       is_coach_of_team: { Args: { _team_id: string }; Returns: boolean }
       is_team_member: {
