@@ -19,6 +19,24 @@ import {
   type SportSession,
 } from "@/lib/planner";
 import { cn } from "@/lib/utils";
+import { humanError } from "@/lib/errors";
+import type { Tables } from "@/integrations/supabase/types";
+
+type TeamRow = Tables<"teams">;
+
+interface TeamMemberRow extends Tables<"team_members"> {
+  profiles: Pick<Tables<"profiles">, "name" | "role"> | null;
+}
+
+interface RecoveryStatRow extends DailyStat {
+  user_id: string;
+}
+interface RecoverySportRow extends SportSession {
+  user_id: string;
+}
+interface RecoveryGymRow extends GymSession {
+  user_id: string;
+}
 
 export const Route = createFileRoute("/_authenticated/team")({
   head: () => ({ meta: [{ title: "Teams – Hybrid Athlete" }] }),
@@ -68,7 +86,7 @@ function TeamPage() {
       qc.invalidateQueries({ queryKey: ["teams"] });
       toast.success("Team erstellt");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   if (me?.role !== "coach") {
@@ -126,7 +144,7 @@ function TeamPage() {
   );
 }
 
-function TeamDetail({ team }: { team: any }) {
+function TeamDetail({ team }: { team: TeamRow }) {
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
@@ -139,14 +157,14 @@ function TeamDetail({ team }: { team: any }) {
         .select("*, profiles!team_members_user_id_fkey(name, role)")
         .eq("team_id", team.id);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as TeamMemberRow[];
     },
   });
 
   // Recovery-Ampel je aktivem Mitglied: daily_stats (heute/gestern) + Load 72h.
   const activeUserIds = (members ?? [])
-    .filter((m: any) => m.status === "active")
-    .map((m: any) => m.user_id as string);
+    .filter((m) => m.status === "active")
+    .map((m) => m.user_id);
 
   const { data: teamRecovery } = useQuery({
     queryKey: ["team-recovery", team.id, activeUserIds],
@@ -178,20 +196,20 @@ function TeamDetail({ team }: { team: any }) {
 
       const statsByUser = new Map<string, DailyStat>();
       // Neuestes stat pro Nutzer (heute vor gestern) als Basis.
-      for (const row of (statsRes.data ?? []) as any[]) {
+      for (const row of (statsRes.data ?? []) as RecoveryStatRow[]) {
         const prev = statsByUser.get(row.user_id);
-        if (!prev || row.date > prev.date) statsByUser.set(row.user_id, row as DailyStat);
+        if (!prev || row.date > prev.date) statsByUser.set(row.user_id, row);
       }
       const sportByUser = new Map<string, SportSession[]>();
-      for (const row of (sportRes.data ?? []) as any[]) {
+      for (const row of (sportRes.data ?? []) as RecoverySportRow[]) {
         const arr = sportByUser.get(row.user_id) ?? [];
-        arr.push(row as SportSession);
+        arr.push(row);
         sportByUser.set(row.user_id, arr);
       }
       const gymByUser = new Map<string, GymSession[]>();
-      for (const row of (gymRes.data ?? []) as any[]) {
+      for (const row of (gymRes.data ?? []) as RecoveryGymRow[]) {
         const arr = gymByUser.get(row.user_id) ?? [];
-        arr.push(row as GymSession);
+        arr.push(row);
         gymByUser.set(row.user_id, arr);
       }
 
@@ -241,7 +259,7 @@ function TeamDetail({ team }: { team: any }) {
       qc.invalidateQueries({ queryKey: ["team-members", team.id] });
       toast.success(`Eingeladen: ${prof.name ?? prof.id.slice(0, 6)}`);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const removeMember = useMutation({
@@ -255,7 +273,7 @@ function TeamDetail({ team }: { team: any }) {
       setConfirmRemove(null);
       qc.invalidateQueries({ queryKey: ["team-members", team.id] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const toggleLock = useMutation({
@@ -264,7 +282,7 @@ function TeamDetail({ team }: { team: any }) {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teams"] }),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   return (
@@ -320,7 +338,7 @@ function TeamDetail({ team }: { team: any }) {
           <Users className="h-4 w-4" /> Mitglieder
         </h2>
         <ul className="divide-y divide-border">
-          {(members ?? []).map((m: any) => (
+          {(members ?? []).map((m) => (
             <li key={m.id} className="flex items-center justify-between py-2">
               <div>
                 <div className="flex items-center gap-2 text-sm font-medium">
