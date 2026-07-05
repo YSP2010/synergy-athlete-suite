@@ -84,9 +84,13 @@ function ChatRoom() {
   async function send() {
     const msg = text.trim();
     if (!msg || !me) return;
-    setText("");
     const { error } = await supabase.from("chat_messages").insert({ chat_id: id, sender_id: me.id, message: msg });
-    if (error) toast.error(error.message);
+    if (error) {
+      // Text im Feld belassen, damit der Nutzer erneut senden kann.
+      toast.error(error.message);
+      return;
+    }
+    setText("");
   }
 
   const title = chat?.type === "team"
@@ -145,4 +149,5 @@ function ChatRoom() {
     </div>
   );
 }
+
 
