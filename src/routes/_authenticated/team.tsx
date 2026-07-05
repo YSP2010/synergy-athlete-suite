@@ -7,19 +7,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Users, Plus, Mail, MessageSquare, Trash2, Loader2, Shield, Settings2 } from "lucide-react";
-import { findProfileByEmail, getOrCreateDirectChat } from "@/lib/team";
+import { findProfileByEmail, getOrCreateDirectChat, createTeamWithChat, leaveTeamChat } from "@/lib/team";
 import { Switch } from "@/components/ui/switch";
+import { QueryError } from "@/components/ui/query-error";
+import { toISODate, today, addDays } from "@/lib/dates";
+import {
+  calcRecovery,
+  type DailyStat,
+  type GymSession,
+  type RecoveryLevel,
+  type SportSession,
+} from "@/lib/planner";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/team")({
-  head: () => ({
-    meta: [
-      { title: "Teams – Hybrid Athlete" },
-      { name: "description", content: "Verwalte deine Teams, lade Athlet:innen ein und chatte mit ihnen." },
-      { name: "robots", content: "noindex, follow" },
-      { property: "og:title", content: "Teams – Hybrid Athlete" },
-      { property: "og:description", content: "Team-Übersicht, Einladungen und Chat für Coaches." },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Teams – Hybrid Athlete" }] }),
   component: TeamPage,
 });
 
@@ -38,7 +40,7 @@ function TeamPage() {
     },
   });
 
-  const { data: teams } = useQuery({
+  const { data: teams, isError: teamsError, refetch: refetchTeams } = useQuery({
     queryKey: ["teams", me?.id],
     enabled: !!me?.id,
     queryFn: async () => {
@@ -57,28 +59,12 @@ function TeamPage() {
   const createTeam = useMutation({
     mutationFn: async () => {
       if (!newTeam.trim()) throw new Error("Name fehlt");
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Nicht angemeldet");
-      const { data: team, error } = await supabase
-        .from("teams")
-        .insert({ name: newTeam.trim(), coach_id: u.user.id })
-        .select("*")
-        .single();
-      if (error) throw error;
-      // team chat
-      const { data: chat, error: cErr } = await supabase
-        .from("chats")
-        .insert({ type: "team", team_id: team.id, created_by: u.user.id })
-        .select("id")
-        .single();
-      if (cErr) throw cErr;
-      await supabase.from("chat_participants").insert({ chat_id: chat.id, user_id: u.user.id });
-      await supabase.from("teams").update({ team_chat_id: chat.id }).eq("id", team.id);
-      return team;
+      // Atomar: Team + Team-Chat + Teilnahme in einer SECURITY-DEFINER-RPC.
+      return await createTeamWithChat(newTeam);
     },
-    onSuccess: (t) => {
+    onSuccess: (teamId) => {
       setNewTeam("");
-      setSelected(t.id);
+      setSelected(teamId);
       qc.invalidateQueries({ queryKey: ["teams"] });
       toast.success("Team erstellt");
     },
@@ -91,9 +77,9 @@ function TeamPage() {
         <Shield className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
         <h1 className="font-display text-2xl font-bold">Nur für Trainer</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Dieser Bereich ist Trainern vorbehalten. Du kannst deine Rolle in den Einstellungen ändern.
+          Dieser Bereich ist Trainern vorbehalten. Die Trainer-Rolle wird bei der Registrierung
+          gewählt und kann später nicht mehr geändert werden.
         </p>
-        <Button asChild className="mt-4"><Link to="/settings">Einstellungen</Link></Button>
       </div>
     );
   }
@@ -104,6 +90,8 @@ function TeamPage() {
         <h1 className="font-display text-3xl font-bold">Deine Teams</h1>
         <p className="text-sm text-muted-foreground">Erstelle Teams, lade Spieler ein und öffne Team-Chats.</p>
       </header>
+
+      {teamsError && <QueryError onRetry={() => refetchTeams()} />}
 
       <div className="card-elevated p-4">
         <Label htmlFor="new-team-name">Neues Team erstellen</Label>
@@ -141,6 +129,7 @@ function TeamPage() {
 function TeamDetail({ team }: { team: any }) {
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
 
   const { data: members } = useQuery({
     queryKey: ["team-members", team.id],
@@ -154,13 +143,89 @@ function TeamDetail({ team }: { team: any }) {
     },
   });
 
+  // Recovery-Ampel je aktivem Mitglied: daily_stats (heute/gestern) + Load 72h.
+  const activeUserIds = (members ?? [])
+    .filter((m: any) => m.status === "active")
+    .map((m: any) => m.user_id as string);
+
+  const { data: teamRecovery } = useQuery({
+    queryKey: ["team-recovery", team.id, activeUserIds],
+    enabled: activeUserIds.length > 0,
+    queryFn: async () => {
+      const todayIso = toISODate(today());
+      const yesterdayIso = toISODate(addDays(today(), -1));
+      const windowStart = toISODate(addDays(today(), -3));
+
+      const [statsRes, sportRes, gymRes] = await Promise.all([
+        supabase
+          .from("daily_stats")
+          .select("user_id,date,weight_kg,sleep_hours,sleep_quality,soreness,stress,mood")
+          .in("user_id", activeUserIds)
+          .in("date", [todayIso, yesterdayIso]),
+        supabase
+          .from("workouts_sport")
+          .select("user_id,date,kind,intensity,match_hardness,duration_min")
+          .in("user_id", activeUserIds)
+          .gte("date", windowStart)
+          .lt("date", todayIso),
+        supabase
+          .from("workouts_gym")
+          .select("user_id,date,session_type,duration_min")
+          .in("user_id", activeUserIds)
+          .gte("date", windowStart)
+          .lt("date", todayIso),
+      ]);
+
+      const statsByUser = new Map<string, DailyStat>();
+      // Neuestes stat pro Nutzer (heute vor gestern) als Basis.
+      for (const row of (statsRes.data ?? []) as any[]) {
+        const prev = statsByUser.get(row.user_id);
+        if (!prev || row.date > prev.date) statsByUser.set(row.user_id, row as DailyStat);
+      }
+      const sportByUser = new Map<string, SportSession[]>();
+      for (const row of (sportRes.data ?? []) as any[]) {
+        const arr = sportByUser.get(row.user_id) ?? [];
+        arr.push(row as SportSession);
+        sportByUser.set(row.user_id, arr);
+      }
+      const gymByUser = new Map<string, GymSession[]>();
+      for (const row of (gymRes.data ?? []) as any[]) {
+        const arr = gymByUser.get(row.user_id) ?? [];
+        arr.push(row as GymSession);
+        gymByUser.set(row.user_id, arr);
+      }
+
+      const result: Record<string, { score: number; level: RecoveryLevel; hasData: boolean }> = {};
+      for (const uid of activeUserIds) {
+        const stat = statsByUser.get(uid) ?? null;
+        const sport = sportByUser.get(uid) ?? [];
+        const gym = gymByUser.get(uid) ?? [];
+        const hasData = !!stat || sport.length > 0 || gym.length > 0;
+        const r = calcRecovery(stat, sport, gym);
+        result[uid] = { score: r.score, level: r.level, hasData };
+      }
+      return result;
+    },
+  });
+
   const invite = useMutation({
     mutationFn: async () => {
       const prof = await findProfileByEmail(email);
       if (!prof) throw new Error("Kein Nutzer mit dieser E-Mail gefunden");
+      // Upsert statt Insert: erlaubt erneutes Einladen nach vorheriger
+      // Ablehnung (UNIQUE(team_id, user_id)) durch Zurücksetzen des Status.
       const { error } = await supabase
         .from("team_members")
-        .insert({ team_id: team.id, user_id: prof.id, status: "pending" });
+        .upsert(
+          {
+            team_id: team.id,
+            user_id: prof.id,
+            status: "pending",
+            invited_at: new Date().toISOString(),
+            responded_at: null,
+          },
+          { onConflict: "team_id,user_id" },
+        );
       if (error) throw error;
       // open direct chat with player and post a hello message
       const chatId = await getOrCreateDirectChat(prof.id);
@@ -180,11 +245,17 @@ function TeamDetail({ team }: { team: any }) {
   });
 
   const removeMember = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("team_members").delete().eq("id", id);
+    mutationFn: async (m: { id: string; user_id: string }) => {
+      const { error } = await supabase.from("team_members").delete().eq("id", m.id);
       if (error) throw error;
+      // Chat-Zugriff des entfernten Mitglieds im Team-Chat aufräumen.
+      await leaveTeamChat(team.team_chat_id ?? null, m.user_id);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["team-members", team.id] }),
+    onSuccess: () => {
+      setConfirmRemove(null);
+      qc.invalidateQueries({ queryKey: ["team-members", team.id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const toggleLock = useMutation({
@@ -193,6 +264,7 @@ function TeamDetail({ team }: { team: any }) {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teams"] }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
@@ -251,7 +323,10 @@ function TeamDetail({ team }: { team: any }) {
           {(members ?? []).map((m: any) => (
             <li key={m.id} className="flex items-center justify-between py-2">
               <div>
-                <div className="text-sm font-medium">{m.profiles?.name ?? "Unbekannt"}</div>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  {m.profiles?.name ?? "Unbekannt"}
+                  {m.status === "active" && <RecoveryDot rec={teamRecovery?.[m.user_id]} />}
+                </div>
                 <div className="text-xs text-muted-foreground">
                   Status: <span className="capitalize">{m.status}</span>
                 </div>
@@ -262,14 +337,30 @@ function TeamDetail({ team }: { team: any }) {
                     <Link to="/athletes/$id" params={{ id: m.user_id }}>Ansicht</Link>
                   </Button>
                 )}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => removeMember.mutate(m.id)}
-                  aria-label="Entfernen"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {confirmRemove === m.id ? (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={removeMember.isPending}
+                      onClick={() => removeMember.mutate({ id: m.id, user_id: m.user_id })}
+                    >
+                      Wirklich entfernen
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setConfirmRemove(null)}>
+                      Abbrechen
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setConfirmRemove(m.id)}
+                    aria-label="Entfernen"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </li>
           ))}
@@ -281,3 +372,28 @@ function TeamDetail({ team }: { team: any }) {
     </section>
   );
 }
+
+// Recovery-Ampel: grün (green ≥ 75), gelb (amber ≥ 50), rot (< 50) – Schwellen
+// stammen direkt aus calcRecovery. Ohne Check-in/Daten: grauer Punkt + „–".
+function RecoveryDot({
+  rec,
+}: {
+  rec?: { score: number; level: RecoveryLevel; hasData: boolean };
+}) {
+  if (!rec || !rec.hasData) {
+    return (
+      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+        <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" />–
+      </span>
+    );
+  }
+  const color =
+    rec.level === "green" ? "bg-success" : rec.level === "amber" ? "bg-warn" : "bg-danger";
+  return (
+    <span className="flex items-center gap-1 text-xs">
+      <span className={cn("h-2.5 w-2.5 rounded-full", color)} title="Recovery-Score" />
+      <span className="tabular text-muted-foreground">{rec.score}</span>
+    </span>
+  );
+}
+
