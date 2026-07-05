@@ -3,4 +3,4 @@ Allow: /
 Disallow: /dashboard
 Disallow: /auth
 
-Sitemap: https://DEINE-DOMAIN/sitemap.xml
+Sitemap: https://https://synergy-athlete-suite.lovable.app/sitemap.xml
