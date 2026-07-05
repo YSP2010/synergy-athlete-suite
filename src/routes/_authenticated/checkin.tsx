@@ -10,6 +10,7 @@ import { toISODate } from "@/lib/dates";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CheckinTrend } from "@/components/checkin/CheckinTrend";
 
 export const Route = createFileRoute("/_authenticated/checkin")({
   head: () => ({ meta: [{ title: "Daily Check-in – Hybrid Athlete" }] }),
@@ -23,21 +24,25 @@ const SCALE_LABELS = {
   mood: ["Schlecht", "Meh", "Okay", "Gut", "Top"],
 };
 
+const EMPTY_FORM = {
+  weight_kg: "",
+  sleep_hours: "8",
+  sleep_quality: 3,
+  soreness: 2,
+  stress: 2,
+  mood: 3,
+  notes: "",
+};
+
 function CheckinPage() {
   const nav = useNavigate();
-  const today = toISODate(new Date());
-  const [f, setF] = useState({
-    weight_kg: "",
-    sleep_hours: "8",
-    sleep_quality: 3,
-    soreness: 2,
-    stress: 2,
-    mood: 3,
-    notes: "",
-  });
+  const todayIso = toISODate(new Date());
+  // Datum des Check-ins – erlaubt das Nachtragen vergangener Tage.
+  const [date, setDate] = useState(todayIso);
+  const [f, setF] = useState(EMPTY_FORM);
 
   const { data: existing, isLoading } = useQuery({
-    queryKey: ["checkin", today],
+    queryKey: ["checkin", date],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
@@ -45,12 +50,13 @@ function CheckinPage() {
         .from("daily_stats")
         .select("*")
         .eq("user_id", u.user.id)
-        .eq("date", today)
+        .eq("date", date)
         .maybeSingle();
       return data;
     },
   });
 
+  // Beim Datumswechsel Formular auf die vorhandenen Werte (oder leer) setzen.
   useEffect(() => {
     if (existing) {
       setF({
@@ -62,6 +68,8 @@ function CheckinPage() {
         mood: existing.mood ?? 3,
         notes: existing.notes ?? "",
       });
+    } else {
+      setF(EMPTY_FORM);
     }
   }, [existing]);
 
@@ -71,7 +79,7 @@ function CheckinPage() {
       if (!u.user) throw new Error("Nicht angemeldet");
       const payload = {
         user_id: u.user.id,
-        date: today,
+        date,
         weight_kg: f.weight_kg ? Number(f.weight_kg) : null,
         sleep_hours: Number(f.sleep_hours),
         sleep_quality: f.sleep_quality,
@@ -92,15 +100,30 @@ function CheckinPage() {
     onError: (e) => toast.error(e.message),
   });
 
-  if (isLoading) return <div className="py-20 text-center text-muted-foreground">Lade…</div>;
-
   return (
     <div className="mx-auto max-w-xl space-y-5 pb-8">
       <div>
         <h1 className="font-display text-3xl font-bold">Daily Check-in</h1>
-        <p className="text-sm text-muted-foreground">Wie fühlst du dich heute?</p>
+        <p className="text-sm text-muted-foreground">
+          {date === todayIso ? "Wie fühlst du dich heute?" : "Vergangenen Tag nachtragen."}
+        </p>
       </div>
 
+      <div className="card-elevated p-4">
+        <Label htmlFor="checkin-date">Datum</Label>
+        <Input
+          id="checkin-date"
+          type="date"
+          max={todayIso}
+          value={date}
+          onChange={(e) => setDate(e.target.value || todayIso)}
+          className="mt-1"
+        />
+      </div>
+
+      {isLoading ? (
+        <div className="py-20 text-center text-muted-foreground">Lade…</div>
+      ) : (
       <div className="card-elevated space-y-5 p-5">
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -164,6 +187,9 @@ function CheckinPage() {
           Speichern
         </Button>
       </div>
+      )}
+
+      <CheckinTrend />
     </div>
   );
 }
@@ -215,3 +241,4 @@ function ScaleRow({
     </div>
   );
 }
+
