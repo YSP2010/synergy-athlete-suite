@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { QueryError } from "@/components/ui/query-error";
 import { MessageSquare, Users, User } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/chat")({
@@ -9,7 +10,7 @@ export const Route = createFileRoute("/_authenticated/chat")({
 });
 
 function ChatListPage() {
-  const { data: chats } = useQuery({
+  const { data: chats, isError, refetch } = useQuery({
     queryKey: ["chats"],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
@@ -42,6 +43,8 @@ function ChatListPage() {
         <p className="text-sm text-muted-foreground">Team- und Direktnachrichten in Echtzeit.</p>
       </header>
 
+      {isError && <QueryError onRetry={() => refetch()} />}
+
       <div className="card-elevated divide-y divide-border">
         {(chats ?? []).map((c: any) => {
           const title = c.type === "team" ? c.teams?.name ?? "Team-Chat" : c.others.map((o: any) => o.profiles?.name ?? "Unbekannt").join(", ") || "Direkt-Chat";
@@ -72,3 +75,4 @@ function ChatListPage() {
     </div>
   );
 }
+
