@@ -24,6 +24,7 @@ import {
   ageFrom,
   addDays,
   isoDow,
+  parseISODate,
   startOfWeek,
   toISODate,
   WEEKDAY_LONG,
@@ -34,6 +35,7 @@ import {
 } from "@/lib/planner";
 import { MacroRings } from "@/components/dashboard/MacroRings";
 import { QueryError } from "@/components/ui/query-error";
+import { humanError } from "@/lib/errors";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/nutrition")({
@@ -71,7 +73,7 @@ function NutritionPage() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("no user");
       const uid = u.user.id;
-      const day = new Date(dateIso);
+      const day = parseISODate(dateIso);
       const weekStart = startOfWeek(day);
       const weekEnd = addDays(weekStart, 6);
 
@@ -170,7 +172,7 @@ function NutritionPage() {
       setForm({ meal: form.meal, name: "", kcal: "", protein_g: "", carbs_g: "", fat_g: "" });
       toast.success("Mahlzeit hinzugefügt");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
   const del = useMutation({
@@ -182,10 +184,10 @@ function NutritionPage() {
       qc.invalidateQueries({ queryKey: ["nutrition", dateIso] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
 
-  const d = new Date(dateIso);
+  const d = parseISODate(dateIso);
   const isToday = dateIso === toISODate(new Date());
 
   return (
@@ -384,4 +386,3 @@ function NumCol({ label, v, on }: { label: string; v: string; on: (v: string) =>
     </div>
   );
 }
-
