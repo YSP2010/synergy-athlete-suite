@@ -13,8 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Check, Trophy, Flame } from "lucide-react";
+import { ArrowLeft, Check, Trophy, Flame, SearchX } from "lucide-react";
 import { sportName } from "@/lib/planner";
+import { parseISODate } from "@/lib/dates";
+import { humanError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/sport/$id")({
@@ -39,7 +41,7 @@ function SportDetailPage() {
   const qc = useQueryClient();
   const nav = useNavigate();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["sport", id],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
@@ -95,15 +97,38 @@ function SportDetailPage() {
         toast.success("Gespeichert");
       }
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanError(e)),
   });
+
+  if (!isLoading && (isError || !data)) {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <div className="card-elevated flex flex-col items-center gap-3 p-8">
+          <div className="grid h-11 w-11 place-items-center rounded-full bg-danger/10 text-danger">
+            <SearchX className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="font-display text-lg font-semibold">Nicht gefunden</div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Diese Sport-Session existiert nicht mehr oder du hast keinen Zugriff darauf.
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/sport">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Zurück zum Sport-Log
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading || !data || !f) {
     return <div className="py-20 text-center text-muted-foreground">Lade…</div>;
   }
 
   const sportLabel = sportName(data.sport);
-  const d = new Date(data.workout.date);
+  const d = parseISODate(data.workout.date);
   const isMatch = f.kind === "match";
 
   return (
