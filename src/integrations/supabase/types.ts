@@ -316,6 +316,36 @@ export type Database = {
         }
         Relationships: []
       }
+      progress_insights: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          metrics: Json
+          period_end: string
+          period_start: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          metrics?: Json
+          period_end: string
+          period_start: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          metrics?: Json
+          period_end?: string
+          period_start?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           allergies: string[] | null
@@ -558,6 +588,11 @@ export type Database = {
     }
     Functions: {
       coach_can_view_athlete: { Args: { _user_id: string }; Returns: boolean }
+      create_team_with_chat: { Args: { _name: string }; Returns: string }
+      get_or_create_direct_chat: {
+        Args: { _other_user_id: string }
+        Returns: string
+      }
       find_profile_by_email: {
         Args: { _email: string }
         Returns: {
@@ -565,10 +600,6 @@ export type Database = {
           name: string
           role: Database["public"]["Enums"]["user_role"]
         }[]
-      }
-      get_or_create_direct_chat: {
-        Args: { _other_user_id: string }
-        Returns: string
       }
       is_chat_participant: { Args: { _chat_id: string }; Returns: boolean }
       is_coach_of_team: { Args: { _team_id: string }; Returns: boolean }
