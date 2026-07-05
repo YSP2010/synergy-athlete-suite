@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Dumbbell, Plus, ChevronRight, CalendarDays, Timer } from "lucide-react";
-import { toISODate, WEEKDAY_LONG } from "@/lib/dates";
+import { parseISODate, toISODate, WEEKDAY_LONG } from "@/lib/dates";
+import { humanError } from "@/lib/errors";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/gym")({
@@ -69,7 +70,7 @@ function GymListPage() {
       qc.invalidateQueries({ queryKey: ["dashboard"] });
       if (id) nav({ to: "/gym/$id", params: { id } });
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(humanError(e)),
   });
 
   return (
@@ -118,7 +119,7 @@ function GymListPage() {
         ) : (
           <div className="space-y-2">
             {data.rows.map((r) => {
-              const d = new Date(r.date);
+              const d = parseISODate(r.date);
               return (
                 <Link
                   key={r.id}
