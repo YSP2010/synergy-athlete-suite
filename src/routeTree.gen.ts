@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuidesHybridTrainingSplitsRouteImport } from './routes/guides.hybrid-training-splits'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSportRouteImport } from './routes/_authenticated/sport'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -44,6 +45,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesHybridTrainingSplitsRoute =
+  GuidesHybridTrainingSplitsRouteImport.update({
+    id: '/guides/hybrid-training-splits',
+    path: '/guides/hybrid-training-splits',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -133,6 +140,7 @@ const AuthenticatedAthletesIdRoute = AuthenticatedAthletesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/chat': typeof AuthenticatedChatRouteWithChildren
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -154,6 +162,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/chat': typeof AuthenticatedChatRouteWithChildren
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -177,6 +186,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/_authenticated/chat': typeof AuthenticatedChatRouteWithChildren
   '/_authenticated/checkin': typeof AuthenticatedCheckinRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/guides/hybrid-training-splits'
     | '/chat'
     | '/checkin'
     | '/dashboard'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/guides/hybrid-training-splits'
     | '/chat'
     | '/checkin'
     | '/dashboard'
@@ -243,6 +255,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/guides/hybrid-training-splits'
     | '/_authenticated/chat'
     | '/_authenticated/checkin'
     | '/_authenticated/dashboard'
@@ -266,6 +279,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  GuidesHybridTrainingSplitsRoute: typeof GuidesHybridTrainingSplitsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -289,6 +303,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/hybrid-training-splits': {
+      id: '/guides/hybrid-training-splits'
+      path: '/guides/hybrid-training-splits'
+      fullPath: '/guides/hybrid-training-splits'
+      preLoaderRoute: typeof GuidesHybridTrainingSplitsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/team': {
@@ -487,6 +508,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  GuidesHybridTrainingSplitsRoute: GuidesHybridTrainingSplitsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
