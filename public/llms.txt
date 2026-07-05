@@ -1,6 +1,6 @@
 # Hybrid Athlete Performance Planner
 
-> Trainingsplaner für Hybrid-Athlet:innen, die Fußball (oder andere Teamsportarten) mit Krafttraining im Gym kombinieren. Die App plant Training, Regeneration und Ernährung als ein zusammenhängendes System.
+> Trainingsplaner für Hybrid-Athleten, die Fußball (oder andere Teamsportarten) mit Krafttraining im Gym kombinieren. Die App plant Training, Regeneration und Ernährung als ein zusammenhängendes System.
 
 ## Für wen
 
@@ -8,13 +8,14 @@ Amateur- und Leistungssportler:innen, die parallel Vereinssport (v. a. Fußball)
 
 ## Kernfeatures
 
-- Dynamische Wochenplanung: Push/Pull/Legs-Rotation automatisch um Spieltage herum, inkl. 48-Stunden-Regel.
-- Recovery-Score aus Schlaf, Muskelkater, Stress und Trainingslast der letzten 72 Stunden.
-- Makro-Berechnung nach Mifflin-St-Jeor mit Carbo-Loading vor harten Spielen.
+- Dynamische Wochenplanung: Push/Pull/Legs-Rotation automatisch um Spieltage herum, inkl. 48-Stunden-Regel (kein Beintraining direkt vor harten Spielen).
+- Recovery-Score: berechnet aus Schlaf, Schlafqualität, Muskelkater, Stress und Trainingslast der letzten 72 Stunden; ersetzt bei niedrigem Wert die nächste harte Einheit durch Active Recovery.
+- Makro-Berechnung: Kalorien nach Mifflin-St-Jeor plus Aktivitätsfaktor und Ziel; Carbo-Loading vor harten Spielen (bis 7,5 g Kohlenhydrate pro kg Körpergewicht).
 - KI-Food-Scanner: schätzt aus einem Foto Kalorien, Makros, Health-Score und Passung zum Tagesziel.
+- Check-in, Gym-Log, Sport-Log, Ernährungs-Log und Tagebuch.
 - Team- und Coach-Funktionen mit Chat.
 
-## Pages
+## Öffentliche Seiten
 
-- [Startseite](/): Landing mit Feature-Übersicht und Recovery-Argumentation.
-- [Ratgeber: Hybrid-Training-Splits](/guides/hybrid-training-splits): Push/Pull/Legs vs. Upper/Lower rund um Spieltage, 48h-Beintraining-Regel und Carbo-Loading.
+- / – Landingpage
+- /guides/hybrid-training-splits – Ratgeber zu Trainings-Splits rund um Spieltage
