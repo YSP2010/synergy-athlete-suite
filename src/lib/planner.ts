@@ -41,13 +41,25 @@ export interface AthleteProfile {
  * Numerische Felder kommen aus Supabase als String (NUMERIC) und werden hier
  * defensiv nach Number konvertiert.
  */
-export function toAthleteProfile(profile: any): AthleteProfile {
+type ProfileRowLike = {
+  sex?: string | null;
+  height_cm?: number | string | null;
+  weight_kg?: number | string | null;
+  birth_date?: string | null;
+  goal?: string | null;
+  gym_days?: number[] | null;
+  sport_days?: number[] | null;
+  match_days?: number[] | null;
+  sport?: string | null;
+};
+
+export function toAthleteProfile(profile: ProfileRowLike | null | undefined): AthleteProfile {
   return {
-    sex: profile?.sex ?? null,
+    sex: (profile?.sex as Sex | null) ?? null,
     height_cm: profile?.height_cm ? Number(profile.height_cm) : null,
     weight_kg: profile?.weight_kg ? Number(profile.weight_kg) : null,
     birth_date: profile?.birth_date ?? null,
-    goal: profile?.goal ?? "performance",
+    goal: (profile?.goal as Goal | null) ?? "performance",
     gym_days: profile?.gym_days ?? [],
     sport_days: profile?.sport_days ?? [],
     match_days: profile?.match_days ?? [],
