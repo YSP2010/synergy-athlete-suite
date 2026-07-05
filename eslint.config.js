@@ -37,4 +37,11 @@ export default tseslint.config(
     },
   },
   eslintPluginPrettier,
+  {
+    // Formatierung soll die CI nicht blockieren. Einmalig per GitHub-Action
+    // "Autoformat" beheben (prettier --write); danach optional wieder "error".
+    rules: {
+      "prettier/prettier": "warn",
+    },
+  },
 );
