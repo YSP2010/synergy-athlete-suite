@@ -30,9 +30,10 @@ import {
 } from "@/lib/dates";
 import {
   calcDailyMacros,
-  type AthleteProfile,
+  toAthleteProfile,
 } from "@/lib/planner";
 import { MacroRings } from "@/components/dashboard/MacroRings";
+import { QueryError } from "@/components/ui/query-error";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/nutrition")({
@@ -64,7 +65,7 @@ function NutritionPage() {
   const qc = useQueryClient();
   const [dateIso, setDateIso] = useState(toISODate(new Date()));
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["nutrition", dateIso],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
@@ -108,17 +109,7 @@ function NutritionPage() {
       const todaySport = sport.find((s) => s.date === dateIso);
       const todayGym = gym.find((g) => g.date === dateIso);
 
-      const ath: AthleteProfile = {
-        sex: profile?.sex ?? null,
-        height_cm: profile?.height_cm ? Number(profile.height_cm) : null,
-        weight_kg: profile?.weight_kg ? Number(profile.weight_kg) : null,
-        birth_date: profile?.birth_date ?? null,
-        goal: profile?.goal ?? "performance",
-        gym_days: profile?.gym_days ?? [],
-        sport_days: profile?.sport_days ?? [],
-        match_days: profile?.match_days ?? [],
-        sport: profile?.sport ?? null,
-      };
+      const ath = toAthleteProfile(profile);
 
       const macros = calcDailyMacros(
         ath,
@@ -232,7 +223,9 @@ function NutritionPage() {
         </button>
       </div>
 
-      {isLoading || !data ? (
+      {isError ? (
+        <QueryError onRetry={() => refetch()} />
+      ) : isLoading || !data ? (
         <div className="py-10 text-center text-muted-foreground">Lade…</div>
       ) : (
         <>
