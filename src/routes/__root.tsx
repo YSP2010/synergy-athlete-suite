@@ -90,16 +90,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Fußball + Gym clever kombinieren. Recovery-Score, Wochenplan, Makros, Food-Scanner.",
       },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png",
-      },
+      { property: "og:site_name", content: "Hybrid Athlete" },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -109,6 +101,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Hybrid Athlete",
+          url: "https://synergy-athlete-suite.lovable.app/",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Hybrid Athlete",
+          url: "https://synergy-athlete-suite.lovable.app/",
+        }),
       },
     ],
   }),

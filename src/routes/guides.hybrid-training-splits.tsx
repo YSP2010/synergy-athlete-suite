@@ -1,16 +1,36 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
+const URL = "https://synergy-athlete-suite.lovable.app/guides/hybrid-training-splits";
+const TITLE = "Hybrid-Training-Splits: Push/Pull/Legs vs. Upper/Lower rund um Spieltage";
+const DESCRIPTION =
+  "Welcher Trainings-Split passt für Fußballer, die im Gym Kraft aufbauen? Push/Pull/Legs vs. Upper/Lower, die 48h-Beintraining-Regel und Carbo-Loading vor harten Spielen.";
+
 export const Route = createFileRoute("/guides/hybrid-training-splits")({
   head: () => ({
     meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:url", content: URL },
+      { property: "og:type", content: "article" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESCRIPTION },
+    ],
+    links: [{ rel: "canonical", href: URL }],
+    scripts: [
       {
-        title: "Hybrid-Training-Splits: Push/Pull/Legs vs. Upper/Lower rund um Spieltage",
-      },
-      {
-        name: "description",
-        content:
-          "Welcher Trainings-Split passt für Fußballer, die im Gym Kraft aufbauen? Push/Pull/Legs vs. Upper/Lower, die 48h-Beintraining-Regel und Carbo-Loading vor harten Spielen.",
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: TITLE,
+          description: DESCRIPTION,
+          author: { "@type": "Organization", name: "Hybrid Athlete" },
+          publisher: { "@type": "Organization", name: "Hybrid Athlete" },
+          mainEntityOfPage: URL,
+        }),
       },
     ],
   }),

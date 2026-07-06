@@ -20,7 +20,7 @@ import { LogOut } from "lucide-react";
 import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Einstellungen" }] }),
+  head: () => ({ meta: [{ title: "Einstellungen – Hybrid Athlete" }, { name: "robots", content: "noindex" }] }),
   component: SettingsPage,
 });
 

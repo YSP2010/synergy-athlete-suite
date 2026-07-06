@@ -9,7 +9,8 @@ const APP_JSON_LD = {
   description:
     "Trainingsplaner für Hybrid-Athleten, die Fußball und Krafttraining kombinieren. Dynamische Wochenplanung, Recovery-Score, Makro-Berechnung und KI-Food-Scanner.",
   applicationCategory: "HealthApplication",
-  operatingSystem: "Web",
+  operatingSystem: "Web, iOS, Android",
+  url: "https://synergy-athlete-suite.lovable.app/",
   offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
 };
 
@@ -37,7 +38,22 @@ export const Route = createFileRoute("/")({
         content:
           "Kombiniere Fußball, Krafttraining, Ernährung und Recovery in einem Plan. Dynamische Wochenplanung, Recovery-Score, Makro-Berechnung mit Carbo-Loading und KI-Food-Scanner.",
       },
+      { property: "og:title", content: "Trainingsplaner für Hybrid-Athleten – Fußball + Gym" },
+      {
+        property: "og:description",
+        content:
+          "Fußball, Gym, Recovery und Ernährung in einem intelligenten Wochenplan – mit Recovery-Score, Carbo-Loading und KI-Food-Scanner.",
+      },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:title", content: "Trainingsplaner für Hybrid-Athleten – Fußball + Gym" },
+      {
+        name: "twitter:description",
+        content:
+          "Fußball, Gym, Recovery und Ernährung in einem intelligenten Wochenplan.",
+      },
     ],
+    links: [{ rel: "canonical", href: "https://synergy-athlete-suite.lovable.app/" }],
     scripts: [
       {
         type: "application/ld+json",
