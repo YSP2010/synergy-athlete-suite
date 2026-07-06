@@ -32,7 +32,7 @@ function InvitesPage() {
       if (!u.user) return [];
       const { data, error } = await supabase
         .from("team_members")
-        .select("*, teams(name, coach_id, team_chat_id, profiles!teams_coach_id_fkey(name))")
+        .select("*, teams(name, coach_id, team_chat_id, profiles!teams_coach_id_profiles_fkey(name))")
         .eq("user_id", u.user.id);
       if (error) throw error;
       return (data ?? []) as InviteRow[];

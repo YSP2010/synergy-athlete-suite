@@ -205,12 +205,14 @@ function PlanPage() {
     mutationFn: async ({ date, hardness }: { date: string; hardness: MatchHardness }) => {
       if (!data) return;
       const existing = data.sport.find((s) => s.date === date && s.kind === "match");
-      if (existing) {
+      if (existing?.id) {
         const { error } = await supabase
           .from("workouts_sport")
           .update({ match_hardness: hardness })
           .eq("id", existing.id);
         if (error) throw error;
+      } else if (existing) {
+        return;
       } else {
         const { error } = await supabase.from("workouts_sport").insert({
           user_id: data.uid,

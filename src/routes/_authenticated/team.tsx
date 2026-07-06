@@ -180,7 +180,7 @@ function TeamDetail({ team }: { team: TeamRow }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("team_members")
-        .select("*, profiles!team_members_user_id_fkey(name, role)")
+        .select("*, profiles!team_members_user_id_profiles_fkey(name, role)")
         .eq("team_id", team.id);
       if (error) throw error;
       return (data ?? []) as TeamMemberRow[];

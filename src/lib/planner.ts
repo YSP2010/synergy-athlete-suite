@@ -107,6 +107,7 @@ export interface DailyStat {
 }
 
 export interface SportSession {
+  id?: string;
   date: string;
   kind: SportKind;
   intensity: Intensity;
