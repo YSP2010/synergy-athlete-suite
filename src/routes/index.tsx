@@ -9,7 +9,8 @@ const APP_JSON_LD = {
   description:
     "Trainingsplaner für Hybrid-Athleten, die Fußball und Krafttraining kombinieren. Dynamische Wochenplanung, Recovery-Score, Makro-Berechnung und KI-Food-Scanner.",
   applicationCategory: "HealthApplication",
-  operatingSystem: "Web",
+  operatingSystem: "Web, iOS, Android",
+  url: "https://synergy-athlete-suite.lovable.app/",
   offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
 };
 
