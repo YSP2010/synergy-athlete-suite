@@ -53,7 +53,7 @@ function ChatRoom() {
     queryFn: async () => {
       const { data } = await supabase
         .from("chat_participants")
-        .select("user_id, profiles!chat_participants_user_id_fkey(name)")
+        .select("user_id, profiles!chat_participants_user_id_profiles_fkey(name)")
         .eq("chat_id", id)
         .neq("user_id", me!.id);
       return (data ?? []) as ChatParticipantRow[];
@@ -65,7 +65,7 @@ function ChatRoom() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("chat_messages")
-        .select("*, profiles!chat_messages_sender_id_fkey(name)")
+        .select("*, profiles!chat_messages_sender_id_profiles_fkey(name)")
         .eq("chat_id", id)
         .order("created_at");
       if (error) throw error;

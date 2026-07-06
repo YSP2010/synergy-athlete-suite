@@ -50,7 +50,7 @@ function ChatListPage() {
           const [{ data: others }, { data: last }] = await Promise.all([
             supabase
               .from("chat_participants")
-              .select("user_id, profiles!chat_participants_user_id_fkey(name)")
+              .select("user_id, profiles!chat_participants_user_id_profiles_fkey(name)")
               .eq("chat_id", c.id)
               .neq("user_id", u.user!.id),
             supabase
