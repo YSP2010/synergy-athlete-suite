@@ -13,8 +13,20 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Anmelden – Hybrid Athlete" },
-      { name: "description", content: "Melde dich an und plane Training, Recovery und Ernährung." },
+      {
+        name: "description",
+        content:
+          "Melde dich beim Hybrid Athlete Performance Planner an oder registriere dich als Athlet:in oder Coach.",
+      },
+      { property: "og:title", content: "Anmelden – Hybrid Athlete" },
+      {
+        property: "og:description",
+        content: "Login und Registrierung für den Hybrid Athlete Performance Planner.",
+      },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/auth" },
+      { name: "robots", content: "noindex, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://synergy-athlete-suite.lovable.app/auth" }],
   }),
   component: AuthPage,
 });
