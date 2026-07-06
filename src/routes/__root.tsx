@@ -92,14 +92,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png",
+        content: "https://synergy-athlete-suite.lovable.app/og-cover.png",
       },
       {
         name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ea2566e5-6356-41ed-934e-7c220cfc8371/id-preview-d9ea3b8c--f3ff7f61-3989-4bb4-87dc-65acf8e6d292.lovable.app-1783077443160.png",
+        content: "https://synergy-athlete-suite.lovable.app/og-cover.png",
       },
+      { property: "og:site_name", content: "Hybrid Athlete" },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
