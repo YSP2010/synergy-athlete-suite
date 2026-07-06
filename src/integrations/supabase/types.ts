@@ -44,6 +44,13 @@ export type Database = {
             referencedRelation: "chats"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_messages_sender_id_profiles_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_participants: {
@@ -71,6 +78,13 @@ export type Database = {
             columns: ["chat_id"]
             isOneToOne: false
             referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_participants_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -379,6 +393,39 @@ export type Database = {
         }
         Relationships: []
       }
+      progress_insights: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          metrics: Json | null
+          period_end: string
+          period_start: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          metrics?: Json | null
+          period_end: string
+          period_start: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          metrics?: Json | null
+          period_end?: string
+          period_start?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           id: string
@@ -412,6 +459,13 @@ export type Database = {
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "team_members_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       teams: {
@@ -442,7 +496,15 @@ export type Database = {
           team_chat_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "teams_coach_id_profiles_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       weekly_planner: {
         Row: {
@@ -558,6 +620,7 @@ export type Database = {
     }
     Functions: {
       coach_can_view_athlete: { Args: { _user_id: string }; Returns: boolean }
+      create_team_with_chat: { Args: { _name: string }; Returns: string }
       find_profile_by_email: {
         Args: { _email: string }
         Returns: {
