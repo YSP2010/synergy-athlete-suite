@@ -12,8 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as GuidesHybridTrainingSplitsRouteImport } from './routes/guides.hybrid-training-splits'
 import { Route as GuidesNutritionForHybridAthletesRouteImport } from './routes/guides.nutrition-for-hybrid-athletes'
+import { Route as GuidesHybridTrainingSplitsRouteImport } from './routes/guides.hybrid-training-splits'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSportRouteImport } from './routes/_authenticated/sport'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -47,16 +47,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GuidesHybridTrainingSplitsRoute =
-  GuidesHybridTrainingSplitsRouteImport.update({
-    id: '/guides/hybrid-training-splits',
-    path: '/guides/hybrid-training-splits',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const GuidesNutritionForHybridAthletesRoute =
   GuidesNutritionForHybridAthletesRouteImport.update({
     id: '/guides/nutrition-for-hybrid-athletes',
     path: '/guides/nutrition-for-hybrid-athletes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesHybridTrainingSplitsRoute =
+  GuidesHybridTrainingSplitsRouteImport.update({
+    id: '/guides/hybrid-training-splits',
+    path: '/guides/hybrid-training-splits',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
@@ -153,14 +153,12 @@ const AuthenticatedAthletesIdRoute = AuthenticatedAthletesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
-  '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/chat': typeof AuthenticatedChatRouteWithChildren
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/gym': typeof AuthenticatedGymRouteWithChildren
-  '/invites': typeof AuthenticatedInvitesRoute
   '/insights': typeof AuthenticatedInsightsRoute
+  '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -169,6 +167,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
+  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
+  '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
@@ -177,14 +177,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
-  '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/chat': typeof AuthenticatedChatRouteWithChildren
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/gym': typeof AuthenticatedGymRouteWithChildren
-  '/invites': typeof AuthenticatedInvitesRoute
   '/insights': typeof AuthenticatedInsightsRoute
+  '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -193,6 +191,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
+  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
+  '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
@@ -203,14 +203,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
-  '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/_authenticated/chat': typeof AuthenticatedChatRouteWithChildren
   '/_authenticated/checkin': typeof AuthenticatedCheckinRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/gym': typeof AuthenticatedGymRouteWithChildren
-  '/_authenticated/invites': typeof AuthenticatedInvitesRoute
   '/_authenticated/insights': typeof AuthenticatedInsightsRoute
+  '/_authenticated/invites': typeof AuthenticatedInvitesRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
@@ -219,6 +217,8 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/sport': typeof AuthenticatedSportRouteWithChildren
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
+  '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/_authenticated/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/gym/$id': typeof AuthenticatedGymIdRoute
@@ -229,14 +229,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/guides/hybrid-training-splits'
-    | '/guides/nutrition-for-hybrid-athletes'
     | '/chat'
     | '/checkin'
     | '/dashboard'
     | '/gym'
-    | '/invites'
     | '/insights'
+    | '/invites'
     | '/journal'
     | '/nutrition'
     | '/onboarding'
@@ -245,6 +243,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sport'
     | '/team'
+    | '/guides/hybrid-training-splits'
+    | '/guides/nutrition-for-hybrid-athletes'
     | '/athletes/$id'
     | '/chat/$id'
     | '/gym/$id'
@@ -253,14 +253,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/guides/hybrid-training-splits'
-    | '/guides/nutrition-for-hybrid-athletes'
     | '/chat'
     | '/checkin'
     | '/dashboard'
     | '/gym'
-    | '/invites'
     | '/insights'
+    | '/invites'
     | '/journal'
     | '/nutrition'
     | '/onboarding'
@@ -269,6 +267,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sport'
     | '/team'
+    | '/guides/hybrid-training-splits'
+    | '/guides/nutrition-for-hybrid-athletes'
     | '/athletes/$id'
     | '/chat/$id'
     | '/gym/$id'
@@ -278,14 +278,12 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/guides/hybrid-training-splits'
-    | '/guides/nutrition-for-hybrid-athletes'
     | '/_authenticated/chat'
     | '/_authenticated/checkin'
     | '/_authenticated/dashboard'
     | '/_authenticated/gym'
-    | '/_authenticated/invites'
     | '/_authenticated/insights'
+    | '/_authenticated/invites'
     | '/_authenticated/journal'
     | '/_authenticated/nutrition'
     | '/_authenticated/onboarding'
@@ -294,6 +292,8 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/sport'
     | '/_authenticated/team'
+    | '/guides/hybrid-training-splits'
+    | '/guides/nutrition-for-hybrid-athletes'
     | '/_authenticated/athletes/$id'
     | '/_authenticated/chat/$id'
     | '/_authenticated/gym/$id'
@@ -331,18 +331,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/guides/hybrid-training-splits': {
-      id: '/guides/hybrid-training-splits'
-      path: '/guides/hybrid-training-splits'
-      fullPath: '/guides/hybrid-training-splits'
-      preLoaderRoute: typeof GuidesHybridTrainingSplitsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/guides/nutrition-for-hybrid-athletes': {
       id: '/guides/nutrition-for-hybrid-athletes'
       path: '/guides/nutrition-for-hybrid-athletes'
       fullPath: '/guides/nutrition-for-hybrid-athletes'
       preLoaderRoute: typeof GuidesNutritionForHybridAthletesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/hybrid-training-splits': {
+      id: '/guides/hybrid-training-splits'
+      path: '/guides/hybrid-training-splits'
+      fullPath: '/guides/hybrid-training-splits'
+      preLoaderRoute: typeof GuidesHybridTrainingSplitsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/team': {
@@ -512,8 +512,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCheckinRoute: typeof AuthenticatedCheckinRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedGymRoute: typeof AuthenticatedGymRouteWithChildren
-  AuthenticatedInvitesRoute: typeof AuthenticatedInvitesRoute
   AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
+  AuthenticatedInvitesRoute: typeof AuthenticatedInvitesRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
@@ -530,8 +530,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCheckinRoute: AuthenticatedCheckinRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedGymRoute: AuthenticatedGymRouteWithChildren,
-  AuthenticatedInvitesRoute: AuthenticatedInvitesRoute,
   AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
+  AuthenticatedInvitesRoute: AuthenticatedInvitesRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
