@@ -1,16 +1,37 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
+const URL = "https://synergy-athlete-suite.lovable.app/guides/nutrition-for-hybrid-athletes";
+const TITLE =
+  "Ernährung für Hybrid-Athleten: Kalorien, Protein & Carbo-Loading für Fußball + Gym";
+const DESCRIPTION =
+  "Wie viel sollten Fußballer essen, die zusätzlich Kraft aufbauen? Kalorienbedarf nach Mifflin-St-Jeor, 2 g Protein pro kg, Carbo-Loading mit 7,5 g/kg und Meal-Timing rund um Spieltage.";
+
 export const Route = createFileRoute("/guides/nutrition-for-hybrid-athletes")({
   head: () => ({
     meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:url", content: URL },
+      { property: "og:type", content: "article" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESCRIPTION },
+    ],
+    links: [{ rel: "canonical", href: URL }],
+    scripts: [
       {
-        title: "Ernährung für Hybrid-Athleten: Kalorien, Protein & Carbo-Loading für Fußball + Gym",
-      },
-      {
-        name: "description",
-        content:
-          "Wie viel sollten Fußballer essen, die zusätzlich Kraft aufbauen? Kalorienbedarf nach Mifflin-St-Jeor, 2 g Protein pro kg, Carbo-Loading mit 7,5 g/kg und Meal-Timing rund um Spieltage.",
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: TITLE,
+          description: DESCRIPTION,
+          author: { "@type": "Organization", name: "Hybrid Athlete" },
+          publisher: { "@type": "Organization", name: "Hybrid Athlete" },
+          mainEntityOfPage: URL,
+        }),
       },
     ],
   }),
