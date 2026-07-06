@@ -15,7 +15,10 @@ Amateur- und Leistungssportler:innen, die parallel Vereinssport (v. a. Fußball)
 - Check-in, Gym-Log, Sport-Log, Ernährungs-Log und Tagebuch.
 - Team- und Coach-Funktionen mit Chat.
 
-## Öffentliche Seiten
+## Pages
 
-- / – Landingpage
-- /guides/hybrid-training-splits – Ratgeber zu Trainings-Splits rund um Spieltage
+- [Startseite](/): Landingpage mit Feature-Überblick und Anmeldung.
+- [Trainings-Splits Guide](/guides/hybrid-training-splits): Push/Pull/Legs vs. Upper/Lower rund um Spieltage, 48h-Regel, Carbo-Loading.
+- [Ernährungs-Guide](/guides/nutrition-for-hybrid-athletes): Kalorien nach Mifflin-St-Jeor, Protein 2 g/kg, Carbo-Loading 7,5 g/kg, Meal-Timing.
+- [Leg Day & Fußball](/guides/leg-day-and-football): Beintraining um Spiele planen, 48–72 h Recovery-Fenster, Volumen-Template nach Spielhärte.
+- [Anmelden](/auth): Login und Registrierung für Athlet:innen und Coaches.
