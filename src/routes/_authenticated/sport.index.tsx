@@ -16,7 +16,7 @@ import { sportName } from "@/lib/planner";
 import { humanError } from "@/lib/errors";
 import { useState } from "react";
 
-export const Route = createFileRoute("/_authenticated/sport")({
+export const Route = createFileRoute("/_authenticated/sport/")({
   head: () => ({ meta: [{ title: "Sport-Log – Hybrid Athlete" }] }),
   component: SportListPage,
 });

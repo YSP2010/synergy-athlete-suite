@@ -15,7 +15,7 @@ import { parseISODate, toISODate, WEEKDAY_LONG } from "@/lib/dates";
 import { humanError } from "@/lib/errors";
 import { useState } from "react";
 
-export const Route = createFileRoute("/_authenticated/gym")({
+export const Route = createFileRoute("/_authenticated/gym/")({
   head: () => ({ meta: [{ title: "Gym-Log – Hybrid Athlete" }] }),
   component: GymListPage,
 });
