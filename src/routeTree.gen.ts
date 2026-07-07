@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuidesNutritionForHybridAthletesRouteImport } from './routes/guides.nutrition-for-hybrid-athletes'
 import { Route as GuidesLegDayAndFootballRouteImport } from './routes/guides.leg-day-and-football'
 import { Route as GuidesHybridTrainingSplitsRouteImport } from './routes/guides.hybrid-training-splits'
+import { Route as Guides12WeekProgramRouteImport } from './routes/guides.12-week-program'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSportRouteImport } from './routes/_authenticated/sport'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -65,6 +66,11 @@ const GuidesHybridTrainingSplitsRoute =
     path: '/guides/hybrid-training-splits',
     getParentRoute: () => rootRouteImport,
   } as any)
+const Guides12WeekProgramRoute = Guides12WeekProgramRouteImport.update({
+  id: '/guides/12-week-program',
+  path: '/guides/12-week-program',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
+  '/guides/12-week-program': typeof Guides12WeekProgramRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sport': typeof AuthenticatedSportRouteWithChildren
   '/team': typeof AuthenticatedTeamRoute
+  '/guides/12-week-program': typeof Guides12WeekProgramRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/sport': typeof AuthenticatedSportRouteWithChildren
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/guides/12-week-program': typeof Guides12WeekProgramRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sport'
     | '/team'
+    | '/guides/12-week-program'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sport'
     | '/team'
+    | '/guides/12-week-program'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/sport'
     | '/_authenticated/team'
+    | '/guides/12-week-program'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
@@ -316,6 +328,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  Guides12WeekProgramRoute: typeof Guides12WeekProgramRoute
   GuidesHybridTrainingSplitsRoute: typeof GuidesHybridTrainingSplitsRoute
   GuidesLegDayAndFootballRoute: typeof GuidesLegDayAndFootballRoute
   GuidesNutritionForHybridAthletesRoute: typeof GuidesNutritionForHybridAthletesRoute
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/guides/hybrid-training-splits'
       fullPath: '/guides/hybrid-training-splits'
       preLoaderRoute: typeof GuidesHybridTrainingSplitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/12-week-program': {
+      id: '/guides/12-week-program'
+      path: '/guides/12-week-program'
+      fullPath: '/guides/12-week-program'
+      preLoaderRoute: typeof Guides12WeekProgramRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/team': {
@@ -570,6 +590,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  Guides12WeekProgramRoute: Guides12WeekProgramRoute,
   GuidesHybridTrainingSplitsRoute: GuidesHybridTrainingSplitsRoute,
   GuidesLegDayAndFootballRoute: GuidesLegDayAndFootballRoute,
   GuidesNutritionForHybridAthletesRoute: GuidesNutritionForHybridAthletesRoute,

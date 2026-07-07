@@ -1,6 +1,20 @@
 User-agent: *
 Allow: /
-Disallow: /dashboard
 Disallow: /auth
+Disallow: /dashboard
+Disallow: /plan
+Disallow: /checkin
+Disallow: /gym
+Disallow: /sport
+Disallow: /nutrition
+Disallow: /scan
+Disallow: /journal
+Disallow: /insights
+Disallow: /invites
+Disallow: /chat
+Disallow: /team
+Disallow: /athletes
+Disallow: /settings
+Disallow: /onboarding
 
 Sitemap: https://synergy-athlete-suite.lovable.app/sitemap.xml
