@@ -5,7 +5,7 @@ import { QueryError } from "@/components/ui/query-error";
 import { MessageSquare, Users, User } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
-export const Route = createFileRoute("/_authenticated/chat")({
+export const Route = createFileRoute("/_authenticated/chat/")({
   head: () => ({ meta: [{ title: "Chats – Hybrid Athlete" }] }),
   component: ChatListPage,
 });
