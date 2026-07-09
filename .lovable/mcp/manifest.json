@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://jqrrxuezrkdypwoudxuz.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "hybrid-athlete-mcp",
+      "version": "0.1.0",
+      "title": "Hybrid Athlete"
+    },
+    "tools": [
+      {
+        "name": "whoami",
+        "title": "Wer bin ich",
+        "description": "Gibt das Profil des angemeldeten Nutzers zurück (Name, Rolle, Sportart, Ziel, Alter, Gewicht).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_today_status",
+        "title": "Heutiger Status",
+        "description": "Gibt die heutigen Daily-Stats zurück (Schlaf, Muskelkater, Stimmung, Recovery-Score, Makros).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_gym_sessions",
+        "title": "Gym-Sessions anzeigen",
+        "description": "Listet die letzten Krafttraining-Sessions des Nutzers mit Datum, Typ und Status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Anzahl Einträge (Default 10).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_sport_sessions",
+        "title": "Sport-Sessions anzeigen",
+        "description": "Listet die letzten Sport-Sessions (Fußball/Tennis: Training oder Spiel) mit Intensität und Härte.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Anzahl Einträge (Default 10).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_journal_entries",
+        "title": "Tagebuch-Einträge anzeigen",
+        "description": "Listet die letzten Tagebuch-Einträge (Datum, Titel, Mood, Tags, Inhalt).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Anzahl Einträge (Default 10).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_journal_entry",
+        "title": "Tagebuch-Eintrag erstellen",
+        "description": "Legt einen neuen Tagebuch-Eintrag für den angemeldeten Nutzer an. Datum optional (Default: heute).",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Kurzer Titel des Eintrags."
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Freitext des Eintrags."
+            },
+            "mood": {
+              "description": "Optionales Mood (1–5).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "tags": {
+              "description": "Optionale Tag-Liste.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "date": {
+              "description": "ISO-Datum YYYY-MM-DD.",
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          },
+          "required": [
+            "title",
+            "content"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
