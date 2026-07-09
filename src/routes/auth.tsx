@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
@@ -31,8 +31,15 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+function readNext(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const raw = new URLSearchParams(window.location.search).get("next");
+  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : undefined;
+}
+
 function AuthPage() {
-  const nav = useNavigate();
+  const next = typeof window === "undefined" ? undefined : readNext();
+  const returnTo = next ?? "/dashboard";
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [role, setRole] = useState<"athlete" | "coach">("athlete");
   const [email, setEmail] = useState("");
@@ -40,6 +47,25 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState(false);
+
+  // Nach OAuth-Rückkehr: sobald eine Session existiert, auf `next` weiterleiten.
+  useEffect(() => {
+    let done = false;
+    const go = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!done && data.session) window.location.href = returnTo;
+    };
+    void go();
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        window.location.href = returnTo;
+      }
+    });
+    return () => {
+      done = true;
+      sub.subscription.unsubscribe();
+    };
+  }, [returnTo]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -52,7 +78,7 @@ function AuthPage() {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: window.location.origin + returnTo,
             data: { name, role },
           },
         });
@@ -69,7 +95,8 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Willkommen zurück");
       }
-      nav({ to: "/dashboard", replace: true });
+      // Ziel-URL (z. B. OAuth-Consent) statt fester /dashboard-Redirect.
+      window.location.href = returnTo;
     } catch (err) {
       toast.error(humanError(err));
     } finally {
@@ -79,8 +106,12 @@ function AuthPage() {
 
   async function google() {
     setLoading(true);
+    // redirect_uri MUSS eine öffentliche Route sein – wir kehren zurück nach /auth
+    // und routen von dort auf `next` weiter, sobald die Session steht.
+    const url = new URL("/auth", window.location.origin);
+    if (next) url.searchParams.set("next", next);
     const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: url.toString(),
     });
     if (res.error) {
       toast.error(humanError(res.error));
@@ -88,7 +119,7 @@ function AuthPage() {
       return;
     }
     if (res.redirected) return;
-    nav({ to: "/dashboard", replace: true });
+    window.location.href = returnTo;
   }
 
   if (confirmEmail) {
