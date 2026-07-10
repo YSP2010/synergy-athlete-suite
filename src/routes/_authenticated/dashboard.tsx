@@ -137,8 +137,25 @@ function DashboardPage() {
       const todaySlot = plan.find((p) => p.date === todayIso);
       const tomorrowSlot = plan.find((p) => p.date === toISODate(addDays(today, 1)));
 
-      const todaySport = sport.find((s) => s.date === todayIso);
-      const todayGym = gym.find((g) => g.date === todayIso);
+      // Für Makros zählt tatsächlich geloggtes Training. Fehlt es, greifen
+      // wir auf den geplanten Slot (inkl. manuellem Override) zurück, damit
+      // Kalorien/Kohlenhydrate auch nach einer Plan-Anpassung reagieren.
+      const todaySport: SportSession | undefined =
+        sport.find((s) => s.date === todayIso) ??
+        (todaySlot?.kind === "sport" || todaySlot?.kind === "match"
+          ? {
+              date: todayIso,
+              kind: todaySlot.kind,
+              intensity: todaySlot.kind === "match" ? "high" : "mid",
+              match_hardness: todaySlot.hardness ?? null,
+              duration_min: null,
+            }
+          : undefined);
+      const todayGym: GymSession | undefined =
+        gym.find((g) => g.date === todayIso) ??
+        (todaySlot?.kind === "gym" && todaySlot.sessionType
+          ? { date: todayIso, session_type: todaySlot.sessionType, duration_min: null }
+          : undefined);
       const tomorrowMatchHard = tomorrowSlot?.kind === "match" && tomorrowSlot.hardness === "hard";
 
       const macros = calcDailyMacros(
