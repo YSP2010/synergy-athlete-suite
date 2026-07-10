@@ -376,6 +376,7 @@ function PlanPage() {
           checked={locked}
           disabled={toggleLock.isPending}
           onCheckedChange={(v) => toggleLock.mutate({ locked: v, slots: plan })}
+          aria-label="Woche sperren"
         />
       </div>
 
