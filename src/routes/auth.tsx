@@ -158,7 +158,7 @@ function AuthPage() {
             <Zap className="h-6 w-6" strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className="font-display text-2xl font-bold leading-tight">Hybrid Athlete</h1>
+            <h1 className="font-display text-2xl font-bold leading-tight">Hybrid Athlete — Performance Planner</h1>
             <p className="text-sm text-muted-foreground">Performance Planner</p>
           </div>
         </div>
