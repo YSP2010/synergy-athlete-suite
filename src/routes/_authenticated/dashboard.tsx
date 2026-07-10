@@ -11,12 +11,15 @@ import {
   WEEKDAY_LONG,
 } from "@/lib/dates";
 import {
+  applyOverrides,
   calcRecovery,
   calcDailyMacros,
   generateWeekPlan,
   toAthleteProfile,
   type DailyStat,
   type GymSession,
+  type PlannedSlot,
+  type SlotOverride,
   type SportSession,
 } from "@/lib/planner";
 import { RecoveryRing } from "@/components/dashboard/RecoveryRing";
