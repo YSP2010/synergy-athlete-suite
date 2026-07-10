@@ -296,6 +296,24 @@ export interface SlotOverride {
   detail?: string;
 }
 
+/** Liefert eine virtuelle Sport-Einheit aus einem geplanten Slot für Makro-Ziele. */
+export function plannedSportFromSlot(slot: PlannedSlot | undefined): SportSession | undefined {
+  if (!slot || (slot.kind !== "sport" && slot.kind !== "match")) return undefined;
+  return {
+    date: slot.date,
+    kind: slot.kind === "match" ? "match" : "training",
+    intensity: slot.kind === "match" ? "high" : "mid",
+    match_hardness: slot.hardness ?? null,
+    duration_min: null,
+  };
+}
+
+/** Liefert eine virtuelle Gym-Einheit aus einem geplanten Slot für Makro-Ziele. */
+export function plannedGymFromSlot(slot: PlannedSlot | undefined): GymSession | undefined {
+  if (!slot || slot.kind !== "gym" || !slot.sessionType) return undefined;
+  return { date: slot.date, session_type: slot.sessionType, duration_min: null };
+}
+
 /**
  * Wendet manuelle Overrides (per `slot.date`-Key) auf einen generierten Plan an.
  * Reine Funktion – erzeugt eine neue Slot-Liste, ohne Eingaben zu mutieren.
