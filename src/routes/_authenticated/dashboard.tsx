@@ -70,7 +70,7 @@ function DashboardPage() {
       const weekStart = startOfWeek(today);
       const weekEnd = addDays(weekStart, 6);
 
-      const [profileRes, statRes, sportRes, gymRes] = await Promise.all([
+      const [profileRes, statRes, sportRes, gymRes, plannerRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
         supabase
           .from("daily_stats")
@@ -91,6 +91,12 @@ function DashboardPage() {
           .eq("user_id", uid)
           .gte("date", threeDaysAgo)
           .lte("date", toISODate(weekEnd)),
+        supabase
+          .from("weekly_planner")
+          .select("plan,locked")
+          .eq("user_id", uid)
+          .eq("week_start", toISODate(weekStart))
+          .maybeSingle(),
       ]);
 
       if (profileRes.error) throw profileRes.error;
@@ -99,6 +105,10 @@ function DashboardPage() {
       const stat: DailyStat | null = (statRes.data?.[0] as DailyStat | undefined) ?? null;
       const sport = (sportRes.data ?? []) as SportSession[];
       const gym = (gymRes.data ?? []) as GymSession[];
+      const planner = plannerRes.data as unknown as {
+        plan: { overrides?: Record<string, SlotOverride>; snapshot?: PlannedSlot[] } | null;
+        locked: boolean | null;
+      } | null;
 
       const recent = {
         sport: sport.filter((s) => s.date < todayIso && s.date >= threeDaysAgo),
@@ -117,7 +127,13 @@ function DashboardPage() {
         }
       }
 
-      const plan = generateWeekPlan(ath, weekStart, matchHardness, recovery.score);
+      // Wochenplan: bei gesperrter Woche Snapshot verwenden, sonst
+      // Live-Plan + manuelle Overrides aus /plan.
+      const generated = generateWeekPlan(ath, weekStart, matchHardness, recovery.score);
+      const plan: PlannedSlot[] =
+        planner?.locked && planner.plan?.snapshot
+          ? planner.plan.snapshot
+          : applyOverrides(generated, planner?.plan?.overrides);
       const todaySlot = plan.find((p) => p.date === todayIso);
       const tomorrowSlot = plan.find((p) => p.date === toISODate(addDays(today, 1)));
 
