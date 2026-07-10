@@ -261,6 +261,7 @@ function PlanPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["plan"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Plan angepasst");
     },
     onError: (e) => toast.error(humanError(e)),
