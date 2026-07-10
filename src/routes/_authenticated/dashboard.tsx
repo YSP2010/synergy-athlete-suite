@@ -145,7 +145,7 @@ function DashboardPage() {
         (todaySlot?.kind === "sport" || todaySlot?.kind === "match"
           ? {
               date: todayIso,
-              kind: todaySlot.kind,
+              kind: todaySlot.kind === "match" ? "match" : "training",
               intensity: todaySlot.kind === "match" ? "high" : "mid",
               match_hardness: todaySlot.hardness ?? null,
               duration_min: null,
