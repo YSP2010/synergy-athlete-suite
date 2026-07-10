@@ -299,6 +299,7 @@ function PlanPage() {
     },
     onSuccess: (_r, vars) => {
       qc.invalidateQueries({ queryKey: ["plan"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success(vars.locked ? "Woche gesperrt" : "Woche entsperrt");
     },
     onError: (e) => toast.error(humanError(e)),
