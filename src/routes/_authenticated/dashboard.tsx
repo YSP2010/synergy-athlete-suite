@@ -15,6 +15,8 @@ import {
   calcRecovery,
   calcDailyMacros,
   generateWeekPlan,
+  plannedGymFromSlot,
+  plannedSportFromSlot,
   toAthleteProfile,
   type DailyStat,
   type GymSession,
@@ -141,21 +143,9 @@ function DashboardPage() {
       // wir auf den geplanten Slot (inkl. manuellem Override) zurück, damit
       // Kalorien/Kohlenhydrate auch nach einer Plan-Anpassung reagieren.
       const todaySport: SportSession | undefined =
-        sport.find((s) => s.date === todayIso) ??
-        (todaySlot?.kind === "sport" || todaySlot?.kind === "match"
-          ? {
-              date: todayIso,
-              kind: todaySlot.kind === "match" ? "match" : "training",
-              intensity: todaySlot.kind === "match" ? "high" : "mid",
-              match_hardness: todaySlot.hardness ?? null,
-              duration_min: null,
-            }
-          : undefined);
+        sport.find((s) => s.date === todayIso) ?? plannedSportFromSlot(todaySlot);
       const todayGym: GymSession | undefined =
-        gym.find((g) => g.date === todayIso) ??
-        (todaySlot?.kind === "gym" && todaySlot.sessionType
-          ? { date: todayIso, session_type: todaySlot.sessionType, duration_min: null }
-          : undefined);
+        gym.find((g) => g.date === todayIso) ?? plannedGymFromSlot(todaySlot);
       const tomorrowMatchHard = tomorrowSlot?.kind === "match" && tomorrowSlot.hardness === "hard";
 
       const macros = calcDailyMacros(

@@ -22,7 +22,20 @@ import {
   toISODate,
   WEEKDAY_LONG,
 } from "@/lib/dates";
-import { calcDailyMacros, toAthleteProfile } from "@/lib/planner";
+import {
+  applyOverrides,
+  calcDailyMacros,
+  calcRecovery,
+  generateWeekPlan,
+  plannedGymFromSlot,
+  plannedSportFromSlot,
+  toAthleteProfile,
+  type DailyStat,
+  type GymSession,
+  type PlannedSlot,
+  type SlotOverride,
+  type SportSession,
+} from "@/lib/planner";
 import { MacroRings } from "@/components/dashboard/MacroRings";
 import { QueryError } from "@/components/ui/query-error";
 import { humanError } from "@/lib/errors";
@@ -53,6 +66,11 @@ interface LogRow {
   source: "manual" | "scan";
 }
 
+interface PlannerPlan {
+  overrides?: Record<string, SlotOverride>;
+  snapshot?: PlannedSlot[];
+}
+
 function NutritionPage() {
   const qc = useQueryClient();
   const [dateIso, setDateIso] = useState(toISODate(new Date()));
@@ -67,7 +85,12 @@ function NutritionPage() {
       const weekStart = startOfWeek(day);
       const weekEnd = addDays(weekStart, 6);
 
-      const [profileRes, logsRes, sportRes, gymRes] = await Promise.all([
+      const yesterdayIso = toISODate(addDays(day, -1));
+      const threeDaysAgo = toISODate(addDays(day, -3));
+      const weekStartIso = toISODate(weekStart);
+      const weekEndIso = toISODate(weekEnd);
+
+      const [profileRes, logsRes, sportRes, gymRes, statRes, plannerRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
         supabase
           .from("nutrition_logs")
@@ -79,35 +102,75 @@ function NutritionPage() {
           .from("workouts_sport")
           .select("date,kind,intensity,match_hardness,duration_min")
           .eq("user_id", uid)
-          .gte("date", toISODate(weekStart))
-          .lte("date", toISODate(weekEnd)),
+          .gte("date", threeDaysAgo)
+          .lte("date", weekEndIso),
         supabase
           .from("workouts_gym")
           .select("date,session_type,duration_min")
           .eq("user_id", uid)
-          .eq("date", dateIso),
+          .gte("date", threeDaysAgo)
+          .lte("date", weekEndIso),
+        supabase
+          .from("daily_stats")
+          .select("date,weight_kg,sleep_hours,sleep_quality,soreness,stress,mood")
+          .eq("user_id", uid)
+          .in("date", [dateIso, yesterdayIso])
+          .order("date", { ascending: false })
+          .limit(1),
+        supabase
+          .from("weekly_planner")
+          .select("plan,locked")
+          .eq("user_id", uid)
+          .eq("week_start", weekStartIso)
+          .maybeSingle(),
       ]);
       if (logsRes.error) throw logsRes.error;
 
       const profile = profileRes.data;
       const rows = (logsRes.data ?? []) as LogRow[];
-      const sport = sportRes.data ?? [];
-      const gym = gymRes.data ?? [];
+      const sport = (sportRes.data ?? []) as SportSession[];
+      const gym = (gymRes.data ?? []) as GymSession[];
+      const stat: DailyStat | null = (statRes.data?.[0] as DailyStat | undefined) ?? null;
+      const planner = plannerRes.data as unknown as {
+        plan: PlannerPlan | null;
+        locked: boolean | null;
+      } | null;
 
-      const tomorrow = toISODate(addDays(day, 1));
-      const tomorrowMatchHard = sport.some(
-        (s) => s.date === tomorrow && s.kind === "match" && s.match_hardness === "hard",
-      );
-      const todaySport = sport.find((s) => s.date === dateIso);
-      const todayGym = gym.find((g) => g.date === dateIso);
+      const recentSport = sport.filter((s) => s.date < dateIso && s.date >= threeDaysAgo);
+      const recentGym = gym.filter((g) => g.date < dateIso && g.date >= threeDaysAgo);
+      const recovery = calcRecovery(stat, recentSport, recentGym);
+
+      const matchHardness: Record<number, "easy" | "normal" | "hard"> = {};
+      for (const s of sport) {
+        if (s.kind === "match" && s.date >= weekStartIso && s.date <= weekEndIso) {
+          matchHardness[isoDow(parseISODate(s.date))] = (s.match_hardness ?? "normal") as never;
+        }
+      }
 
       const ath = toAthleteProfile(profile);
+      const generated = generateWeekPlan(ath, weekStart, matchHardness, recovery.score);
+      const plan: PlannedSlot[] =
+        planner?.locked && planner.plan?.snapshot
+          ? planner.plan.snapshot
+          : applyOverrides(generated, planner?.plan?.overrides);
+
+      const daySlot = plan.find((p) => p.date === dateIso);
+      const tomorrowSlot = plan.find((p) => p.date === toISODate(addDays(day, 1)));
+
+      const tomorrowMatchHard =
+        sport.some(
+          (s) =>
+            s.date === tomorrowSlot?.date && s.kind === "match" && s.match_hardness === "hard",
+        ) ||
+        (tomorrowSlot?.kind === "match" && tomorrowSlot.hardness === "hard");
+      const todaySport = sport.find((s) => s.date === dateIso) ?? plannedSportFromSlot(daySlot);
+      const todayGym = gym.find((g) => g.date === dateIso) ?? plannedGymFromSlot(daySlot);
 
       const macros = calcDailyMacros(
         ath,
         ageFrom(profile?.birth_date),
-        todaySport as never,
-        todayGym as never,
+        todaySport,
+        todayGym,
         tomorrowMatchHard,
       );
 

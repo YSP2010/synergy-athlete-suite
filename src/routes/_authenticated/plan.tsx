@@ -37,6 +37,15 @@ const OVERRIDE_OPTIONS: {
   build: () => SlotOverride;
 }[] = [
   {
+    value: "sport",
+    label: "Sport-Training",
+    build: () => ({
+      kind: "sport",
+      label: "Sport-Training",
+      detail: "Training",
+    }),
+  },
+  {
     value: "push",
     label: "Gym · Push",
     build: () => ({
@@ -227,6 +236,7 @@ function PlanPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["plan"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["nutrition"] });
       toast.success("Spielhärte aktualisiert – Plan neu berechnet");
     },
     onError: (e) => toast.error(humanError(e)),
@@ -262,6 +272,7 @@ function PlanPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["plan"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["nutrition"] });
       toast.success("Plan angepasst");
     },
     onError: (e) => toast.error(humanError(e)),
@@ -300,6 +311,7 @@ function PlanPage() {
     onSuccess: (_r, vars) => {
       qc.invalidateQueries({ queryKey: ["plan"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["nutrition"] });
       toast.success(vars.locked ? "Woche gesperrt" : "Woche entsperrt");
     },
     onError: (e) => toast.error(humanError(e)),
@@ -454,6 +466,9 @@ function PlanPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="auto" disabled>
+                        Automatisch
+                      </SelectItem>
                       {OVERRIDE_OPTIONS.map((o) => (
                         <SelectItem key={o.value} value={o.value}>
                           {o.label}
@@ -485,15 +500,16 @@ function PlanPage() {
 /** Ermittelt den passenden Select-Wert für den aktuellen (ggf. überschriebenen) Slot. */
 function overrideValueFor(slot: PlannedSlot, overrides: Record<string, SlotOverride>): string {
   const ov = overrides[slot.date];
+  if (!ov) return "auto";
   const sessionType: GymType | undefined = ov?.sessionType ?? slot.sessionType;
   const kind = ov?.kind ?? slot.kind;
+  if (kind === "sport") return "sport";
   if (sessionType && OVERRIDE_OPTIONS.some((o) => o.value === sessionType)) {
     return sessionType;
   }
   if (kind === "recovery") return "recovery";
   if (kind === "rest") return "rest";
-  // Fallback (z. B. sport-Tage ohne passende Option): erste Option.
-  return OVERRIDE_OPTIONS[0].value;
+  return "auto";
 }
 
 function SlotDot({ kind }: { kind: string }) {
