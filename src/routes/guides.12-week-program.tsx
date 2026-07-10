@@ -53,7 +53,7 @@ function Block({
   return (
     <div className="rounded-2xl border border-border bg-elevated p-5">
       <div className="text-xs uppercase tracking-wide text-neon">{weeks}</div>
-      <h3 className="mt-1 font-display text-lg font-semibold">{phase}</h3>
+      <h2 className="mt-1 font-display text-lg font-semibold">{phase}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{focus}</p>
       <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         <div>
