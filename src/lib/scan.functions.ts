@@ -120,7 +120,8 @@ export const analyzeFoodScan = createServerFn({ method: "POST" })
       throw new Error("AI-Guthaben aufgebraucht. Bitte im Workspace-Billing aufladen.");
     if (!gwRes.ok) {
       const t = await gwRes.text().catch(() => "");
-      throw new Error(`AI-Fehler ${gwRes.status}: ${t.slice(0, 200)}`);
+      console.error("[scan] AI gateway error", gwRes.status, t);
+      throw new Error("KI-Dienst nicht erreichbar, bitte später erneut versuchen");
     }
 
     const json = (await gwRes.json()) as {
