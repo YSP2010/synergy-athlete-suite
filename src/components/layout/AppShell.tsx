@@ -1,7 +1,7 @@
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import type { ReactNode } from "react";
-import { Activity, BookOpen, CalendarDays, Camera, Dumbbell, FileUp, Flag, HeartPulse, LayoutDashboard, LineChart, LogOut, Mail, MessageSquare, Settings, TrendingUp, Trophy, Users, Utensils, type LucideIcon } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { Activity, Bike, BookOpen, CalendarDays, Camera, Dumbbell, FileUp, Flag, HeartPulse, LayoutDashboard, LineChart, LogOut, Mail, Medal, MessageSquare, MoreHorizontal, Settings, ShieldCheck, TrendingUp, Trophy, Users, Utensils, Wrench, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,15 +28,21 @@ const ATHLETE_NAV: NavItem[] = [
   { to: "/courses", label: "Strecken", icon: Flag, shortLabel: "Strecken" },
   { to: "/analytics", label: "Analyse", icon: LineChart, shortLabel: "Analyse" },
   { to: "/records", label: "Bestleistungen", icon: Trophy, shortLabel: "PRs" },
+  { to: "/leaderboard", label: "Bestenliste", icon: Medal, shortLabel: "Rang" },
+  { to: "/triathlon", label: "Triathlon", icon: Bike, shortLabel: "Tri" },
+  { to: "/races", label: "Rennen", icon: Flag, shortLabel: "Rennen" },
+  { to: "/equipment", label: "Ausrüstung", icon: Wrench, shortLabel: "Gear" },
   { to: "/import", label: "Import", icon: FileUp, shortLabel: "Import" },
   { to: "/invites", label: "Einladungen", icon: Mail, shortLabel: "Invites" },
   { to: "/chat", label: "Chat", icon: MessageSquare, shortLabel: "Chat" },
+  { to: "/privacy", label: "Datenschutz", icon: ShieldCheck, shortLabel: "Daten" },
 ];
 
 const COACH_NAV: NavItem[] = [
   { to: "/team", label: "Teams", icon: Users, shortLabel: "Teams" },
   { to: "/chat", label: "Chat", icon: MessageSquare, shortLabel: "Chat" },
 ];
+
 
 export function AppShell({ children }: { children: ReactNode }) {
   const loc = useLocation();
