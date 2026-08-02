@@ -156,36 +156,45 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMoreOpen(false)}>
           <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
           <div
-            className="absolute inset-x-0 bottom-16 max-h-[60vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card p-3"
+            className="absolute inset-x-0 bottom-16 flex max-h-[70vh] flex-col rounded-t-2xl border-t border-border bg-card"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="grid grid-cols-3 gap-2">
-              {MORE_NAV.map((n) => {
-                const Icon = n.icon;
-                return (
-                  <Link
-                    key={n.to}
-                    to={n.to}
-                    onClick={() => setMoreOpen(false)}
-                    className="flex flex-col items-center gap-1.5 rounded-lg bg-elevated px-2 py-3 text-xs font-medium text-muted-foreground"
-                  >
-                    <Icon className="h-5 w-5 text-neon" />
-                    <span className="text-center leading-tight">{n.label}</span>
-                  </Link>
-                );
-              })}
-              <Link
-                to="/settings"
-                onClick={() => setMoreOpen(false)}
-                className="flex flex-col items-center gap-1.5 rounded-lg bg-elevated px-2 py-3 text-xs font-medium text-muted-foreground"
-              >
-                <Settings className="h-5 w-5 text-neon" />
-                Einstellungen
-              </Link>
+            <div className="flex shrink-0 justify-center py-2">
+              <span className="h-1.5 w-10 rounded-full bg-border" aria-hidden="true" />
+            </div>
+            <div
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 pt-0"
+              style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+            >
+              <div className="grid grid-cols-3 gap-2">
+                {MORE_NAV.map((n) => {
+                  const Icon = n.icon;
+                  return (
+                    <Link
+                      key={n.to}
+                      to={n.to}
+                      onClick={() => setMoreOpen(false)}
+                      className="flex flex-col items-center gap-1.5 rounded-lg bg-elevated px-2 py-3 text-xs font-medium text-muted-foreground"
+                    >
+                      <Icon className="h-5 w-5 text-neon" />
+                      <span className="text-center leading-tight">{n.label}</span>
+                    </Link>
+                  );
+                })}
+                <Link
+                  to="/settings"
+                  onClick={() => setMoreOpen(false)}
+                  className="flex flex-col items-center gap-1.5 rounded-lg bg-elevated px-2 py-3 text-xs font-medium text-muted-foreground"
+                >
+                  <Settings className="h-5 w-5 text-neon" />
+                  Einstellungen
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       )}
+
 
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/90 backdrop-blur md:hidden"
