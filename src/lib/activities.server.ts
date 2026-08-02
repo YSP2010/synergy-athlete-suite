@@ -4,6 +4,7 @@ import { findDuplicate, fingerprintOf, type ActivityFingerprint } from "./import
 import { downsampleTrack } from "./import/downsample";
 import { geometryFromTrack, matchCourse, type CourseGeometry } from "./import/match";
 import type { ParsedActivity } from "./import/types";
+import { looksMultisport, segmentsFromLaps } from "./triathlon/segments";
 
 type DB = SupabaseClient<Database>;
 
