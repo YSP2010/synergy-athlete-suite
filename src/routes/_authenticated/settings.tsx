@@ -207,3 +207,134 @@ function DayPicker({
     </div>
   );
 }
+
+/** Abschnitt „Bestenliste & Sichtbarkeit" – Einwilligungen inklusive Protokoll. */
+function LeaderboardSettings() {
+  const qc = useQueryClient();
+  const recompute = useServerFn(recomputeMyLeaderboard);
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile-leaderboard"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, name, leaderboard_opt_in, leaderboard_display_name, leaderboard_share_health")
+        .eq("id", u.user.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const [displayName, setDisplayName] = useState("");
+  useEffect(() => {
+    if (profile) setDisplayName(profile.leaderboard_display_name ?? "");
+  }, [profile]);
+
+  const update = useMutation({
+    mutationFn: async (patch: Record<string, unknown> & { consentKind?: string; consentValue?: boolean }) => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("no user");
+      const { consentKind, consentValue, ...fields } = patch;
+      const { error } = await supabase.from("profiles").update(fields).eq("id", u.user.id);
+      if (error) throw error;
+      if (consentKind) {
+        await supabase.from("consents").insert({
+          user_id: u.user.id,
+          kind: consentKind,
+          granted: consentValue === true,
+          version: "v1",
+        });
+      }
+      if (fields["leaderboard_opt_in"] === true || consentValue === true) {
+        await recompute({ data: undefined });
+      }
+    },
+    onSuccess: () => {
+      toast.success("Gespeichert");
+      qc.invalidateQueries({ queryKey: ["profile-leaderboard"] });
+      qc.invalidateQueries({ queryKey: ["lb-me"] });
+      qc.invalidateQueries({ queryKey: ["lb-rows"] });
+    },
+    onError: (e) => toast.error(humanError(e)),
+  });
+
+  const optedIn = profile?.leaderboard_opt_in === true;
+  const preview = displayName.trim() || profile?.name || "Athlet";
+
+  return (
+    <div className="card-elevated space-y-4 p-5">
+      <h2 className="font-display text-lg font-semibold">Bestenliste & Sichtbarkeit</h2>
+
+      <label className="flex items-start justify-between gap-4">
+        <span className="text-sm">
+          <span className="font-medium">An der Bestenliste teilnehmen</span>
+          <span className="block text-xs text-muted-foreground">
+            Andere angemeldete Nutzer sehen deinen Anzeigenamen und deine Werte in Lauf-, Rad-, Schwimm- und
+            Konsistenz-Kategorien.
+          </span>
+        </span>
+        <Switch
+          checked={optedIn}
+          onCheckedChange={(v) =>
+            update.mutate({ leaderboard_opt_in: v, consentKind: "leaderboard", consentValue: v })
+          }
+        />
+      </label>
+
+      <label className="flex items-start justify-between gap-4">
+        <span className="text-sm">
+          <span className="font-medium">Gesundheitsdaten in Wertungen freigeben</span>
+          <span className="block text-xs text-muted-foreground">
+            Zusätzliche Zustimmung für Schlaf-Score, HRV-Konstanz und Ruhepuls. Jederzeit widerrufbar – die
+            Einträge werden dann sofort gelöscht.
+          </span>
+        </span>
+        <Switch
+          checked={profile?.leaderboard_share_health === true}
+          disabled={!optedIn}
+          onCheckedChange={(v) =>
+            update.mutate({ leaderboard_share_health: v, consentKind: "leaderboard_health", consentValue: v })
+          }
+        />
+      </label>
+
+      <div>
+        <Label>Anzeigename in der Rangliste</Label>
+        <Input
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          placeholder="Pseudonym erlaubt"
+          maxLength={40}
+        />
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          Vorschau: andere sehen dich als <strong className="text-foreground">{preview}</strong>
+          {optedIn ? "" : " – aktuell erscheinst du nirgends."}
+        </p>
+      </div>
+
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          className="flex-1"
+          onClick={() => update.mutate({ leaderboard_display_name: displayName.trim() || null })}
+          disabled={update.isPending}
+        >
+          Anzeigename speichern
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={async () => {
+            const res = await recompute({ data: undefined });
+            toast.success(res?.skipped === "rate_limit" ? "Kürzlich schon berechnet" : "Werte aktualisiert");
+          }}
+          disabled={!optedIn}
+          aria-label="Bestenlisten-Werte neu berechnen"
+        >
+          {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+        </Button>
+      </div>
+    </div>
+  );
+}
