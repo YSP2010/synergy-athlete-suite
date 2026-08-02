@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Zap } from "lucide-react";
 import { humanError } from "@/lib/errors";
+import { safeRedirect } from "@/lib/invites";
+
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -33,9 +35,11 @@ export const Route = createFileRoute("/auth")({
 
 function readNext(): string | undefined {
   if (typeof window === "undefined") return undefined;
-  const raw = new URLSearchParams(window.location.search).get("next");
-  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : undefined;
+  const params = new URLSearchParams(window.location.search);
+  // `next` (bestehend) und `redirect` (Einladungslinks) werden beide akzeptiert.
+  return safeRedirect(params.get("next") ?? params.get("redirect"));
 }
+
 
 function AuthPage() {
   const next = typeof window === "undefined" ? undefined : readNext();

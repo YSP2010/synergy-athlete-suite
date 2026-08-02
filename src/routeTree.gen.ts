@@ -13,6 +13,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JoinTokenRouteImport } from './routes/join.$token'
 import { Route as GuidesNutritionForHybridAthletesRouteImport } from './routes/guides.nutrition-for-hybrid-athletes'
 import { Route as GuidesLegDayAndFootballRouteImport } from './routes/guides.leg-day-and-football'
 import { Route as GuidesHybridTrainingSplitsRouteImport } from './routes/guides.hybrid-training-splits'
@@ -26,6 +27,7 @@ import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPlanRouteImport } from './routes/_authenticated/plan'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNutritionRouteImport } from './routes/_authenticated/nutrition'
+import { Route as AuthenticatedMatchdayRouteImport } from './routes/_authenticated/matchday'
 import { Route as AuthenticatedLeaderboardRouteImport } from './routes/_authenticated/leaderboard'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedInvitesRouteImport } from './routes/_authenticated/invites'
@@ -70,6 +72,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinTokenRoute = JoinTokenRouteImport.update({
+  id: '/join/$token',
+  path: '/join/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidesNutritionForHybridAthletesRoute =
@@ -137,6 +144,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
 const AuthenticatedNutritionRoute = AuthenticatedNutritionRouteImport.update({
   id: '/nutrition',
   path: '/nutrition',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMatchdayRoute = AuthenticatedMatchdayRouteImport.update({
+  id: '/matchday',
+  path: '/matchday',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLeaderboardRoute =
@@ -292,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
+  '/matchday': typeof AuthenticatedMatchdayRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
@@ -305,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
+  '/join/$token': typeof JoinTokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activities/$id': typeof AuthenticatedActivitiesIdRoute
@@ -336,6 +350,7 @@ export interface FileRoutesByTo {
   '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
+  '/matchday': typeof AuthenticatedMatchdayRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
@@ -349,6 +364,7 @@ export interface FileRoutesByTo {
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
+  '/join/$token': typeof JoinTokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activities/$id': typeof AuthenticatedActivitiesIdRoute
@@ -382,6 +398,7 @@ export interface FileRoutesById {
   '/_authenticated/invites': typeof AuthenticatedInvitesRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/leaderboard': typeof AuthenticatedLeaderboardRoute
+  '/_authenticated/matchday': typeof AuthenticatedMatchdayRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/plan': typeof AuthenticatedPlanRoute
@@ -395,6 +412,7 @@ export interface FileRoutesById {
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
+  '/join/$token': typeof JoinTokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/activities/$id': typeof AuthenticatedActivitiesIdRoute
@@ -428,6 +446,7 @@ export interface FileRouteTypes {
     | '/invites'
     | '/journal'
     | '/leaderboard'
+    | '/matchday'
     | '/nutrition'
     | '/onboarding'
     | '/plan'
@@ -441,6 +460,7 @@ export interface FileRouteTypes {
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
+    | '/join/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/activities/$id'
@@ -472,6 +492,7 @@ export interface FileRouteTypes {
     | '/invites'
     | '/journal'
     | '/leaderboard'
+    | '/matchday'
     | '/nutrition'
     | '/onboarding'
     | '/plan'
@@ -485,6 +506,7 @@ export interface FileRouteTypes {
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
+    | '/join/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/activities/$id'
@@ -517,6 +539,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invites'
     | '/_authenticated/journal'
     | '/_authenticated/leaderboard'
+    | '/_authenticated/matchday'
     | '/_authenticated/nutrition'
     | '/_authenticated/onboarding'
     | '/_authenticated/plan'
@@ -530,6 +553,7 @@ export interface FileRouteTypes {
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
+    | '/join/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/activities/$id'
@@ -558,6 +582,7 @@ export interface RootRouteChildren {
   GuidesHybridTrainingSplitsRoute: typeof GuidesHybridTrainingSplitsRoute
   GuidesLegDayAndFootballRoute: typeof GuidesLegDayAndFootballRoute
   GuidesNutritionForHybridAthletesRoute: typeof GuidesNutritionForHybridAthletesRoute
+  JoinTokenRoute: typeof JoinTokenRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -590,6 +615,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join/$token': {
+      id: '/join/$token'
+      path: '/join/$token'
+      fullPath: '/join/$token'
+      preLoaderRoute: typeof JoinTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/nutrition-for-hybrid-athletes': {
@@ -681,6 +713,13 @@ declare module '@tanstack/react-router' {
       path: '/nutrition'
       fullPath: '/nutrition'
       preLoaderRoute: typeof AuthenticatedNutritionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/matchday': {
+      id: '/_authenticated/matchday'
+      path: '/matchday'
+      fullPath: '/matchday'
+      preLoaderRoute: typeof AuthenticatedMatchdayRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/leaderboard': {
@@ -878,6 +917,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInvitesRoute: typeof AuthenticatedInvitesRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedLeaderboardRoute: typeof AuthenticatedLeaderboardRoute
+  AuthenticatedMatchdayRoute: typeof AuthenticatedMatchdayRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlanRoute: typeof AuthenticatedPlanRoute
@@ -912,6 +952,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInvitesRoute: AuthenticatedInvitesRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedLeaderboardRoute: AuthenticatedLeaderboardRoute,
+  AuthenticatedMatchdayRoute: AuthenticatedMatchdayRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlanRoute: AuthenticatedPlanRoute,
@@ -951,6 +992,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesHybridTrainingSplitsRoute: GuidesHybridTrainingSplitsRoute,
   GuidesLegDayAndFootballRoute: GuidesLegDayAndFootballRoute,
   GuidesNutritionForHybridAthletesRoute: GuidesNutritionForHybridAthletesRoute,
+  JoinTokenRoute: JoinTokenRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }

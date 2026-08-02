@@ -1,7 +1,7 @@
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
-import { Activity, Bike, BookOpen, CalendarDays, Camera, Dumbbell, FileUp, Flag, HeartPulse, LayoutDashboard, LineChart, LogOut, Mail, Medal, MessageSquare, MoreHorizontal, Settings, ShieldCheck, TrendingUp, Trophy, Users, Utensils, Wrench, type LucideIcon } from "lucide-react";
+import { Activity, Bike, BookOpen, CalendarDays, Camera, Dumbbell, FileUp, Flag, HeartPulse, LayoutDashboard, LineChart, LogOut, Mail, Medal, MessageSquare, MoreHorizontal, Settings, ShieldCheck, Timer, TrendingUp, Trophy, Users, Utensils, Wrench, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,6 +18,7 @@ const ATHLETE_NAV: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, shortLabel: "Home" },
   { to: "/plan", label: "Wochenplan", icon: CalendarDays, shortLabel: "Plan" },
   { to: "/checkin", label: "Check-in", icon: HeartPulse, shortLabel: "Check" },
+  { to: "/matchday", label: "Spieltag", icon: Timer, shortLabel: "Spieltag" },
   { to: "/gym", label: "Gym-Log", icon: Dumbbell, shortLabel: "Gym" },
   { to: "/sport", label: "Sport-Log", icon: Trophy, shortLabel: "Sport" },
   { to: "/nutrition", label: "Ernährung", icon: Utensils, shortLabel: "Food" },

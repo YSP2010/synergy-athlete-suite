@@ -21,6 +21,11 @@ import { Switch } from "@/components/ui/switch";
 import { useServerFn } from "@tanstack/react-start";
 import { recomputeMyLeaderboard } from "@/lib/leaderboard.functions";
 import { humanError } from "@/lib/errors";
+import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { clearAppCaches } from "@/lib/pwa/register";
+import { GuardianConsentCard } from "@/components/settings/GuardianConsentCard";
+import { GUARDIAN_CONSENT_KIND, isMinor } from "@/lib/youth";
+
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Einstellungen – Hybrid Athlete" }, { name: "robots", content: "noindex" }] }),
@@ -95,6 +100,7 @@ function SettingsPage() {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
+    await clearAppCaches();
     nav({ to: "/auth", replace: true });
   }
 
@@ -152,7 +158,12 @@ function SettingsPage() {
         </Button>
       </div>
 
+      <GuardianConsentCard />
+
       <LeaderboardSettings />
+
+      <NotificationSettings />
+
 
       <Link
         to="/privacy"
@@ -220,10 +231,20 @@ function LeaderboardSettings() {
       if (!u.user) return null;
       const { data } = await supabase
         .from("profiles")
-        .select("id, name, leaderboard_opt_in, leaderboard_display_name, leaderboard_share_health")
+        .select(
+          "id, name, birth_date, leaderboard_opt_in, leaderboard_display_name, leaderboard_share_health",
+        )
         .eq("id", u.user.id)
         .maybeSingle();
-      return data;
+      const { data: consent } = await supabase
+        .from("consents")
+        .select("granted")
+        .eq("user_id", u.user.id)
+        .eq("kind", GUARDIAN_CONSENT_KIND)
+        .order("changed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data ? { ...data, guardianGranted: consent?.granted === true } : null;
     },
   });
 
@@ -267,11 +288,19 @@ function LeaderboardSettings() {
   });
 
   const optedIn = profile?.leaderboard_opt_in === true;
+  // Jugendschutz: unter 16 nur mit Einwilligung der Erziehungsberechtigten.
+  const youthBlocked = isMinor(profile?.birth_date) && profile?.guardianGranted !== true;
   const preview = displayName.trim() || profile?.name || "Athlet";
 
   return (
     <div className="card-elevated space-y-4 p-5">
       <h2 className="font-display text-lg font-semibold">Bestenliste & Sichtbarkeit</h2>
+      {youthBlocked && (
+        <p className="rounded-lg border border-border bg-elevated p-3 text-xs text-muted-foreground">
+          Öffentliche Wertungen sind gesperrt, bis die Einwilligung der Erziehungsberechtigten
+          vorliegt.
+        </p>
+      )}
 
       <label className="flex items-start justify-between gap-4">
         <span className="text-sm">
@@ -283,6 +312,7 @@ function LeaderboardSettings() {
         </span>
         <Switch
           checked={optedIn}
+          disabled={youthBlocked}
           onCheckedChange={(v) =>
             update.mutate({ leaderboard_opt_in: v, consentKind: "leaderboard", consentValue: v })
           }
@@ -299,7 +329,7 @@ function LeaderboardSettings() {
         </span>
         <Switch
           checked={profile?.leaderboard_share_health === true}
-          disabled={!optedIn}
+          disabled={!optedIn || youthBlocked}
           onCheckedChange={(v) =>
             update.mutate({ leaderboard_share_health: v, consentKind: "leaderboard_health", consentValue: v })
           }
@@ -335,7 +365,7 @@ function LeaderboardSettings() {
             const res = await recompute({ data: undefined });
             toast.success(res?.skipped === "rate_limit" ? "Kürzlich schon berechnet" : "Werte aktualisiert");
           }}
-          disabled={!optedIn}
+          disabled={!optedIn || youthBlocked}
           aria-label="Bestenlisten-Werte neu berechnen"
         >
           {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}

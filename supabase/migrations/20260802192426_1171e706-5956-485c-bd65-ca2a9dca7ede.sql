@@ -1,0 +1,4 @@
+ALTER TABLE public.workouts_sport
+  ADD COLUMN IF NOT EXISTS kickoff_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS opponent TEXT,
+  ADD COLUMN IF NOT EXISTS location TEXT;
