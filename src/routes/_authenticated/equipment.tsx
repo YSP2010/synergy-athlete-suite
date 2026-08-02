@@ -20,13 +20,15 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/equipment")({
   head: () => ({
     meta: [
-      { title: "Ausrüstung – Hybrid Athlete" },
-      { name: "description", content: "Laufschuhe, Räder und Neoprenanzüge mit Kilometerstand und Verschleißwarnung." },
-      { property: "og:title", content: "Ausrüstung – Hybrid Athlete" },
-      { property: "og:description", content: "Kilometerstand und Verschleiß deiner Ausrüstung im Blick." },
+      { title: "Equipment – Hybrid Athlete" },
+      { name: "description", content: "Laufschuhe, Räder und Ausrüstung mit automatischer Kilometerzählung verwalten." },
+      { property: "og:title", content: "Equipment – Hybrid Athlete" },
+      { property: "og:description", content: "Ausrüstung mit automatischer Kilometerzählung verwalten." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/equipment" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "robots", content: "noindex" },
+      { name: "twitter:title", content: "Equipment – Hybrid Athlete" },
+      { name: "twitter:description", content: "Ausrüstung mit automatischer Kilometerzählung verwalten." },
     ],
   }),
   component: EquipmentPage,

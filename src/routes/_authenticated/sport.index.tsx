@@ -17,6 +17,19 @@ import { humanError } from "@/lib/errors";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/sport/")({
+  head: () => ({
+    meta: [
+      { title: "Sport-Training – Hybrid Athlete" },
+      { name: "description", content: "Spiele und Sporteinheiten mit Intensität und Belastung im Verlauf." },
+      { property: "og:title", content: "Sport-Training – Hybrid Athlete" },
+      { property: "og:description", content: "Spiele und Sporteinheiten im Verlauf." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/sport" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Sport-Training – Hybrid Athlete" },
+      { name: "twitter:description", content: "Spiele und Sporteinheiten im Verlauf." },
+    ],
+  }),
   head: () => ({ meta: [{ title: "Sport-Log – Hybrid Athlete" }] }),
   component: SportListPage,
 });

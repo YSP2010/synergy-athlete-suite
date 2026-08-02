@@ -47,6 +47,19 @@ interface RecoveryGymRow extends GymSession {
 }
 
 export const Route = createFileRoute("/_authenticated/team")({
+  head: () => ({
+    meta: [
+      { title: "Team-Cockpit – Hybrid Athlete" },
+      { name: "description", content: "Readiness aller Athleten, Einladungen und Teamverwaltung für Trainer." },
+      { property: "og:title", content: "Team-Cockpit – Hybrid Athlete" },
+      { property: "og:description", content: "Readiness, Einladungen und Teamverwaltung für Trainer." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/team" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Team-Cockpit – Hybrid Athlete" },
+      { name: "twitter:description", content: "Readiness, Einladungen und Teamverwaltung für Trainer." },
+    ],
+  }),
   head: () => ({ meta: [{ title: "Teams – Hybrid Athlete" }] }),
   component: TeamPage,
 });

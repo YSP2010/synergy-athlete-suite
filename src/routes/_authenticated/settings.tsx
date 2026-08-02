@@ -28,6 +28,19 @@ import { GUARDIAN_CONSENT_KIND, isMinor } from "@/lib/youth";
 
 
 export const Route = createFileRoute("/_authenticated/settings")({
+  head: () => ({
+    meta: [
+      { title: "Einstellungen – Hybrid Athlete" },
+      { name: "description", content: "Profil, Sportart, Ziele, Benachrichtigungen und Bestenlisten-Freigaben verwalten." },
+      { property: "og:title", content: "Einstellungen – Hybrid Athlete" },
+      { property: "og:description", content: "Profil, Ziele und Benachrichtigungen verwalten." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/settings" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Einstellungen – Hybrid Athlete" },
+      { name: "twitter:description", content: "Profil, Ziele und Benachrichtigungen verwalten." },
+    ],
+  }),
   head: () => ({ meta: [{ title: "Einstellungen – Hybrid Athlete" }, { name: "robots", content: "noindex" }] }),
   component: SettingsPage,
 });

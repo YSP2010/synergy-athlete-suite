@@ -23,15 +23,14 @@ export const Route = createFileRoute("/_authenticated/leaderboard")({
   head: () => ({
     meta: [
       { title: "Bestenliste – Hybrid Athlete" },
-      {
-        name: "description",
-        content: "Freiwillige Ranglisten für Lauf, Rad, Schwimmen und Konsistenz – nur mit Einwilligung.",
-      },
+      { name: "description", content: "Verifizierte Ranglisten für Lauf-, Rad- und Triathlon-Leistungen." },
       { property: "og:title", content: "Bestenliste – Hybrid Athlete" },
-      { property: "og:description", content: "Freiwillige Ranglisten aus verifizierten Geräteaktivitäten." },
+      { property: "og:description", content: "Verifizierte Ranglisten für Lauf, Rad und Triathlon." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/leaderboard" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "robots", content: "noindex" },
+      { name: "twitter:title", content: "Bestenliste – Hybrid Athlete" },
+      { name: "twitter:description", content: "Verifizierte Ranglisten für Lauf, Rad und Triathlon." },
     ],
   }),
   component: LeaderboardPage,

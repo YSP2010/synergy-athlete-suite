@@ -12,12 +12,14 @@ export const Route = createFileRoute("/_authenticated/triathlon")({
   head: () => ({
     meta: [
       { title: "Triathlon – Hybrid Athlete" },
-      { name: "description", content: "Disziplin-Balance, kommende Rennen und Schwächen im Dreikampf erkennen." },
+      { name: "description", content: "Schwimmen, Rad und Laufen inklusive Wechselzeiten getrennt auswerten." },
       { property: "og:title", content: "Triathlon – Hybrid Athlete" },
-      { property: "og:description", content: "Disziplin-Balance und Rennplanung für Triathleten." },
+      { property: "og:description", content: "Swim, Bike, Run und Wechselzeiten auswerten." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/triathlon" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "robots", content: "noindex" },
+      { name: "twitter:title", content: "Triathlon – Hybrid Athlete" },
+      { name: "twitter:description", content: "Swim, Bike, Run und Wechselzeiten auswerten." },
     ],
   }),
   component: TriathlonPage,

@@ -43,6 +43,19 @@ import { humanError } from "@/lib/errors";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/nutrition")({
+  head: () => ({
+    meta: [
+      { title: "Ernährung – Hybrid Athlete" },
+      { name: "description", content: "Mahlzeiten loggen und Makros passend zu Gym- und Fußballtagen steuern." },
+      { property: "og:title", content: "Ernährung – Hybrid Athlete" },
+      { property: "og:description", content: "Mahlzeiten loggen, Makros an Trainingstage anpassen." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/nutrition" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Ernährung – Hybrid Athlete" },
+      { name: "twitter:description", content: "Mahlzeiten loggen, Makros an Trainingstage anpassen." },
+    ],
+  }),
   head: () => ({ meta: [{ title: "Ernährung – Hybrid Athlete" }] }),
   component: NutritionPage,
 });

@@ -10,12 +10,14 @@ import type { TrackPoint } from "@/lib/import/downsample";
 export const Route = createFileRoute("/_authenticated/courses/$id")({
   head: () => ({
     meta: [
-      { title: "Bestenliste – Hybrid Athlete" },
-      { name: "description", content: "Bestenliste einer Strecke: schnellste Zeiten, Pace und Puls aller Versuche." },
-      { property: "og:title", content: "Bestenliste – Hybrid Athlete" },
-      { property: "og:description", content: "Schnellste Zeiten, Pace und Puls aller Versuche auf dieser Strecke." },
-      { property: "og:type", content: "article" },
+      { title: "Strecke – Hybrid Athlete" },
+      { name: "description", content: "Streckenprofil, Bestzeiten und Bestenliste für diese Route." },
+      { property: "og:title", content: "Strecke – Hybrid Athlete" },
+      { property: "og:description", content: "Streckenprofil, Bestzeiten und Bestenliste." },
+      { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Strecke – Hybrid Athlete" },
+      { name: "twitter:description", content: "Streckenprofil, Bestzeiten und Bestenliste." },
     ],
   }),
   component: CourseDetail,

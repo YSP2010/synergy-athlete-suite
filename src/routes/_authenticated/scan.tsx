@@ -22,6 +22,19 @@ import {
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/scan")({
+  head: () => ({
+    meta: [
+      { title: "Food-Scanner – Hybrid Athlete" },
+      { name: "description", content: "Mahlzeit fotografieren und Kalorien sowie Makros per KI schätzen lassen." },
+      { property: "og:title", content: "Food-Scanner – Hybrid Athlete" },
+      { property: "og:description", content: "Mahlzeit fotografieren, Makros per KI schätzen." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/scan" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Food-Scanner – Hybrid Athlete" },
+      { name: "twitter:description", content: "Mahlzeit fotografieren, Makros per KI schätzen." },
+    ],
+  }),
   head: () => ({ meta: [{ title: "Food-Scanner – Hybrid Athlete" }] }),
   component: ScanPage,
 });
