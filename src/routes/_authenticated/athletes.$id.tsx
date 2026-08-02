@@ -366,7 +366,13 @@ function AthleteView() {
           <div className="text-sm text-muted-foreground">Kein Plan verfügbar.</div>
         )}
       </section>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-xl font-semibold">Leistungsanalyse</h2>
+        <AnalyticsView userId={id} readOnly />
+      </section>
     </div>
+
   );
 }
 
