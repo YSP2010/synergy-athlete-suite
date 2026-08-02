@@ -233,7 +233,13 @@ function LeaderboardSettings() {
   }, [profile]);
 
   const update = useMutation({
-    mutationFn: async (patch: Record<string, unknown> & { consentKind?: string; consentValue?: boolean }) => {
+    mutationFn: async (
+      patch: {
+        leaderboard_opt_in?: boolean;
+        leaderboard_share_health?: boolean;
+        leaderboard_display_name?: string | null;
+      } & { consentKind?: string; consentValue?: boolean },
+    ) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("no user");
       const { consentKind, consentValue, ...fields } = patch;
