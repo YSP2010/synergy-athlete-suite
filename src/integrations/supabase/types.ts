@@ -1837,9 +1837,12 @@ export type Database = {
           duration_min: number | null
           id: string
           intensity: Database["public"]["Enums"]["intensity_level"]
+          kickoff_at: string | null
           kind: Database["public"]["Enums"]["sport_kind"]
+          location: string | null
           match_hardness: Database["public"]["Enums"]["match_hardness"] | null
           notes: string | null
+          opponent: string | null
           status: Database["public"]["Enums"]["session_status"]
           updated_at: string
           user_id: string
@@ -1850,9 +1853,12 @@ export type Database = {
           duration_min?: number | null
           id?: string
           intensity?: Database["public"]["Enums"]["intensity_level"]
+          kickoff_at?: string | null
           kind?: Database["public"]["Enums"]["sport_kind"]
+          location?: string | null
           match_hardness?: Database["public"]["Enums"]["match_hardness"] | null
           notes?: string | null
+          opponent?: string | null
           status?: Database["public"]["Enums"]["session_status"]
           updated_at?: string
           user_id: string
@@ -1863,9 +1869,12 @@ export type Database = {
           duration_min?: number | null
           id?: string
           intensity?: Database["public"]["Enums"]["intensity_level"]
+          kickoff_at?: string | null
           kind?: Database["public"]["Enums"]["sport_kind"]
+          location?: string | null
           match_hardness?: Database["public"]["Enums"]["match_hardness"] | null
           notes?: string | null
+          opponent?: string | null
           status?: Database["public"]["Enums"]["session_status"]
           updated_at?: string
           user_id?: string
