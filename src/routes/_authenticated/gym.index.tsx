@@ -29,7 +29,6 @@ export const Route = createFileRoute("/_authenticated/gym/")({
       { name: "twitter:description", content: "Krafteinheiten mit Volumen, RPE und Übungsverlauf." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Gym-Log – Hybrid Athlete" }] }),
   component: GymListPage,
 });
 

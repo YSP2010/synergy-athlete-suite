@@ -39,7 +39,6 @@ export const Route = createFileRoute("/_authenticated/gym/$id")({
       { name: "twitter:description", content: "Sätze, Gewicht und RPE protokollieren." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Gym-Session – Hybrid Athlete" }] }),
   component: GymDetailPage,
 });
 

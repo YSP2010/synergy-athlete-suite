@@ -36,7 +36,6 @@ export const Route = createFileRoute("/_authenticated/journal")({
       { name: "twitter:description", content: "Reflexionen und Stimmung festhalten, durchsuchbar." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Tagebuch – Hybrid Athlete" }] }),
   component: JournalPage,
 });
 

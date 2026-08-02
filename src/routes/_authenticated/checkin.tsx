@@ -27,7 +27,6 @@ export const Route = createFileRoute("/_authenticated/checkin")({
       { name: "twitter:description", content: "Schlaf, Stress und Energie erfassen für deinen Recovery-Score." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Daily Check-in – Hybrid Athlete" }] }),
   component: CheckinPage,
 });
 

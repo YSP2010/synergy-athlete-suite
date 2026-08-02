@@ -35,7 +35,6 @@ export const Route = createFileRoute("/_authenticated/scan")({
       { name: "twitter:description", content: "Mahlzeit fotografieren, Makros per KI schätzen." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Food-Scanner – Hybrid Athlete" }] }),
   component: ScanPage,
 });
 

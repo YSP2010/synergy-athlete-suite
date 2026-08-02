@@ -19,7 +19,6 @@ export const Route = createFileRoute("/_authenticated/chat/")({
       { name: "twitter:description", content: "Team- und Direktchats an einem Ort." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Chats – Hybrid Athlete" }] }),
   component: ChatListPage,
 });
 

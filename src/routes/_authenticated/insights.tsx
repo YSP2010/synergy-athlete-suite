@@ -32,7 +32,6 @@ export const Route = createFileRoute("/_authenticated/insights")({
       { name: "twitter:description", content: "KI-Auswertung von Training, Schlaf und Ernährung." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Fortschritt – Hybrid Athlete" }] }),
   component: InsightsPage,
 });
 

@@ -30,7 +30,6 @@ export const Route = createFileRoute("/_authenticated/sport/")({
       { name: "twitter:description", content: "Spiele und Sporteinheiten im Verlauf." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Sport-Log – Hybrid Athlete" }] }),
   component: SportListPage,
 });
 

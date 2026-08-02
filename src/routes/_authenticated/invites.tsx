@@ -23,7 +23,6 @@ export const Route = createFileRoute("/_authenticated/invites")({
       { name: "twitter:description", content: "Team-Einladungen erstellen und verwalten." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Einladungen – Hybrid Athlete" }] }),
   component: InvitesPage,
 });
 

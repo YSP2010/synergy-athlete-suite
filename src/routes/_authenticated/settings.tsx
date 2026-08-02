@@ -41,7 +41,6 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { name: "twitter:description", content: "Profil, Ziele und Benachrichtigungen verwalten." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Einstellungen – Hybrid Athlete" }, { name: "robots", content: "noindex" }] }),
   component: SettingsPage,
 });
 

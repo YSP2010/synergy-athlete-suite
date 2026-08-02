@@ -22,7 +22,6 @@ export const Route = createFileRoute("/_authenticated/chat/$id")({
       { name: "twitter:description", content: "Trainer-Athlet-Chat in Echtzeit." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Chat – Hybrid Athlete" }] }),
   component: ChatRoom,
 });
 

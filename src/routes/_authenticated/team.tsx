@@ -60,7 +60,6 @@ export const Route = createFileRoute("/_authenticated/team")({
       { name: "twitter:description", content: "Readiness, Einladungen und Teamverwaltung für Trainer." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Teams – Hybrid Athlete" }] }),
   component: TeamPage,
 });
 

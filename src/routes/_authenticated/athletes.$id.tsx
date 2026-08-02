@@ -66,7 +66,6 @@ export const Route = createFileRoute("/_authenticated/athletes/$id")({
       { name: "twitter:description", content: "Trainer-Ansicht mit Readiness und Trainingsverlauf." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Athlet – Hybrid Athlete" }] }),
   component: AthleteView,
 });
 

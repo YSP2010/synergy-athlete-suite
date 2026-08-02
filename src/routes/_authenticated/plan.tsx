@@ -154,7 +154,6 @@ export const Route = createFileRoute("/_authenticated/plan")({
       { name: "twitter:description", content: "Dynamischer Plan aus Sport, Gym und Regeneration." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Wochenplan – Hybrid Athlete" }] }),
   component: PlanPage,
 });
 

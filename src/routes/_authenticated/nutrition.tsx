@@ -56,7 +56,6 @@ export const Route = createFileRoute("/_authenticated/nutrition")({
       { name: "twitter:description", content: "Mahlzeiten loggen, Makros an Trainingstage anpassen." },
     ],
   }),
-  head: () => ({ meta: [{ title: "Ernährung – Hybrid Athlete" }] }),
   component: NutritionPage,
 });
 
