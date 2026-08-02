@@ -280,8 +280,11 @@ export async function runJobBatch(db: DB, userId: string, jobId: string): Promis
         counters.duplicates += 1;
       } else if (error) {
         throw error;
-      } else if (outcome.status === "done") counters.imported += 1;
-      else if (outcome.status === "failed") counters.failed += 1;
+      } else if (outcome.status === "done" && outcome.activity) {
+        const stored = await storeActivity(db, userId, row.id, outcome.activity);
+        if (stored === "duplicate") counters.duplicates += 1;
+        else if (stored === "done") counters.imported += 1;
+      } else if (outcome.status === "failed") counters.failed += 1;
     } catch (e) {
       console.error("[import] file failed", row.id, e);
       await db
