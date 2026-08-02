@@ -123,11 +123,29 @@ export function NotificationSettings() {
               toast.error("Benachrichtigungen wurden im Browser blockiert.");
               return;
             }
-            new Notification("Synergy Athlete", {
-              body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
-              icon: "/pwa-192.png",
-            });
-            toast.success("Lokale Testnachricht ausgelöst");
+            const reg = await navigator.serviceWorker?.getRegistration();
+            if (reg) {
+              // Android/Chrome erlaubt nur Notifications über den Service Worker.
+              await reg.showNotification("Synergy Athlete", {
+                body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
+                icon: "/pwa-192.png",
+                badge: "/pwa-192.png",
+              });
+              toast.success("Lokale Testnachricht ausgelöst");
+              return;
+            }
+            try {
+              new Notification("Synergy Athlete", {
+                body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
+                icon: "/pwa-192.png",
+              });
+              toast.success("Lokale Testnachricht ausgelöst");
+            } catch {
+              toast.error(
+                "Testnachricht braucht die installierte bzw. veröffentlichte App – in der Vorschau ist der Service Worker deaktiviert.",
+              );
+            }
+
           } catch (e) {
             toast.error(humanError(e));
           } finally {
