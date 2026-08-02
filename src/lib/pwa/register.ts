@@ -30,16 +30,17 @@ async function unregisterOwn(): Promise<void> {
   );
 }
 
-export async function registerServiceWorker(): Promise<void> {
-  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return null;
   if (isBlockedContext()) {
     await unregisterOwn();
-    return;
+    return null;
   }
   try {
-    await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+    return await navigator.serviceWorker.register(SW_URL, { scope: "/" });
   } catch {
     // Kein harter Fehler: die App funktioniert auch ohne Offline-Unterstützung.
+    return null;
   }
 }
 
