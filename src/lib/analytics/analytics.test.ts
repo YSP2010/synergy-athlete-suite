@@ -27,7 +27,7 @@ describe("zones", () => {
   it("nutzt die Schwellen-HR bevorzugt", () => {
     const z = hrZones(190, 170);
     expect(z).toHaveLength(5);
-    expect(z[3]!.from).toBe(Math.round(170 * 0.94));
+    expect(z[3]!.from).toBe(170); // Zone 4 startet an der Schwelle
   });
   it("fällt auf maxHr zurück", () => {
     expect(hrZones(200)[0]!.from).toBe(100);
