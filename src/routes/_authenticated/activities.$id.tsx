@@ -310,3 +310,13 @@ function ChartCard({ title, children }: { title: string; children: React.ReactEl
     </div>
   );
 }
+
+/** Deutsche Bezeichnungen für Multisport-Segmente. */
+const SEGMENT_LABEL: Record<string, string> = {
+  swim: "Schwimmen",
+  t1: "Wechsel 1",
+  bike: "Radfahren",
+  t2: "Wechsel 2",
+  run: "Laufen",
+  other: "Sonstiges",
+};
