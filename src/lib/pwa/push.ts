@@ -65,8 +65,10 @@ export async function subscribeToPush(vapidKey: string): Promise<SubscriptionKey
 /** Meldet das Gerät ab und liefert den entfernten Endpunkt. */
 export async function unsubscribeFromPush(): Promise<string | null> {
   if (!("serviceWorker" in navigator)) return null;
-  const reg = await navigator.serviceWorker.ready;
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (!reg) return null;
   const sub = await reg.pushManager.getSubscription();
+
   if (!sub) return null;
   const endpoint = sub.endpoint;
   await sub.unsubscribe();
