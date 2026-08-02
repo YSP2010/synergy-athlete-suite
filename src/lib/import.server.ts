@@ -103,23 +103,54 @@ async function insertChildRow(
   relativePath: string,
   outcome: FileOutcome,
 ): Promise<"done" | "skipped" | "failed" | "duplicate"> {
-  const { error } = await db.from("import_files").insert({
-    job_id: jobId,
-    user_id: userId,
-    relative_path: relativePath,
-    file_type: outcome.fileType,
-    content_hash: outcome.contentHash,
-    status: outcome.status,
-    skip_reason: outcome.skipReason ?? null,
-    error: outcome.error ?? null,
-    processed_at: new Date().toISOString(),
-  });
+  const { data, error } = await db
+    .from("import_files")
+    .insert({
+      job_id: jobId,
+      user_id: userId,
+      relative_path: relativePath,
+      file_type: outcome.fileType,
+      content_hash: outcome.contentHash,
+      status: outcome.status,
+      skip_reason: outcome.skipReason ?? null,
+      error: outcome.error ?? null,
+      processed_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
   if (error) {
     // 23505 = unique_violation auf (user_id, content_hash) → schon importiert.
     if (error.code === "23505") return "duplicate";
     throw error;
   }
-  return outcome.status;
+  if (outcome.status !== "done" || !outcome.activity) return outcome.status;
+  return storeActivity(db, userId, data.id as string, outcome.activity);
+}
+
+/** Schreibt die Aktivität und spiegelt Duplikate/Routen in der Datei-Zeile. */
+async function storeActivity(
+  db: DB,
+  userId: string,
+  fileId: string,
+  activity: ParsedActivity,
+): Promise<"done" | "skipped" | "duplicate"> {
+  const { persistActivity } = await import("./activities.server");
+  const res = await persistActivity(db, userId, fileId, activity);
+  if (res.kind === "duplicate") {
+    await db
+      .from("import_files")
+      .update({ status: "skipped", skip_reason: `duplicate_${res.reason}` })
+      .eq("id", fileId);
+    return "duplicate";
+  }
+  if (res.kind === "route_only") {
+    await db
+      .from("import_files")
+      .update({ status: "skipped", skip_reason: "route_only" })
+      .eq("id", fileId);
+    return "skipped";
+  }
+  return "done";
 }
 
 interface Counters {
