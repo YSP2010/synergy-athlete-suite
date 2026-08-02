@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JoinTokenRouteImport } from './routes/join.$token'
+import { Route as GuidesSupplementsForHybridAthletesRouteImport } from './routes/guides.supplements-for-hybrid-athletes'
 import { Route as GuidesRunningAndLegDayRouteImport } from './routes/guides.running-and-leg-day'
 import { Route as GuidesNutritionForHybridAthletesRouteImport } from './routes/guides.nutrition-for-hybrid-athletes'
 import { Route as GuidesLegDayAndFootballRouteImport } from './routes/guides.leg-day-and-football'
@@ -80,6 +81,12 @@ const JoinTokenRoute = JoinTokenRouteImport.update({
   path: '/join/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesSupplementsForHybridAthletesRoute =
+  GuidesSupplementsForHybridAthletesRouteImport.update({
+    id: '/guides/supplements-for-hybrid-athletes',
+    path: '/guides/supplements-for-hybrid-athletes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesRunningAndLegDayRoute = GuidesRunningAndLegDayRouteImport.update({
   id: '/guides/running-and-leg-day',
   path: '/guides/running-and-leg-day',
@@ -325,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/guides/running-and-leg-day': typeof GuidesRunningAndLegDayRoute
+  '/guides/supplements-for-hybrid-athletes': typeof GuidesSupplementsForHybridAthletesRoute
   '/join/$token': typeof JoinTokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -372,6 +380,7 @@ export interface FileRoutesByTo {
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/guides/running-and-leg-day': typeof GuidesRunningAndLegDayRoute
+  '/guides/supplements-for-hybrid-athletes': typeof GuidesSupplementsForHybridAthletesRoute
   '/join/$token': typeof JoinTokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -421,6 +430,7 @@ export interface FileRoutesById {
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/guides/running-and-leg-day': typeof GuidesRunningAndLegDayRoute
+  '/guides/supplements-for-hybrid-athletes': typeof GuidesSupplementsForHybridAthletesRoute
   '/join/$token': typeof JoinTokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -470,6 +480,7 @@ export interface FileRouteTypes {
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
     | '/guides/running-and-leg-day'
+    | '/guides/supplements-for-hybrid-athletes'
     | '/join/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -517,6 +528,7 @@ export interface FileRouteTypes {
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
     | '/guides/running-and-leg-day'
+    | '/guides/supplements-for-hybrid-athletes'
     | '/join/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -565,6 +577,7 @@ export interface FileRouteTypes {
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
     | '/guides/running-and-leg-day'
+    | '/guides/supplements-for-hybrid-athletes'
     | '/join/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -595,6 +608,7 @@ export interface RootRouteChildren {
   GuidesLegDayAndFootballRoute: typeof GuidesLegDayAndFootballRoute
   GuidesNutritionForHybridAthletesRoute: typeof GuidesNutritionForHybridAthletesRoute
   GuidesRunningAndLegDayRoute: typeof GuidesRunningAndLegDayRoute
+  GuidesSupplementsForHybridAthletesRoute: typeof GuidesSupplementsForHybridAthletesRoute
   JoinTokenRoute: typeof JoinTokenRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -635,6 +649,13 @@ declare module '@tanstack/react-router' {
       path: '/join/$token'
       fullPath: '/join/$token'
       preLoaderRoute: typeof JoinTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/supplements-for-hybrid-athletes': {
+      id: '/guides/supplements-for-hybrid-athletes'
+      path: '/guides/supplements-for-hybrid-athletes'
+      fullPath: '/guides/supplements-for-hybrid-athletes'
+      preLoaderRoute: typeof GuidesSupplementsForHybridAthletesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/running-and-leg-day': {
@@ -1013,6 +1034,8 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesLegDayAndFootballRoute: GuidesLegDayAndFootballRoute,
   GuidesNutritionForHybridAthletesRoute: GuidesNutritionForHybridAthletesRoute,
   GuidesRunningAndLegDayRoute: GuidesRunningAndLegDayRoute,
+  GuidesSupplementsForHybridAthletesRoute:
+    GuidesSupplementsForHybridAthletesRoute,
   JoinTokenRoute: JoinTokenRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
