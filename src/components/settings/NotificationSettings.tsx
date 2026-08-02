@@ -106,7 +106,7 @@ export function NotificationSettings() {
           onClick={async () => {
             setBusy(true);
             try {
-              const res = await test({ data: {} });
+              const res = await test();
               toast[res.ok ? "success" : "error"](
                 res.ok ? "Testnachricht gesendet" : "Kein aktives Gerät gefunden",
               );
