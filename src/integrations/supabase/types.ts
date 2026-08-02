@@ -14,6 +14,228 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          aerobic_te: number | null
+          anaerobic_te: number | null
+          avg_cadence: number | null
+          avg_ground_contact_ms: number | null
+          avg_hr: number | null
+          avg_power_w: number | null
+          avg_speed_mps: number | null
+          avg_stride_length_m: number | null
+          avg_temperature_c: number | null
+          avg_vertical_oscillation_cm: number | null
+          avg_vertical_ratio: number | null
+          calories: number | null
+          created_at: string
+          device_activity_key: string | null
+          device_manufacturer: string | null
+          device_name: string | null
+          distance_m: number | null
+          duration_s: number | null
+          elevation_gain_m: number | null
+          elevation_loss_m: number | null
+          gct_balance_pct: number | null
+          id: string
+          import_file_id: string | null
+          max_cadence: number | null
+          max_hr: number | null
+          max_power_w: number | null
+          max_speed_mps: number | null
+          moving_duration_s: number | null
+          name: string | null
+          normalized_power_w: number | null
+          route_only: boolean
+          sport: string
+          started_at: string | null
+          timezone_offset_min: number | null
+          training_load: number | null
+          updated_at: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          aerobic_te?: number | null
+          anaerobic_te?: number | null
+          avg_cadence?: number | null
+          avg_ground_contact_ms?: number | null
+          avg_hr?: number | null
+          avg_power_w?: number | null
+          avg_speed_mps?: number | null
+          avg_stride_length_m?: number | null
+          avg_temperature_c?: number | null
+          avg_vertical_oscillation_cm?: number | null
+          avg_vertical_ratio?: number | null
+          calories?: number | null
+          created_at?: string
+          device_activity_key?: string | null
+          device_manufacturer?: string | null
+          device_name?: string | null
+          distance_m?: number | null
+          duration_s?: number | null
+          elevation_gain_m?: number | null
+          elevation_loss_m?: number | null
+          gct_balance_pct?: number | null
+          id?: string
+          import_file_id?: string | null
+          max_cadence?: number | null
+          max_hr?: number | null
+          max_power_w?: number | null
+          max_speed_mps?: number | null
+          moving_duration_s?: number | null
+          name?: string | null
+          normalized_power_w?: number | null
+          route_only?: boolean
+          sport?: string
+          started_at?: string | null
+          timezone_offset_min?: number | null
+          training_load?: number | null
+          updated_at?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          aerobic_te?: number | null
+          anaerobic_te?: number | null
+          avg_cadence?: number | null
+          avg_ground_contact_ms?: number | null
+          avg_hr?: number | null
+          avg_power_w?: number | null
+          avg_speed_mps?: number | null
+          avg_stride_length_m?: number | null
+          avg_temperature_c?: number | null
+          avg_vertical_oscillation_cm?: number | null
+          avg_vertical_ratio?: number | null
+          calories?: number | null
+          created_at?: string
+          device_activity_key?: string | null
+          device_manufacturer?: string | null
+          device_name?: string | null
+          distance_m?: number | null
+          duration_s?: number | null
+          elevation_gain_m?: number | null
+          elevation_loss_m?: number | null
+          gct_balance_pct?: number | null
+          id?: string
+          import_file_id?: string | null
+          max_cadence?: number | null
+          max_hr?: number | null
+          max_power_w?: number | null
+          max_speed_mps?: number | null
+          moving_duration_s?: number | null
+          name?: string | null
+          normalized_power_w?: number | null
+          route_only?: boolean
+          sport?: string
+          started_at?: string | null
+          timezone_offset_min?: number | null
+          training_load?: number | null
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_import_file_id_fkey"
+            columns: ["import_file_id"]
+            isOneToOne: false
+            referencedRelation: "import_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_laps: {
+        Row: {
+          activity_id: string
+          avg_cadence: number | null
+          avg_hr: number | null
+          avg_power_w: number | null
+          avg_speed_mps: number | null
+          created_at: string
+          distance_m: number | null
+          duration_s: number | null
+          elevation_gain_m: number | null
+          id: string
+          lap_index: number
+          sport: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          avg_cadence?: number | null
+          avg_hr?: number | null
+          avg_power_w?: number | null
+          avg_speed_mps?: number | null
+          created_at?: string
+          distance_m?: number | null
+          duration_s?: number | null
+          elevation_gain_m?: number | null
+          id?: string
+          lap_index: number
+          sport?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          avg_cadence?: number | null
+          avg_hr?: number | null
+          avg_power_w?: number | null
+          avg_speed_mps?: number | null
+          created_at?: string
+          distance_m?: number | null
+          duration_s?: number | null
+          elevation_gain_m?: number | null
+          id?: string
+          lap_index?: number
+          sport?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_laps_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_tracks: {
+        Row: {
+          activity_id: string
+          bounds: Json | null
+          created_at: string
+          point_count: number
+          points: Json
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          bounds?: Json | null
+          created_at?: string
+          point_count?: number
+          points?: Json
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          bounds?: Json | null
+          created_at?: string
+          point_count?: number
+          points?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_tracks_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: true
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           chat_id: string
@@ -117,6 +339,131 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_efforts: {
+        Row: {
+          activity_id: string
+          avg_hr: number | null
+          avg_speed_mps: number | null
+          course_id: string
+          created_at: string
+          distance_m: number | null
+          duration_s: number
+          id: string
+          match_score: number
+          started_at: string | null
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          activity_id: string
+          avg_hr?: number | null
+          avg_speed_mps?: number | null
+          course_id: string
+          created_at?: string
+          distance_m?: number | null
+          duration_s: number
+          id?: string
+          match_score?: number
+          started_at?: string | null
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          activity_id?: string
+          avg_hr?: number | null
+          avg_speed_mps?: number | null
+          course_id?: string
+          created_at?: string
+          distance_m?: number | null
+          duration_s?: number
+          id?: string
+          match_score?: number
+          started_at?: string | null
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_efforts_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_efforts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          created_at: string
+          description: string | null
+          distance_m: number
+          elevation_gain_m: number | null
+          end_lat: number | null
+          end_lng: number | null
+          geometry: Json
+          id: string
+          is_public: boolean
+          name: string
+          source_activity_id: string | null
+          sport: string
+          start_lat: number | null
+          start_lng: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          distance_m?: number
+          elevation_gain_m?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          geometry?: Json
+          id?: string
+          is_public?: boolean
+          name: string
+          source_activity_id?: string | null
+          sport?: string
+          start_lat?: number | null
+          start_lng?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          distance_m?: number
+          elevation_gain_m?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          geometry?: Json
+          id?: string
+          is_public?: boolean
+          name?: string
+          source_activity_id?: string | null
+          sport?: string
+          start_lat?: number | null
+          start_lng?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_source_activity_id_fkey"
+            columns: ["source_activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
             referencedColumns: ["id"]
           },
         ]
