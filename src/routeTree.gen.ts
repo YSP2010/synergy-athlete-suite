@@ -39,6 +39,7 @@ import { Route as AuthenticatedSportIdRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedGymIdRouteImport } from './routes/_authenticated/gym.$id'
 import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
 import { Route as AuthenticatedAthletesIdRouteImport } from './routes/_authenticated/athletes.$id'
+import { Route as AuthenticatedActivitiesIdRouteImport } from './routes/_authenticated/activities.$id'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
@@ -196,6 +197,12 @@ const AuthenticatedAthletesIdRoute = AuthenticatedAthletesIdRouteImport.update({
   path: '/athletes/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedActivitiesIdRoute =
+  AuthenticatedActivitiesIdRouteImport.update({
+    id: '/activities/$id',
+    path: '/activities/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -232,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/activities/$id': typeof AuthenticatedActivitiesIdRoute
   '/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
@@ -265,6 +273,7 @@ export interface FileRoutesByTo {
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/activities/$id': typeof AuthenticatedActivitiesIdRoute
   '/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
@@ -300,6 +309,7 @@ export interface FileRoutesById {
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/activities/$id': typeof AuthenticatedActivitiesIdRoute
   '/_authenticated/athletes/$id': typeof AuthenticatedAthletesIdRoute
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/gym/$id': typeof AuthenticatedGymIdRoute
@@ -335,6 +345,7 @@ export interface FileRouteTypes {
     | '/guides/nutrition-for-hybrid-athletes'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/activities/$id'
     | '/athletes/$id'
     | '/chat/$id'
     | '/gym/$id'
@@ -368,6 +379,7 @@ export interface FileRouteTypes {
     | '/guides/nutrition-for-hybrid-athletes'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/activities/$id'
     | '/athletes/$id'
     | '/chat/$id'
     | '/gym/$id'
@@ -402,6 +414,7 @@ export interface FileRouteTypes {
     | '/guides/nutrition-for-hybrid-athletes'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/activities/$id'
     | '/_authenticated/athletes/$id'
     | '/_authenticated/chat/$id'
     | '/_authenticated/gym/$id'
@@ -639,6 +652,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAthletesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/activities/$id': {
+      id: '/_authenticated/activities/$id'
+      path: '/activities/$id'
+      fullPath: '/activities/$id'
+      preLoaderRoute: typeof AuthenticatedActivitiesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -669,6 +689,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedActivitiesIdRoute: typeof AuthenticatedActivitiesIdRoute
   AuthenticatedAthletesIdRoute: typeof AuthenticatedAthletesIdRoute
   AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
   AuthenticatedGymIdRoute: typeof AuthenticatedGymIdRoute
@@ -692,6 +713,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedActivitiesIdRoute: AuthenticatedActivitiesIdRoute,
   AuthenticatedAthletesIdRoute: AuthenticatedAthletesIdRoute,
   AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
   AuthenticatedGymIdRoute: AuthenticatedGymIdRoute,
