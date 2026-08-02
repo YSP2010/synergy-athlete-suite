@@ -596,6 +596,51 @@ export type Database = {
           },
         ]
       }
+      hrv_logs: {
+        Row: {
+          baseline_high_ms: number | null
+          baseline_low_ms: number | null
+          created_at: string
+          date: string
+          id: string
+          last_night_5min_high_ms: number | null
+          last_night_avg_ms: number | null
+          source: Database["public"]["Enums"]["activity_source"]
+          status: string | null
+          updated_at: string
+          user_id: string
+          weekly_avg_ms: number | null
+        }
+        Insert: {
+          baseline_high_ms?: number | null
+          baseline_low_ms?: number | null
+          created_at?: string
+          date: string
+          id?: string
+          last_night_5min_high_ms?: number | null
+          last_night_avg_ms?: number | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          status?: string | null
+          updated_at?: string
+          user_id: string
+          weekly_avg_ms?: number | null
+        }
+        Update: {
+          baseline_high_ms?: number | null
+          baseline_low_ms?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          last_night_5min_high_ms?: number | null
+          last_night_avg_ms?: number | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+          weekly_avg_ms?: number | null
+        }
+        Relationships: []
+      }
       import_files: {
         Row: {
           content_hash: string
@@ -787,6 +832,53 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_records: {
+        Row: {
+          achieved_at: string | null
+          activity_id: string | null
+          created_at: string
+          id: string
+          metric: string
+          sport: string
+          unit: string
+          updated_at: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          achieved_at?: string | null
+          activity_id?: string | null
+          created_at?: string
+          id?: string
+          metric: string
+          sport: string
+          unit: string
+          updated_at?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          achieved_at?: string | null
+          activity_id?: string | null
+          created_at?: string
+          id?: string
+          metric?: string
+          sport?: string
+          unit?: string
+          updated_at?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_records_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           allergies: string[] | null
@@ -883,6 +975,75 @@ export type Database = {
         }
         Relationships: []
       }
+      sleep_logs: {
+        Row: {
+          avg_respiration: number | null
+          avg_sleep_hr: number | null
+          avg_sleep_hrv_ms: number | null
+          avg_spo2: number | null
+          awake_s: number | null
+          created_at: string
+          date: string
+          deep_s: number | null
+          duration_s: number | null
+          id: string
+          light_s: number | null
+          nap: boolean
+          rem_s: number | null
+          restlessness: number | null
+          sleep_end: string | null
+          sleep_score: number | null
+          sleep_start: string | null
+          source: Database["public"]["Enums"]["activity_source"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avg_respiration?: number | null
+          avg_sleep_hr?: number | null
+          avg_sleep_hrv_ms?: number | null
+          avg_spo2?: number | null
+          awake_s?: number | null
+          created_at?: string
+          date: string
+          deep_s?: number | null
+          duration_s?: number | null
+          id?: string
+          light_s?: number | null
+          nap?: boolean
+          rem_s?: number | null
+          restlessness?: number | null
+          sleep_end?: string | null
+          sleep_score?: number | null
+          sleep_start?: string | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avg_respiration?: number | null
+          avg_sleep_hr?: number | null
+          avg_sleep_hrv_ms?: number | null
+          avg_spo2?: number | null
+          awake_s?: number | null
+          created_at?: string
+          date?: string
+          deep_s?: number | null
+          duration_s?: number | null
+          id?: string
+          light_s?: number | null
+          nap?: boolean
+          rem_s?: number | null
+          restlessness?: number | null
+          sleep_end?: string | null
+          sleep_score?: number | null
+          sleep_start?: string | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           id: string
@@ -963,6 +1124,66 @@ export type Database = {
           },
         ]
       }
+      user_metrics: {
+        Row: {
+          acute_load: number | null
+          chronic_load: number | null
+          created_at: string
+          date: string
+          fitness_age: number | null
+          ftp_w: number | null
+          id: string
+          lactate_threshold_hr: number | null
+          lactate_threshold_speed_mps: number | null
+          load_ratio: number | null
+          source: Database["public"]["Enums"]["activity_source"]
+          training_readiness: number | null
+          training_status: string | null
+          updated_at: string
+          user_id: string
+          vo2max_cycling: number | null
+          vo2max_running: number | null
+        }
+        Insert: {
+          acute_load?: number | null
+          chronic_load?: number | null
+          created_at?: string
+          date: string
+          fitness_age?: number | null
+          ftp_w?: number | null
+          id?: string
+          lactate_threshold_hr?: number | null
+          lactate_threshold_speed_mps?: number | null
+          load_ratio?: number | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          training_readiness?: number | null
+          training_status?: string | null
+          updated_at?: string
+          user_id: string
+          vo2max_cycling?: number | null
+          vo2max_running?: number | null
+        }
+        Update: {
+          acute_load?: number | null
+          chronic_load?: number | null
+          created_at?: string
+          date?: string
+          fitness_age?: number | null
+          ftp_w?: number | null
+          id?: string
+          lactate_threshold_hr?: number | null
+          lactate_threshold_speed_mps?: number | null
+          load_ratio?: number | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          training_readiness?: number | null
+          training_status?: string | null
+          updated_at?: string
+          user_id?: string
+          vo2max_cycling?: number | null
+          vo2max_running?: number | null
+        }
+        Relationships: []
+      }
       weekly_planner: {
         Row: {
           created_at: string
@@ -990,6 +1211,90 @@ export type Database = {
           updated_at?: string
           user_id?: string
           week_start?: string
+        }
+        Relationships: []
+      }
+      wellness_daily: {
+        Row: {
+          active_kcal: number | null
+          avg_respiration: number | null
+          avg_spo2: number | null
+          avg_stress: number | null
+          bmr_kcal: number | null
+          body_battery_end: number | null
+          body_battery_max: number | null
+          body_battery_min: number | null
+          body_battery_start: number | null
+          created_at: string
+          date: string
+          distance_m: number | null
+          floors_climbed: number | null
+          id: string
+          intensity_minutes_moderate: number | null
+          intensity_minutes_vigorous: number | null
+          max_hr: number | null
+          max_stress: number | null
+          min_hr: number | null
+          resting_hr: number | null
+          skin_temp_deviation_c: number | null
+          source: Database["public"]["Enums"]["activity_source"]
+          steps: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_kcal?: number | null
+          avg_respiration?: number | null
+          avg_spo2?: number | null
+          avg_stress?: number | null
+          bmr_kcal?: number | null
+          body_battery_end?: number | null
+          body_battery_max?: number | null
+          body_battery_min?: number | null
+          body_battery_start?: number | null
+          created_at?: string
+          date: string
+          distance_m?: number | null
+          floors_climbed?: number | null
+          id?: string
+          intensity_minutes_moderate?: number | null
+          intensity_minutes_vigorous?: number | null
+          max_hr?: number | null
+          max_stress?: number | null
+          min_hr?: number | null
+          resting_hr?: number | null
+          skin_temp_deviation_c?: number | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          steps?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_kcal?: number | null
+          avg_respiration?: number | null
+          avg_spo2?: number | null
+          avg_stress?: number | null
+          bmr_kcal?: number | null
+          body_battery_end?: number | null
+          body_battery_max?: number | null
+          body_battery_min?: number | null
+          body_battery_start?: number | null
+          created_at?: string
+          date?: string
+          distance_m?: number | null
+          floors_climbed?: number | null
+          id?: string
+          intensity_minutes_moderate?: number | null
+          intensity_minutes_vigorous?: number | null
+          max_hr?: number | null
+          max_stress?: number | null
+          min_hr?: number | null
+          resting_hr?: number | null
+          skin_temp_deviation_c?: number | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          steps?: number | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1113,6 +1418,7 @@ export type Database = {
       }
     }
     Enums: {
+      activity_source: "file" | "garmin" | "manual"
       chat_type: "direct" | "team"
       goal_type: "muscle_gain" | "maintain" | "recomp" | "performance"
       gym_session_type:
@@ -1261,6 +1567,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_source: ["file", "garmin", "manual"],
       chat_type: ["direct", "team"],
       goal_type: ["muscle_gain", "maintain", "recomp", "performance"],
       gym_session_type: [
