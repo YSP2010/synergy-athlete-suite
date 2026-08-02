@@ -47,16 +47,22 @@ function ActivityDetail() {
   const { data, isLoading } = useQuery({
     queryKey: ["activity", id],
     queryFn: async () => {
-      const [act, track, laps] = await Promise.all([
+      const [act, track, laps, segs] = await Promise.all([
         supabase.from("activities").select("*").eq("id", id).maybeSingle(),
         supabase.from("activity_tracks").select("points, bounds").eq("activity_id", id).maybeSingle(),
         supabase.from("activity_laps").select("*").eq("activity_id", id).order("lap_index"),
+        supabase
+          .from("multisport_segments")
+          .select("*")
+          .eq("activity_id", id)
+          .order("segment_index"),
       ]);
       if (act.error) throw act.error;
       return {
         activity: act.data,
         points: ((track.data?.points as unknown as TrackPoint[]) ?? []),
         laps: laps.data ?? [],
+        segments: segs.data ?? [],
       };
     },
   });
