@@ -125,7 +125,7 @@ export function NotificationSettings() {
             }
             new Notification("Synergy Athlete", {
               body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
-              icon: "/icons/icon-192.png",
+              icon: "/pwa-192.png",
             });
             toast.success("Lokale Testnachricht ausgelöst");
           } catch (e) {
