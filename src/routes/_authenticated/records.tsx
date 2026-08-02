@@ -23,6 +23,26 @@ export const Route = createFileRoute("/_authenticated/records")({
   component: RecordsPage,
 });
 
+const METRIC_LABELS: Record<string, string> = {
+  fastest_1k: "Schnellster 1 km",
+  fastest_5k: "Schnellste 5 km",
+  fastest_10k: "Schnellste 10 km",
+  fastest_hm: "Schnellster Halbmarathon",
+  fastest_marathon: "Schnellster Marathon",
+  fastest_100m: "Schnellste 100 m",
+  fastest_400m: "Schnellste 400 m",
+  longest_distance: "Längste Distanz",
+  longest_duration: "Längste Dauer",
+  most_elevation: "Meiste Höhenmeter",
+  max_power: "Höchste Leistung",
+  max_speed: "Höchstes Tempo",
+};
+
+/** Klarname für eine Rekord-Kennzahl. */
+function metricLabel(metric: string): string {
+  return METRIC_LABELS[metric] ?? metric.replace(/_/g, " ");
+}
+
 function fmtValue(value: number, unit: string): string {
   if (unit === "s") {
     const h = Math.floor(value / 3600);
@@ -42,7 +62,7 @@ function RecordsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("personal_records")
-        .select("id, sport, metric, label, value, unit, activity_id, achieved_at")
+        .select("id, sport, metric, value, unit, activity_id, achieved_at")
         .order("sport", { ascending: true });
       if (error) throw error;
       return data;
@@ -91,7 +111,7 @@ function RecordsPage() {
                 <Card key={r.id}>
                   <CardContent className="space-y-1 p-4">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-muted-foreground">{r.label}</span>
+                      <span className="text-xs text-muted-foreground">{metricLabel(r.metric)}</span>
                       <Badge variant="outline" className="shrink-0">
                         <Trophy className="mr-1 h-3 w-3" />
                         PR
