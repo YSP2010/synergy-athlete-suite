@@ -253,7 +253,7 @@ function LeaderboardSettings() {
           version: "v1",
         });
       }
-      if (fields["leaderboard_opt_in"] === true || consentValue === true) {
+      if (fields.leaderboard_opt_in === true || consentValue === true) {
         await recompute({ data: undefined });
       }
     },
