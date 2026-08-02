@@ -22,6 +22,7 @@ import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/t
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
 import { Route as AuthenticatedRecordsRouteImport } from './routes/_authenticated/records'
+import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticated/privacy'
 import { Route as AuthenticatedPlanRouteImport } from './routes/_authenticated/plan'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNutritionRouteImport } from './routes/_authenticated/nutrition'
@@ -116,6 +117,11 @@ const AuthenticatedScanRoute = AuthenticatedScanRouteImport.update({
 const AuthenticatedRecordsRoute = AuthenticatedRecordsRouteImport.update({
   id: '/records',
   path: '/records',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPrivacyRoute = AuthenticatedPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPlanRoute = AuthenticatedPlanRouteImport.update({
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
+  '/privacy': typeof AuthenticatedPrivacyRoute
   '/records': typeof AuthenticatedRecordsRoute
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -332,6 +339,7 @@ export interface FileRoutesByTo {
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
+  '/privacy': typeof AuthenticatedPrivacyRoute
   '/records': typeof AuthenticatedRecordsRoute
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -377,6 +385,7 @@ export interface FileRoutesById {
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/plan': typeof AuthenticatedPlanRoute
+  '/_authenticated/privacy': typeof AuthenticatedPrivacyRoute
   '/_authenticated/records': typeof AuthenticatedRecordsRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -422,6 +431,7 @@ export interface FileRouteTypes {
     | '/nutrition'
     | '/onboarding'
     | '/plan'
+    | '/privacy'
     | '/records'
     | '/scan'
     | '/settings'
@@ -465,6 +475,7 @@ export interface FileRouteTypes {
     | '/nutrition'
     | '/onboarding'
     | '/plan'
+    | '/privacy'
     | '/records'
     | '/scan'
     | '/settings'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/_authenticated/nutrition'
     | '/_authenticated/onboarding'
     | '/_authenticated/plan'
+    | '/_authenticated/privacy'
     | '/_authenticated/records'
     | '/_authenticated/scan'
     | '/_authenticated/settings'
@@ -641,6 +653,13 @@ declare module '@tanstack/react-router' {
       path: '/records'
       fullPath: '/records'
       preLoaderRoute: typeof AuthenticatedRecordsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/privacy': {
+      id: '/_authenticated/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof AuthenticatedPrivacyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/plan': {
@@ -862,6 +881,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlanRoute: typeof AuthenticatedPlanRoute
+  AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRoute
   AuthenticatedRecordsRoute: typeof AuthenticatedRecordsRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -895,6 +915,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlanRoute: AuthenticatedPlanRoute,
+  AuthenticatedPrivacyRoute: AuthenticatedPrivacyRoute,
   AuthenticatedRecordsRoute: AuthenticatedRecordsRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
