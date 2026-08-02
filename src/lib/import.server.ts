@@ -5,6 +5,7 @@ import { unzipRecursive } from "./import/zip";
 import { parseGpx, parseTcx } from "./import/gpx";
 import { parseFitMessages, mapFitSport } from "./import/fit";
 import { fingerprintOf } from "./import/duplicates";
+import { parseWellnessJson, bundleSize, type WellnessBundle } from "./import/wellness";
 import type { ImportFileType, ParsedActivity } from "./import/types";
 
 export const IMPORT_BUCKET = "imports";
@@ -64,12 +65,26 @@ interface FileOutcome {
   skipReason?: string;
   error?: string;
   activity?: ParsedActivity;
+  /** Tageswerte aus den JSON-Dateien des Konto-Exports (Etappe 3). */
+  wellness?: WellnessBundle;
 }
 
 /** Verarbeitet einen einzelnen Datei-Inhalt (ohne DB-Zugriff) – gut testbar. */
 export async function evaluateFile(bytes: Uint8Array): Promise<FileOutcome> {
   const fileType = sniffFileType(bytes);
   const contentHash = await sha256Hex(bytes);
+  if (fileType === "json") {
+    try {
+      const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+      const wellness = parseWellnessJson(text);
+      if (bundleSize(wellness) === 0) {
+        return { status: "skipped", fileType, contentHash, skipReason: "no_wellness_data" };
+      }
+      return { status: "done", fileType, contentHash, wellness };
+    } catch (e) {
+      return { status: "failed", fileType, contentHash, error: (e as Error).message.slice(0, 300) };
+    }
+  }
   if (!PARSEABLE.includes(fileType)) {
     return { status: "skipped", fileType, contentHash, skipReason: `unsupported_${fileType}` };
   }
@@ -123,8 +138,18 @@ async function insertChildRow(
     if (error.code === "23505") return "duplicate";
     throw error;
   }
+  if (outcome.status === "done" && outcome.wellness) {
+    await storeWellness(db, userId, outcome.wellness);
+    return "done";
+  }
   if (outcome.status !== "done" || !outcome.activity) return outcome.status;
   return storeActivity(db, userId, data.id as string, outcome.activity);
+}
+
+/** Schreibt Wellness-Tageswerte (Upsert je Tag). */
+async function storeWellness(db: DB, userId: string, bundle: WellnessBundle): Promise<void> {
+  const { persistWellness } = await import("./wellness.server");
+  await persistWellness(db, userId, bundle);
 }
 
 /** Schreibt die Aktivität und spiegelt Duplikate/Routen in der Datei-Zeile. */
@@ -280,6 +305,8 @@ export async function runJobBatch(db: DB, userId: string, jobId: string): Promis
         counters.duplicates += 1;
       } else if (error) {
         throw error;
+      } else if (outcome.status === "done" && outcome.wellness) {
+        await storeWellness(db, userId, outcome.wellness);
       } else if (outcome.status === "done" && outcome.activity) {
         const stored = await storeActivity(db, userId, row.id, outcome.activity);
         if (stored === "duplicate") counters.duplicates += 1;
@@ -313,6 +340,15 @@ export async function runJobBatch(db: DB, userId: string, jobId: string): Promis
   const duplicateFiles = (fresh?.duplicate_files ?? 0) + counters.duplicates;
   const failedFiles = (fresh?.failed_files ?? 0) + counters.failed;
   const done = (remaining ?? 0) === 0;
+
+  if (done && importedActivities > 0) {
+    try {
+      const { refreshPersonalRecords } = await import("./records.server");
+      await refreshPersonalRecords(db, userId);
+    } catch (e) {
+      console.error("[import] records refresh failed", e);
+    }
+  }
 
   await db
     .from("import_jobs")
