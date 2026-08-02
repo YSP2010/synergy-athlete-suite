@@ -137,24 +137,67 @@ export interface RecoveryResult {
   };
 }
 
-/** Berechnet Recovery aus letztem daily_stat + Trainings-Load der letzten 72h. */
+/**
+ * Gerätedaten (Garmin) für den jeweiligen Tag. Alle Felder optional – fehlt
+ * ein Wert, greift der bisherige manuelle Fallback.
+ */
+export interface DeviceRecovery {
+  sleepScore?: number | null;
+  sleepHours?: number | null;
+  hrvStatus?: string | null;
+  bodyBattery?: number | null;
+  trainingReadiness?: number | null;
+}
+
+/** HRV-Status → 0..1 */
+function hrvStatusScore(status?: string | null): number | null {
+  if (!status) return null;
+  const s = status.toLowerCase();
+  if (s.includes("balanced")) return 1;
+  if (s.includes("unbalanced")) return 0.5;
+  if (s.includes("low")) return 0.3;
+  if (s.includes("poor")) return 0.1;
+  return null;
+}
+
+/**
+ * Berechnet Recovery aus letztem daily_stat + Trainings-Load der letzten 72h.
+ * Liegen Gerätedaten vor (Schlaf-Score, HRV-Status, Body Battery, Training
+ * Readiness), werden diese bevorzugt; sonst bleibt das Verhalten unverändert.
+ */
 export function calcRecovery(
   stat: DailyStat | null,
   recentSport: SportSession[],
   recentGym: GymSession[],
+  device: DeviceRecovery | null = null,
 ): RecoveryResult {
-  // Schlaf-Stunden 0..10 → normalisiert. Ideal 8h.
-  const h = stat?.sleep_hours ?? 7;
+  // Schlaf-Stunden 0..10 → normalisiert. Ideal 8h. Gerätedaten haben Vorrang.
+  const h = device?.sleepHours ?? stat?.sleep_hours ?? 7;
   const sleepScore = Math.max(0, Math.min(1, 1 - Math.abs(h - 8) / 4));
 
   const q = stat?.sleep_quality ?? 3;
-  const qScore = (q - 1) / 4;
+  const deviceQuality =
+    device?.sleepScore != null ? Math.max(0, Math.min(1, device.sleepScore / 100)) : null;
+  const qScore = deviceQuality ?? (q - 1) / 4;
 
   const sor = stat?.soreness ?? 2; // 1 = kein, 5 = extrem
   const sorScore = 1 - (sor - 1) / 4;
 
   const str = stat?.stress ?? 2;
-  const strScore = 1 - (str - 1) / 4;
+  const manualStress = 1 - (str - 1) / 4;
+  const hrvScore = hrvStatusScore(device?.hrvStatus);
+  const batteryScore =
+    device?.bodyBattery != null ? Math.max(0, Math.min(1, device.bodyBattery / 100)) : null;
+  const readinessScore =
+    device?.trainingReadiness != null
+      ? Math.max(0, Math.min(1, device.trainingReadiness / 100))
+      : null;
+  const deviceStress = [hrvScore, batteryScore, readinessScore].filter(
+    (v): v is number => v !== null,
+  );
+  const strScore = deviceStress.length
+    ? deviceStress.reduce((a, b) => a + b, 0) / deviceStress.length
+    : manualStress;
 
   // Load: sum(intensitätspunkte) der letzten 72h
   const points =
@@ -350,6 +393,7 @@ export function generateWeekPlan(
   weekStart: Date,
   matchHardness: Record<number, MatchHardness> = {},
   recoveryScore: number | null = null,
+  loadSignals: LoadSignals | null = null,
 ): PlannedSlot[] {
   const slots: PlannedSlot[] = [];
   const gymRotation: GymType[] = ["push", "pull", "legs"];
@@ -438,8 +482,8 @@ export function generateWeekPlan(
     }
   }
 
-  // 4) Recovery niedrig → erste harte Gym-Einheit → Active Recovery
-  if (recoveryScore !== null && recoveryScore < 50) {
+  // 4) Recovery niedrig oder Belastungssignale kritisch → Entlastung
+  if ((recoveryScore !== null && recoveryScore < 50) || needsDeload(loadSignals)) {
     const idx = slots.findIndex(
       (s) =>
         s.kind === "gym" && s.sessionType !== undefined && HARD_GYM_TYPES.includes(s.sessionType),
@@ -450,13 +494,41 @@ export function generateWeekPlan(
         label: "Active Recovery",
         kind: "recovery",
         detail: "Mobility, Stretching, Zone-1 20 min",
-        warning: "Recovery-Score niedrig – harte Einheit ersetzt",
+        warning: needsDeload(loadSignals)
+          ? deloadReason(loadSignals)
+          : "Recovery-Score niedrig – harte Einheit ersetzt",
         sessionType: "mobility",
       };
     }
   }
 
   return slots;
+}
+
+/** Belastungssignale aus /analytics (TSB = Form, ACWR = acute:chronic). */
+export interface LoadSignals {
+  tsb: number | null;
+  acwr: number | null;
+}
+
+/** Entlastung empfohlen bei TSB < −30 oder ACWR > 1.5. */
+export function needsDeload(signals: LoadSignals | null | undefined): boolean {
+  if (!signals) return false;
+  if (signals.tsb !== null && signals.tsb < -30) return true;
+  if (signals.acwr !== null && signals.acwr > 1.5) return true;
+  return false;
+}
+
+/** Klartext-Begründung für die Entlastung. */
+export function deloadReason(signals: LoadSignals | null | undefined): string {
+  if (!signals) return "Entlastung empfohlen";
+  if (signals.acwr !== null && signals.acwr > 1.5) {
+    return `Belastungssprung (ACWR ${signals.acwr.toFixed(2)}) – Entlastung empfohlen`;
+  }
+  if (signals.tsb !== null && signals.tsb < -30) {
+    return `Hohe Ermüdung (Form ${Math.round(signals.tsb)}) – Entlastung empfohlen`;
+  }
+  return "Entlastung empfohlen";
 }
 
 function labelForGym(t: GymType): string {

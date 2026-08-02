@@ -13,6 +13,8 @@ Disallow: /insights
 Disallow: /import
 Disallow: /activities
 Disallow: /courses
+Disallow: /analytics
+Disallow: /records
 Disallow: /invites
 Disallow: /chat
 Disallow: /team

@@ -1,11 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchRecoveryContext } from "@/lib/loadSignals";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { addDays, isoDow, startOfWeek, toISODate, WEEKDAY_LONG } from "@/lib/dates";
 import {
   applyOverrides,
   calcRecovery,
+  needsDeload,
+  deloadReason,
   generateWeekPlan,
   toAthleteProfile,
   type DailyStat,
@@ -192,6 +195,7 @@ function PlanPage() {
           .maybeSingle(),
       ]);
       if (profileRes.error) throw profileRes.error;
+      const ctx = await fetchRecoveryContext(uid);
       const profile = profileRes.data;
       const stat = (statRes.data?.[0] as DailyStat | undefined) ?? null;
       const allSport = (sportRes.data ?? []) as SportSession[];
@@ -201,12 +205,12 @@ function PlanPage() {
       // Für den Recovery-Score: dieselbe 72h-Logik wie im Dashboard.
       const recentSport = allSport.filter((s) => s.date < todayIso && s.date >= threeDaysAgo);
       const recentGym = allGym.filter((g) => g.date < todayIso && g.date >= threeDaysAgo);
-      const recovery = calcRecovery(stat, recentSport, recentGym);
+      const recovery = calcRecovery(stat, recentSport, recentGym, ctx.device);
       const planner = plannerRes.data as unknown as {
         plan: PlannerPlan | null;
         locked: boolean | null;
       } | null;
-      return { profile, sport, uid, planner, recoveryScore: recovery.score };
+      return { profile, sport, uid, planner, recoveryScore: recovery.score, signals: ctx.signals };
     },
   });
 
@@ -348,7 +352,7 @@ function PlanPage() {
     locked && planner?.plan?.snapshot
       ? planner.plan.snapshot
       : applyOverrides(
-          generateWeekPlan(ath, weekStart, hardnessMap, data.recoveryScore),
+          generateWeekPlan(ath, weekStart, hardnessMap, data.recoveryScore, data.signals),
           overrides,
         );
   const todayIso = toISODate(new Date());
@@ -362,6 +366,20 @@ function PlanPage() {
           Carbo-Loading auszulösen.
         </p>
       </div>
+
+      {needsDeload(data.signals) && (
+        <div className="card-elevated flex items-start gap-2 border-l-4 border-l-[color:var(--warn)] p-4 text-sm">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--warn)]" />
+          <div>
+            <div className="font-medium">{deloadReason(data.signals)}</div>
+            <p className="text-xs text-muted-foreground">
+              Deine Belastung ist zuletzt schneller gestiegen, als dein Körper sie verarbeitet.
+              Harte Einheiten wurden durch lockere ersetzt – Details unter Analyse.
+            </p>
+          </div>
+        </div>
+      )}
+
 
       <div className="card-elevated flex items-center justify-between p-4">
         <div>

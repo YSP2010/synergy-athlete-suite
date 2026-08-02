@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchRecoveryContext } from "@/lib/loadSignals";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,7 +139,8 @@ function NutritionPage() {
 
       const recentSport = sport.filter((s) => s.date < dateIso && s.date >= threeDaysAgo);
       const recentGym = gym.filter((g) => g.date < dateIso && g.date >= threeDaysAgo);
-      const recovery = calcRecovery(stat, recentSport, recentGym);
+      const ctx = await fetchRecoveryContext(uid);
+      const recovery = calcRecovery(stat, recentSport, recentGym, ctx.device);
 
       const matchHardness: Record<number, "easy" | "normal" | "hard"> = {};
       for (const s of sport) {

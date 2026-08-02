@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { AnalyticsView } from "@/components/analytics/AnalyticsView";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
@@ -366,7 +367,13 @@ function AthleteView() {
           <div className="text-sm text-muted-foreground">Kein Plan verfügbar.</div>
         )}
       </section>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-xl font-semibold">Leistungsanalyse</h2>
+        <AnalyticsView userId={id} readOnly />
+      </section>
     </div>
+
   );
 }
 

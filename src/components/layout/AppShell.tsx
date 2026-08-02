@@ -1,26 +1,7 @@
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import {
-  LayoutDashboard,
-  CalendarDays,
-  Dumbbell,
-  Utensils,
-  Camera,
-  BookOpen,
-  HeartPulse,
-  Settings,
-  LogOut,
-  Trophy,
-  Users,
-  MessageSquare,
-  Mail,
-  TrendingUp,
-  FileUp,
-  Activity,
-  Flag,
-  type LucideIcon,
-} from "lucide-react";
+import { Activity, BookOpen, CalendarDays, Camera, Dumbbell, FileUp, Flag, HeartPulse, LayoutDashboard, LineChart, LogOut, Mail, MessageSquare, Settings, TrendingUp, Trophy, Users, Utensils, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -45,6 +26,8 @@ const ATHLETE_NAV: NavItem[] = [
   { to: "/insights", label: "Fortschritt", icon: TrendingUp, shortLabel: "Trend" },
   { to: "/activities", label: "Aktivitäten", icon: Activity, shortLabel: "Aktiv" },
   { to: "/courses", label: "Strecken", icon: Flag, shortLabel: "Strecken" },
+  { to: "/analytics", label: "Analyse", icon: LineChart, shortLabel: "Analyse" },
+  { to: "/records", label: "Bestleistungen", icon: Trophy, shortLabel: "PRs" },
   { to: "/import", label: "Import", icon: FileUp, shortLabel: "Import" },
   { to: "/invites", label: "Einladungen", icon: Mail, shortLabel: "Invites" },
   { to: "/chat", label: "Chat", icon: MessageSquare, shortLabel: "Chat" },
