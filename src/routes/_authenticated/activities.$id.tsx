@@ -201,7 +201,7 @@ function ActivityDetail() {
           <h2 className="mb-3 font-semibold">Multisport-Segmente</h2>
           <ol className="space-y-2">
             {data!.segments.map((s) => {
-              const transition = s.discipline === "t1" || s.discipline === "t2";
+              const transition = s.segment_type === "t1" || s.segment_type === "t2";
               return (
                 <li
                   key={s.id}
@@ -209,7 +209,7 @@ function ActivityDetail() {
                     transition ? "bg-muted/40" : ""
                   }`}
                 >
-                  <span className="font-medium">{DISCIPLINE_LABEL[s.discipline] ?? s.discipline}</span>
+                  <span className="font-medium">{SEGMENT_LABEL[s.segment_type] ?? s.segment_type}</span>
                   <span className="tabular-nums text-muted-foreground">
                     {fmtDuration(s.duration_s)}
                     {s.distance_m ? ` · ${fmtDistance(s.distance_m)}` : ""}
