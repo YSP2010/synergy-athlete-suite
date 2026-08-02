@@ -16,7 +16,10 @@ import { toast } from "sonner";
 import { WEEKDAY_LABELS } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { Goal } from "@/lib/planner";
-import { LogOut } from "lucide-react";
+import { Loader2, LogOut, RefreshCw, ShieldCheck } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { useServerFn } from "@tanstack/react-start";
+import { recomputeMyLeaderboard } from "@/lib/leaderboard.functions";
 import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/settings")({
