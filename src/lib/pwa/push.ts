@@ -26,7 +26,9 @@ export interface SubscriptionKeys {
 function keyToBase64(sub: PushSubscription, name: "p256dh" | "auth"): string {
   const raw = sub.getKey(name);
   if (!raw) return "";
-  return btoa(String.fromCharCode(...new Uint8Array(raw)));
+  const std = btoa(String.fromCharCode(...new Uint8Array(raw)));
+  // Web-Push erwartet base64url (ohne + / =), sonst schlägt die Verschlüsselung fehl.
+  return std.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 /** Meldet den Browser beim Push-Dienst an und liefert die Schlüssel. */
