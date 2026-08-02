@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { fetchRecoveryContext } from "@/lib/loadSignals";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ageFrom,
@@ -103,6 +104,7 @@ function DashboardPage() {
 
       if (profileRes.error) throw profileRes.error;
 
+      const ctx = await fetchRecoveryContext(uid);
       const profile = profileRes.data;
       const stat: DailyStat | null = (statRes.data?.[0] as DailyStat | undefined) ?? null;
       const sport = (sportRes.data ?? []) as SportSession[];
@@ -116,7 +118,7 @@ function DashboardPage() {
         sport: sport.filter((s) => s.date < todayIso && s.date >= threeDaysAgo),
         gym: gym.filter((g) => g.date < todayIso && g.date >= threeDaysAgo),
       };
-      const recovery = calcRecovery(stat, recent.sport, recent.gym);
+      const recovery = calcRecovery(stat, recent.sport, recent.gym, ctx.device);
 
       const ath = toAthleteProfile(profile);
 
@@ -131,7 +133,7 @@ function DashboardPage() {
 
       // Wochenplan: bei gesperrter Woche Snapshot verwenden, sonst
       // Live-Plan + manuelle Overrides aus /plan.
-      const generated = generateWeekPlan(ath, weekStart, matchHardness, recovery.score);
+      const generated = generateWeekPlan(ath, weekStart, matchHardness, recovery.score, ctx.signals);
       const plan: PlannedSlot[] =
         planner?.locked && planner.plan?.snapshot
           ? planner.plan.snapshot

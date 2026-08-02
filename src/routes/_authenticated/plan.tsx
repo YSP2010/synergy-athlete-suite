@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchRecoveryContext } from "@/lib/loadSignals";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { addDays, isoDow, startOfWeek, toISODate, WEEKDAY_LONG } from "@/lib/dates";
@@ -192,6 +193,7 @@ function PlanPage() {
           .maybeSingle(),
       ]);
       if (profileRes.error) throw profileRes.error;
+      const ctx = await fetchRecoveryContext(uid);
       const profile = profileRes.data;
       const stat = (statRes.data?.[0] as DailyStat | undefined) ?? null;
       const allSport = (sportRes.data ?? []) as SportSession[];
@@ -201,12 +203,12 @@ function PlanPage() {
       // Für den Recovery-Score: dieselbe 72h-Logik wie im Dashboard.
       const recentSport = allSport.filter((s) => s.date < todayIso && s.date >= threeDaysAgo);
       const recentGym = allGym.filter((g) => g.date < todayIso && g.date >= threeDaysAgo);
-      const recovery = calcRecovery(stat, recentSport, recentGym);
+      const recovery = calcRecovery(stat, recentSport, recentGym, ctx.device);
       const planner = plannerRes.data as unknown as {
         plan: PlannerPlan | null;
         locked: boolean | null;
       } | null;
-      return { profile, sport, uid, planner, recoveryScore: recovery.score };
+      return { profile, sport, uid, planner, recoveryScore: recovery.score, signals: ctx.signals };
     },
   });
 
