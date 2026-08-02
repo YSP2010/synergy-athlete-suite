@@ -32,8 +32,20 @@ export function NotificationSettings() {
       setInstalled(!!reg);
       const sub = await reg?.pushManager.getSubscription();
       setActive(!!sub);
+      if (!sub) return;
+      // Vorhandene Abos erneut speichern, damit alte, falsch kodierte Schlüssel korrigiert werden.
+      try {
+        const { key } = await vapid();
+        if (!key) return;
+        const keys = await subscribeToPush(key);
+        await save({ data: { ...keys, userAgent: navigator.userAgent.slice(0, 300) } });
+      } catch {
+        // Nicht kritisch – der Nutzer kann Push manuell neu aktivieren.
+      }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   async function toggle(next: boolean) {
     setBusy(true);
