@@ -22,6 +22,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { recomputeMyLeaderboard } from "@/lib/leaderboard.functions";
 import { humanError } from "@/lib/errors";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { clearAppCaches } from "@/lib/pwa/register";
 
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -97,6 +98,7 @@ function SettingsPage() {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
+    await clearAppCaches();
     nav({ to: "/auth", replace: true });
   }
 
