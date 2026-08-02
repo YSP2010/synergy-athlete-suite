@@ -20,7 +20,18 @@ import { humanError } from "@/lib/errors";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/sport/$id")({
-  head: () => ({ meta: [{ title: "Sport-Session – Hybrid Athlete" }] }),
+  head: () => ({
+    meta: [
+      { title: "Sport-Einheit – Hybrid Athlete" },
+      { name: "description", content: "Intensität, Dauer und Belastung dieser Sporteinheit protokollieren." },
+      { property: "og:title", content: "Sport-Einheit – Hybrid Athlete" },
+      { property: "og:description", content: "Intensität, Dauer und Belastung protokollieren." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Sport-Einheit – Hybrid Athlete" },
+      { name: "twitter:description", content: "Intensität, Dauer und Belastung protokollieren." },
+    ],
+  }),
   component: SportDetailPage,
 });
 

@@ -21,6 +21,19 @@ import type { Goal, Sex } from "@/lib/planner";
 import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
+  head: () => ({
+    meta: [
+      { title: "Einrichtung – Hybrid Athlete" },
+      { name: "description", content: "Sportart, Ziele und Trainingstage festlegen und deinen Wochenplan erstellen." },
+      { property: "og:title", content: "Einrichtung – Hybrid Athlete" },
+      { property: "og:description", content: "Sportart, Ziele und Trainingstage einrichten." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/onboarding" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Einrichtung – Hybrid Athlete" },
+      { name: "twitter:description", content: "Sportart, Ziele und Trainingstage einrichten." },
+    ],
+  }),
   loader: async () => {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return null;

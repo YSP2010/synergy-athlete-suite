@@ -52,7 +52,17 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
     return null;
   },
   head: () => ({
-    meta: [{ title: "Dashboard – Hybrid Athlete" }],
+    meta: [
+      { title: "Dashboard – Hybrid Athlete" },
+      { name: "description", content: "Recovery-Score, Wochenplan, Makro-Ziele und die nächsten Einheiten auf einen Blick." },
+      { property: "og:title", content: "Dashboard – Hybrid Athlete" },
+      { property: "og:description", content: "Recovery-Score, Wochenplan und Makro-Ziele auf einen Blick." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/dashboard" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Dashboard – Hybrid Athlete" },
+      { name: "twitter:description", content: "Recovery-Score, Wochenplan und Makro-Ziele auf einen Blick." },
+    ],
   }),
   component: DashboardPage,
 });

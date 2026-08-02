@@ -6,7 +6,19 @@ import { MessageSquare, Users, User } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/chat/")({
-  head: () => ({ meta: [{ title: "Chats – Hybrid Athlete" }] }),
+  head: () => ({
+    meta: [
+      { title: "Nachrichten – Hybrid Athlete" },
+      { name: "description", content: "Alle Team- und Direktchats zwischen Trainern und Athleten an einem Ort." },
+      { property: "og:title", content: "Nachrichten – Hybrid Athlete" },
+      { property: "og:description", content: "Team- und Direktchats an einem Ort." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/chat" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Nachrichten – Hybrid Athlete" },
+      { name: "twitter:description", content: "Team- und Direktchats an einem Ort." },
+    ],
+  }),
   component: ChatListPage,
 });
 

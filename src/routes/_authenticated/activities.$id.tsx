@@ -28,11 +28,13 @@ export const Route = createFileRoute("/_authenticated/activities/$id")({
   head: () => ({
     meta: [
       { title: "Aktivität – Hybrid Athlete" },
-      { name: "description", content: "Detailansicht einer Einheit mit Karte, Höhenprofil, Puls- und Tempoverlauf." },
+      { name: "description", content: "Details zu deiner Aktivität: Karte, Runden, Herzfrequenz und Leistungsverlauf." },
       { property: "og:title", content: "Aktivität – Hybrid Athlete" },
-      { property: "og:description", content: "Karte, Höhenprofil, Puls- und Tempoverlauf einer Einheit." },
-      { property: "og:type", content: "article" },
+      { property: "og:description", content: "Karte, Runden, Herzfrequenz und Leistung deiner Aktivität." },
+      { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Aktivität – Hybrid Athlete" },
+      { name: "twitter:description", content: "Karte, Runden, Herzfrequenz und Leistung deiner Aktivität." },
     ],
   }),
   component: ActivityDetail,

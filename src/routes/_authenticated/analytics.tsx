@@ -8,15 +8,14 @@ export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({
     meta: [
       { title: "Analyse – Hybrid Athlete" },
-      {
-        name: "description",
-        content:
-          "Belastung, Form, VO2max, Effizienz und Erholung aus deinen Garmin-Daten – verständlich erklärt.",
-      },
+      { name: "description", content: "Belastung, Form, VO2max, Effizienz und Erholung aus deinen Garmin-Daten – verständlich erklärt." },
       { property: "og:title", content: "Analyse – Hybrid Athlete" },
       { property: "og:description", content: "Belastung, Form und Erholung aus deinen Garmin-Daten." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/analytics" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Analyse – Hybrid Athlete" },
+      { name: "twitter:description", content: "Belastung, Form und Erholung aus deinen Garmin-Daten." },
     ],
   }),
   component: AnalyticsPage,

@@ -21,13 +21,15 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/races/")({
   head: () => ({
     meta: [
-      { title: "Rennen – Hybrid Athlete" },
-      { name: "description", content: "Wettkämpfe planen, Zielzeiten setzen und Ergebnisse verknüpfen." },
-      { property: "og:title", content: "Rennen – Hybrid Athlete" },
-      { property: "og:description", content: "Wettkämpfe planen und Zielzeiten setzen." },
+      { title: "Wettkämpfe – Hybrid Athlete" },
+      { name: "description", content: "Anstehende Rennen planen und vergangene Wettkämpfe auswerten." },
+      { property: "og:title", content: "Wettkämpfe – Hybrid Athlete" },
+      { property: "og:description", content: "Rennen planen und Wettkämpfe auswerten." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/races" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "robots", content: "noindex" },
+      { name: "twitter:title", content: "Wettkämpfe – Hybrid Athlete" },
+      { name: "twitter:description", content: "Rennen planen und Wettkämpfe auswerten." },
     ],
   }),
   component: RacesPage,

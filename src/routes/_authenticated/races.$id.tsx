@@ -20,13 +20,14 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/races/$id")({
   head: () => ({
     meta: [
-      { title: "Rennplanung – Hybrid Athlete" },
-      { name: "description", content: "Zielzeiten, Pacing-Plan pro Disziplin und Taper vor dem Wettkampf." },
-      { property: "og:title", content: "Rennplanung – Hybrid Athlete" },
-      { property: "og:description", content: "Zielzeiten und Pacing-Plan für deinen Wettkampf." },
+      { title: "Wettkampf – Hybrid Athlete" },
+      { name: "description", content: "Zielzeit, Splits und Vorbereitung für diesen Wettkampf." },
+      { property: "og:title", content: "Wettkampf – Hybrid Athlete" },
+      { property: "og:description", content: "Zielzeit, Splits und Vorbereitung im Detail." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "robots", content: "noindex" },
+      { name: "twitter:title", content: "Wettkampf – Hybrid Athlete" },
+      { name: "twitter:description", content: "Zielzeit, Splits und Vorbereitung im Detail." },
     ],
   }),
   component: RaceDetail,

@@ -11,11 +11,14 @@ export const Route = createFileRoute("/_authenticated/courses/")({
   head: () => ({
     meta: [
       { title: "Strecken – Hybrid Athlete" },
-      { name: "description", content: "Eigene und öffentliche Strecken mit Bestenliste für wiederholte Läufe und Radrunden." },
+      { name: "description", content: "Deine Lauf- und Radstrecken mit Bestzeiten und Bestenlisten im Team." },
       { property: "og:title", content: "Strecken – Hybrid Athlete" },
-      { property: "og:description", content: "Strecken mit Bestenliste für wiederholte Läufe und Radrunden." },
+      { property: "og:description", content: "Strecken mit Bestzeiten und Team-Bestenlisten." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/courses" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Strecken – Hybrid Athlete" },
+      { name: "twitter:description", content: "Strecken mit Bestzeiten und Team-Bestenlisten." },
     ],
   }),
   component: CoursesPage,

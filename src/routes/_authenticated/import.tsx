@@ -16,7 +16,14 @@ export const Route = createFileRoute("/_authenticated/import")({
   head: () => ({
     meta: [
       { title: "Garmin-Import – Hybrid Athlete" },
-      { name: "robots", content: "noindex" },
+      { name: "description", content: "FIT-, GPX- und TCX-Dateien hochladen und automatisch als Aktivitäten auswerten." },
+      { property: "og:title", content: "Garmin-Import – Hybrid Athlete" },
+      { property: "og:description", content: "FIT, GPX und TCX hochladen und auswerten lassen." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/import" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Garmin-Import – Hybrid Athlete" },
+      { name: "twitter:description", content: "FIT, GPX und TCX hochladen und auswerten lassen." },
     ],
   }),
   component: ImportPage,

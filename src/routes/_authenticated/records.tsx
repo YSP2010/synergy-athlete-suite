@@ -10,14 +10,14 @@ export const Route = createFileRoute("/_authenticated/records")({
   head: () => ({
     meta: [
       { title: "Bestleistungen – Hybrid Athlete" },
-      {
-        name: "description",
-        content: "Persönliche Bestzeiten, längste Einheiten und Höhenrekorde aus deinen Aktivitäten.",
-      },
+      { name: "description", content: "Persönliche Rekorde für Kraft, Lauf, Rad und Schwimmen an einem Ort." },
       { property: "og:title", content: "Bestleistungen – Hybrid Athlete" },
-      { property: "og:description", content: "Persönliche Bestzeiten aus deinen Aktivitäten." },
+      { property: "og:description", content: "Persönliche Rekorde für Kraft und Ausdauer." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/records" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Bestleistungen – Hybrid Athlete" },
+      { name: "twitter:description", content: "Persönliche Rekorde für Kraft und Ausdauer." },
     ],
   }),
   component: RecordsPage,

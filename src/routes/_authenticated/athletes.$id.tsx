@@ -54,7 +54,18 @@ type WeekRow = {
 };
 
 export const Route = createFileRoute("/_authenticated/athletes/$id")({
-  head: () => ({ meta: [{ title: "Athlet – Hybrid Athlete" }] }),
+  head: () => ({
+    meta: [
+      { title: "Athletenprofil – Hybrid Athlete" },
+      { name: "description", content: "Trainer-Ansicht: Belastung, Readiness und Trainingsverlauf eines Athleten." },
+      { property: "og:title", content: "Athletenprofil – Hybrid Athlete" },
+      { property: "og:description", content: "Trainer-Ansicht mit Readiness und Trainingsverlauf." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Athletenprofil – Hybrid Athlete" },
+      { name: "twitter:description", content: "Trainer-Ansicht mit Readiness und Trainingsverlauf." },
+    ],
+  }),
   component: AthleteView,
 });
 

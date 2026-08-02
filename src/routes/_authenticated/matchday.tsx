@@ -25,8 +25,15 @@ import { toISODate } from "@/lib/dates";
 export const Route = createFileRoute("/_authenticated/matchday")({
   head: () => ({
     meta: [
-      { title: "Spieltag-Countdown – Hybrid Athlete" },
-      { name: "robots", content: "noindex" },
+      { title: "Matchday – Hybrid Athlete" },
+      { name: "description", content: "Countdown zum Anpfiff mit synchronisiertem Ess- und Trinkplan." },
+      { property: "og:title", content: "Matchday – Hybrid Athlete" },
+      { property: "og:description", content: "Countdown zum Anpfiff mit Ess- und Trinkplan." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/matchday" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Matchday – Hybrid Athlete" },
+      { name: "twitter:description", content: "Countdown zum Anpfiff mit Ess- und Trinkplan." },
     ],
   }),
   component: MatchdayPage,

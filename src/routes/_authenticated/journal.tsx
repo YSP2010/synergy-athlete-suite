@@ -23,7 +23,19 @@ import { toISODate, addDays, parseISODate, WEEKDAY_LONG, isoDow } from "@/lib/da
 import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/journal")({
-  head: () => ({ meta: [{ title: "Tagebuch – Hybrid Athlete" }] }),
+  head: () => ({
+    meta: [
+      { title: "Trainingstagebuch – Hybrid Athlete" },
+      { name: "description", content: "Reflexionen, Stimmung und Notizen festhalten – durchsuchbar und exportierbar." },
+      { property: "og:title", content: "Trainingstagebuch – Hybrid Athlete" },
+      { property: "og:description", content: "Reflexionen und Stimmung festhalten, durchsuchbar." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/journal" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Trainingstagebuch – Hybrid Athlete" },
+      { name: "twitter:description", content: "Reflexionen und Stimmung festhalten, durchsuchbar." },
+    ],
+  }),
   component: JournalPage,
 });
 

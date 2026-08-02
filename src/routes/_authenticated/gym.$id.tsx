@@ -27,7 +27,18 @@ import { parseISODate } from "@/lib/dates";
 import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/gym/$id")({
-  head: () => ({ meta: [{ title: "Gym-Session – Hybrid Athlete" }] }),
+  head: () => ({
+    meta: [
+      { title: "Gym-Einheit – Hybrid Athlete" },
+      { name: "description", content: "Sätze, Wiederholungen, Gewicht und RPE für diese Krafteinheit protokollieren." },
+      { property: "og:title", content: "Gym-Einheit – Hybrid Athlete" },
+      { property: "og:description", content: "Sätze, Gewicht und RPE protokollieren." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Gym-Einheit – Hybrid Athlete" },
+      { name: "twitter:description", content: "Sätze, Gewicht und RPE protokollieren." },
+    ],
+  }),
   component: GymDetailPage,
 });
 

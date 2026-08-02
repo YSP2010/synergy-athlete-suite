@@ -9,11 +9,14 @@ export const Route = createFileRoute("/_authenticated/activities/")({
   head: () => ({
     meta: [
       { title: "Aktivitäten – Hybrid Athlete" },
-      { name: "description", content: "Alle importierten Garmin-Aktivitäten mit Distanz, Zeit, Puls und Pace im Überblick." },
+      { name: "description", content: "Alle importierten Garmin-Aktivitäten mit Distanz, Zeit, Herzfrequenz und Trainingsbelastung." },
       { property: "og:title", content: "Aktivitäten – Hybrid Athlete" },
-      { property: "og:description", content: "Importierte Trainings mit Distanz, Zeit, Puls und Pace." },
+      { property: "og:description", content: "Deine importierten Garmin-Aktivitäten im Überblick." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/activities" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Aktivitäten – Hybrid Athlete" },
+      { name: "twitter:description", content: "Deine importierten Garmin-Aktivitäten im Überblick." },
     ],
   }),
   component: ActivitiesPage,

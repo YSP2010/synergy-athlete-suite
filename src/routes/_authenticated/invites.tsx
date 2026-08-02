@@ -10,7 +10,19 @@ import { humanError } from "@/lib/errors";
 import type { Tables } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/invites")({
-  head: () => ({ meta: [{ title: "Einladungen – Hybrid Athlete" }] }),
+  head: () => ({
+    meta: [
+      { title: "Einladungen – Hybrid Athlete" },
+      { name: "description", content: "Team-Einladungen erstellen, teilen und verwalten." },
+      { property: "og:title", content: "Einladungen – Hybrid Athlete" },
+      { property: "og:description", content: "Team-Einladungen erstellen und verwalten." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/invites" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Einladungen – Hybrid Athlete" },
+      { name: "twitter:description", content: "Team-Einladungen erstellen und verwalten." },
+    ],
+  }),
   component: InvitesPage,
 });
 

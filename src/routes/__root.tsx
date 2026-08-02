@@ -92,7 +92,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Fußball + Gym clever kombinieren. Recovery-Score, Wochenplan, Makros, Food-Scanner.",
       },
       { property: "og:site_name", content: "Hybrid Athlete" },
-      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

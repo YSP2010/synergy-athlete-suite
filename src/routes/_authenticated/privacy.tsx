@@ -16,15 +16,14 @@ export const Route = createFileRoute("/_authenticated/privacy")({
   head: () => ({
     meta: [
       { title: "Datenschutz – Hybrid Athlete" },
-      {
-        name: "description",
-        content: "Woher deine Daten kommen, wofür sie genutzt werden, Export als ZIP und Kontolöschung.",
-      },
+      { name: "description", content: "Datenfreigaben steuern, Daten exportieren oder Konto vollständig löschen." },
       { property: "og:title", content: "Datenschutz – Hybrid Athlete" },
-      { property: "og:description", content: "Datenexport, Speicherdauer und Kontolöschung." },
+      { property: "og:description", content: "Datenfreigaben steuern, exportieren oder löschen." },
+      { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/privacy" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "robots", content: "noindex" },
+      { name: "twitter:title", content: "Datenschutz – Hybrid Athlete" },
+      { name: "twitter:description", content: "Datenfreigaben steuern, exportieren oder löschen." },
     ],
   }),
   component: PrivacyPage,
