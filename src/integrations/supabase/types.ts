@@ -1233,6 +1233,48 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          topic_checkin: boolean
+          topic_matchday: boolean
+          topic_plan: boolean
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          topic_checkin?: boolean
+          topic_matchday?: boolean
+          topic_plan?: boolean
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          topic_checkin?: boolean
+          topic_matchday?: boolean
+          topic_plan?: boolean
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       races: {
         Row: {
           bike_distance_m: number | null
@@ -1444,6 +1486,56 @@ export type Database = {
             columns: ["segment_id"]
             isOneToOne: false
             referencedRelation: "multisport_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_invites: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          label: string | null
+          max_uses: number | null
+          revoked: boolean
+          team_id: string
+          token_hash: string
+          updated_at: string
+          uses: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          label?: string | null
+          max_uses?: number | null
+          revoked?: boolean
+          team_id: string
+          token_hash: string
+          updated_at?: string
+          uses?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          label?: string | null
+          max_uses?: number | null
+          revoked?: boolean
+          team_id?: string
+          token_hash?: string
+          updated_at?: string
+          uses?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invites_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -1834,11 +1926,48 @@ export type Database = {
         Args: { _other_user_id: string }
         Returns: string
       }
+      get_team_readiness: {
+        Args: { _team_id: string }
+        Returns: {
+          acute_load: number
+          chronic_load: number
+          history_days: number
+          last_checkin: string
+          measured: boolean
+          mood: number
+          name: string
+          sleep_hours: number
+          sleep_quality: number
+          soreness: number
+          stress: number
+          user_id: string
+        }[]
+      }
       is_chat_participant: { Args: { _chat_id: string }; Returns: boolean }
       is_coach_of_team: { Args: { _team_id: string }; Returns: boolean }
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      peek_team_invite: {
+        Args: { _token_hash: string }
+        Returns: {
+          coach_name: string
+          member_count: number
+          reason: string
+          team_id: string
+          team_name: string
+          valid: boolean
+        }[]
+      }
+      redeem_team_invite: {
+        Args: { _token_hash: string }
+        Returns: {
+          ok: boolean
+          reason: string
+          team_id: string
+          team_name: string
+        }[]
       }
     }
     Enums: {

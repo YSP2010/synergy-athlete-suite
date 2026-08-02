@@ -26,6 +26,9 @@ import {
 import { cn } from "@/lib/utils";
 import { humanError } from "@/lib/errors";
 import type { Tables } from "@/integrations/supabase/types";
+import { TeamCockpit } from "@/components/team/TeamCockpit";
+import { TeamInvites } from "@/components/team/TeamInvites";
+
 
 type TeamRow = Tables<"teams">;
 
@@ -174,6 +177,8 @@ function TeamDetail({ team }: { team: TeamRow }) {
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
+  const [tab, setTab] = useState<"cockpit" | "members" | "invite">("cockpit");
+
 
   const { data: members } = useQuery({
     queryKey: ["team-members", team.id],
@@ -328,6 +333,33 @@ function TeamDetail({ team }: { team: TeamRow }) {
         </div>
       </div>
 
+      <div className="flex gap-1 rounded-lg bg-elevated p-1">
+        {(
+          [
+            ["cockpit", "Cockpit"],
+            ["members", "Mitglieder"],
+            ["invite", "Einladen"],
+          ] as const
+        ).map(([key, text]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTab(key)}
+            aria-pressed={tab === key}
+            className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
+              tab === key ? "bg-neon text-neon-foreground" : "text-muted-foreground"
+            }`}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
+
+      {tab === "cockpit" && <TeamCockpit teamId={team.id} />}
+      {tab === "invite" && <TeamInvites teamId={team.id} />}
+
+      {tab === "members" && (
+        <>
       <div className="card-elevated p-4">
         <h2 className="mb-3 flex items-center gap-2 text-sm font-medium">
           <Settings2 className="h-4 w-4" /> Team-Chat Einstellungen
@@ -342,6 +374,7 @@ function TeamDetail({ team }: { team: TeamRow }) {
           <Switch checked={!!team.coach_only_chat} onCheckedChange={(v) => toggleLock.mutate(v)} />
         </div>
       </div>
+
 
       <div className="card-elevated p-4">
         <Label htmlFor="invite-email">Spieler per E-Mail einladen</Label>
@@ -422,7 +455,10 @@ function TeamDetail({ team }: { team: TeamRow }) {
           )}
         </ul>
       </div>
+        </>
+      )}
     </section>
+
   );
 }
 

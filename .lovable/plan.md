@@ -1,80 +1,58 @@
-# Hybrid Athlete: Garmin, Strecken, Bestenliste, Triathlon
 
-Gesamtfahrplan über 6 Etappen. Umgesetzt wird nacheinander — nach jeder Etappe kannst du testen, bevor die nächste startet.
+# Erweiterung: Einladungslink, Cockpit, PWA, Spieltag-Countdown, Jugendschutz
 
-Abweichung vom Dokument (bewusst): Serverlogik läuft nicht über Supabase Edge Functions, sondern über TanStack-Serverfunktionen (`src/lib/*.functions.ts`) bzw. öffentliche API-Routen unter `src/routes/api/public/*` für Cron. Das entspricht dem bestehenden Muster (`scan.functions.ts`, `insights.functions.ts`).
+Umsetzung der fünf Etappen aus dem Dokument, in dieser Reihenfolge. Zentrale Klammer: **eine einzige Quelle für Spieltags-Logik und Tagesmakros**, damit Wochenplan, Dashboard, Ernährung und Countdown niemals auseinanderlaufen.
 
----
+## A — Einladung per Link & QR
 
-## Etappe 1 — Import-Pipeline (FIT / GPX / TCX / Garmin-ZIP)
+- Neue Tabelle `team_invites` (nur SHA-256-Hash des Tokens, `max_uses`, `expires_at`, `revoked`, Nutzungszähler), RLS nur für den Trainer des Teams, GRANTs wie üblich.
+- Zwei Datenbankfunktionen: `peek_team_invite` (auch anonym, gibt nur Teamname, Trainername, Mitgliederzahl zurück) und `redeem_team_invite` (idempotent, `already_member`/`is_coach`/`expired`/`revoked`/`exhausted`).
+- Öffentliche Route `/join/:token` (bewusst außerhalb des Auth-Bereichs): Vorschau, Login-/Registrieren-Buttons mit `?redirect=/join/<token>`, Beitritt, Sonderfall „noch nicht onboarded" (erst beitreten, dann Onboarding).
+- `auth.tsx` bekommt den Suchparameter `redirect` – inklusive Google-Login –, akzeptiert nur app-interne Pfade (genau ein führendes `/`, kein `//`, kein `/\`), sonst `/dashboard`.
+- In `/team`: Bereich „Spieler einladen" mit Link-Erstellung (Bezeichnung, Gültigkeit, max. Nutzungen), einmaliger Klartext-Anzeige, Kopieren, `navigator.share`, clientseitigem QR-Code (`qrcode`-Paket), Liste aktiver Links mit Widerruf. E-Mail-Einladung bleibt bestehen.
 
-**Datenbank**
-- Enum `import_status`; Tabellen `import_jobs`, `import_files` (inkl. `content_hash` mit `UNIQUE(user_id, content_hash)`), RLS `auth.uid() = user_id`, GRANTs, `updated_at`-Trigger.
-- Privater Storage-Bucket `imports`, Policies analog `food-scans` (Ordner = `auth.uid()`).
+## B — Mannschafts-Cockpit
 
-**Server**
-- `import.functions.ts`: Job anlegen + signierte Upload-URLs; Verarbeitung in Blöcken (ca. 25 Dateien pro Aufruf, selbst-fortsetzend, idempotent, pro Datei try/catch); Retry fehlgeschlagener Dateien; Job löschen (Rohdateien, optional Aktivitäten).
-- Parser als reine Funktionen in `src/lib/import/` (FIT via `@garmin/fitsdk`, GPX/TCX via `fast-xml-parser`), Erkennung nach Dateiinhalt statt Pfad, rekursives Entpacken max. 3 Ebenen mit Zip-Bomben- und Path-Traversal-Schutz.
-- Duplikaterkennung dreistufig: content_hash → FIT `file_id`-Schlüssel → Heuristik (Start ±120 s, Distanz ±1 %). Reichhaltigere Datei ergänzt vorhandene Aktivität, überschreibt aber nie nutzerbearbeitete Felder.
+- `/team` wird in Tabs „Cockpit | Mitglieder | Einladen" gegliedert; Athleten sehen weiterhin nur ihre bisherige Ansicht.
+- Belastungsberechnung als reine Funktionen: gemessene Belastung aus importierten Aktivitäten zuerst, sonst Dauer × Intensität aus Gym-/Sport-Einheiten (nur `done`), ACWR 7d gegen 28d/4, unter 21 Tagen Historie kein Wert.
+- Ampel: grau (zu wenig Daten, nie grün), rot (ACWR > 1,5 oder Recovery < 40 oder Muskelkater ≥ 4), gelb (Grenzbereich), sonst grün – mit Tooltip zum konkreten Auslöser und deutlich sichtbarem Hinweis, dass das keine medizinische Aussage ist.
+- Eine Datenbankfunktion `get_team_readiness(_team_id)` liefert alles in einer Abfrage (Trainerprüfung eingebaut).
+- Cockpit-UI: Zähler oben, risikosortierte Liste (mobil Karten), Klick führt auf `/athletes/:id`, eigener Block „Kein Check-in seit 3+ Tagen", Leerzustand verweist auf den Einladungslink.
+- Datenschutz unverändert: Ernährung, Scans, Tagebuch bleiben gesperrt. In `/settings` neuer Abschnitt „Was mein Trainer sieht" plus „Team verlassen" (neue DELETE-Policy für eigene Mitgliedschaft).
 
-**Frontend**
-- Neue Route `/import` (Drag & Drop, Ordner-Upload, Fortschritt live über Realtime, Import-Historie bis auf Dateiebene, Retry/Undo, Garmin-Export-Anleitung).
-- Link aus `settings.tsx`, Eintrag in `AppShell.tsx` (Sidebar + Bottom-Tabs).
-- Vitest-Tests für Parser und Duplikatlogik.
+## C — PWA
 
----
+- `vite-plugin-pwa` mit `registerType: 'prompt'`, Manifest (Start `/dashboard`, standalone, Anthrazit-Theme, deutsche Texte), Icons 192/512 plus maskable.
+- Caching nur App-Shell; alle Backend-Anfragen strikt `NetworkOnly`, Cache-Bereinigung beim Abmelden, eigene Offline-Seite.
+- Installationshinweis: Android über `beforeinstallprompt`, iOS mit Anleitung „Teilen → Zum Home-Bildschirm", höchstens einmal pro Woche, nicht im Standalone-Modus.
+- Push: Tabelle `push_subscriptions` (nur eigene Zeilen), VAPID-Schlüssel als Server-Secret, Versand über Serverfunktion, Berechtigung nur nach bewusstem Schalter in `/settings`, iOS-Sonderfall erklärt, abgelaufene Endpunkte (404/410) werden gelöscht. Benachrichtigungen: Check-in-Erinnerung, Planänderung durch den Trainer, Vorabend-Erinnerung – einzeln abschaltbar.
+- Zeitgesteuerte Erinnerungen: ich prüfe die Verfügbarkeit eines Zeitplaners in der Datenbank und melde das Ergebnis, statt still etwas anderes zu bauen.
+- **Nicht in diesem Durchgang:** Offline-Schreiben im Gym-Log (C5) – eigene Baustelle, kommt danach.
 
-## Etappe 2 — Aktivitäten & Strecken
+## D — Spieltag-Countdown
 
-- Enums `activity_sport`, `activity_source`; Tabellen `activities`, `activity_samples`, `activity_laps`, `courses`, `course_points`, `course_efforts` samt RLS (eigene Daten, `is_public` bei Strecken, `coach_can_view_athlete`).
-- Parser schreibt jetzt echte Aktivitäten; reine Routen-GPX (ohne `<time>`) erzeugen nur eine Strecke.
-- Strecken-Matching als reine Funktion in `src/lib/geo.ts` (Startpunkt-Umkreis + Distanzfilter, dann Punktfolgen-Vergleich) mit Tests.
-- Routen `/activities`, `/activities/$id`, `/courses`, `/courses/$id`: Karten (MapLibre GL, keyfreie Tiles), Höhenprofil und Charts mit Recharts, Export GPX/TCX.
-- Nullable `activity_id` in `workouts_sport` / `workouts_gym`, damit echte Garmin-Werte optional die manuellen Schätzungen ersetzen — ohne Verknüpfung bleibt alles wie bisher.
+- `workouts_sport` wird erweitert: `kickoff_at`, `opponent`, `venue`, `is_home`, `travel_minutes`, `meetup_at`. Ohne Anstoßzeit funktioniert alles wie bisher, mit Hinweis „Anstoßzeit eintragen".
+- Neue Tabelle `match_plan_items` (abhakbar, abwählbar, eigene Punkte möglich), nur für den Nutzer selbst – der Trainer sieht sie nicht.
+- Generator als reine Funktion mit dem beschriebenen Zeitplan T-72h bis T+48h, alle Gramm- und Milliliterangaben aus dem Körpergewicht ausgerechnet; ohne Gewicht nur ein Hinweis-Item. Individualisierung nach Härte, Position, Alter, Anreise, Ernährungsstil und Allergien, plus Frühanstoß- und Spätanstoß-Regel.
+- Routen `/matchday` und `/matchday/:id`: großer Countdown, Zeitleiste mit echten Uhrzeiten, Kategorie-Filter, aufklappbares „Warum?". Kompakte Karte auf `/dashboard` ab 72 h, Button in `sport.$id.tsx`. Neuberechnung bei Änderung von Zeit, Härte oder Gewicht – abgehakte und eigene Punkte bleiben erhalten.
+- Schutzregeln fest verdrahtet: keine Supplemente oder Koffein, kein Defizit an Spieltagen (Ziele als Mindestmengen), sachliche Sprache, sichtbarer Hinweis auf Orientierungswerte.
 
----
+## Synchronisation (der Punkt, der zuletzt gehakt hat)
 
-## Etappe 3 — Auswertung
+- Die Spieltags-Erkennung und die Kohlenhydrat-Erhöhung leben weiterhin **ausschließlich** in `src/lib/planner.ts`. Der Countdown liest daraus, statt eine zweite Rechnung aufzumachen; erweitert wird die vorhandene Funktion um die Anstoßzeit.
+- Dashboard, `/nutrition` und Countdown beziehen ihre Zahlen über denselben Aufruf; Tests vergleichen die drei Ergebnisse für Spieltag, Vortag und normalen Tag auf Gleichheit.
+- Beim Speichern von Wochenplan, Spiel oder Profilgewicht werden die Abfragen für Dashboard, Ernährung und Spieltag gemeinsam aktualisiert, damit die Anzeige nicht nachhinkt.
+- Steht laut Wochenplan 48 h vor einem harten Spiel eine Beineinheit, zeigt der Countdown einen Konflikthinweis mit Verschieben-Button – dieselbe Regel, nicht eine zweite.
 
-- Wellness-Tabellen `wellness_daily`, `sleep_logs`, `hrv_logs`, `user_metrics` (Upsert auf `(user_id, date)`), gespeist aus JSON/HRV-Dateien des Konto-Exports. Fehlende Felder bleiben NULL und werden im UI ausgeblendet.
-- `src/lib/analytics/` als reine Funktionen mit Tests: HR-/Pace-/Power-Zonen, TRIMP, TSS/rTSS/sTSS, CTL/ATL/TSB, ACWR-Ampel, Monotonie/Strain, EF, Pa:Hr-Decoupling, GAP, Riegel- und VO2max-Prognosen, Critical Power/CSS.
-- `personal_records` automatisch nach jedem Import fortschreiben.
-- Routen `/analytics` (Tabs Übersicht/Belastung/Ausdauer/Effizienz/Schlaf, globaler Zeitraum-Umschalter) und `/records`.
-- Integration: Recovery-Score in `planner.ts` bevorzugt Gerätedaten mit unveränderter Signatur und Fallback; `/plan` schlägt bei TSB < −30 oder ACWR > 1.5 Entlastung vor; `/athletes/$id` bekommt einen lesenden Analytics-Reiter (Ernährung, Scanner, Tagebuch bleiben gesperrt).
+## E — Jugendschutz
 
----
-
-## Etappe 4 — Bestenliste (Opt-in)
-
-- `profiles`: `leaderboard_opt_in`, `leaderboard_display_name`, `leaderboard_share_health`. Ohne Opt-in taucht niemand auf; Gesundheitskategorien nur mit zweiter Zustimmung; Ausstieg löscht Einträge sofort.
-- Enums `leaderboard_scope`, `leaderboard_period`; Tabellen `leaderboard_categories` (Stammdaten, schreibgeschützt) und `leaderboard_entries`; Lesezugriff über SECURITY-DEFINER-Funktion `get_leaderboard(...)`.
-- Fairness: nur `activities.verified = true` (FIT mit Gerätesignatur), Plausibilitätsgrenzen, Bestzeiten aus gleitendem Fenster der Zeitreihe, Rate-Limit auf Neuberechnung.
-- Neuberechnung über eine Cron-fähige Route `src/routes/api/public/leaderboard-recompute.ts` mit Secret-Prüfung, inkrementell.
-- Route `/leaderboard` (Scope-/Zeitraum-Umschalter, Kategorie-Chips, Podium, eigener Rang angeheftet) plus Abschnitt „Bestenliste & Sichtbarkeit" in `/settings`.
-
----
-
-## Etappe 5 — Triathlon
-
-- Tabellen `multisport_segments`, `swim_metrics`, `races`, `equipment` (+ `equipment_id` an `activities`, Kilometerstand und Verschleißwarnung).
-- Disziplin-Auswertung: SWOLF/CSS, FTP/NP/IF/Power-Duration, GAP/rTSS, T1/T2-Wechselzeiten, Decoupling Rad→Lauf.
-- Planer lernt Schwimmen, Rad, Lauf, Brick, Kraft, Regeneration; Wochen-TSS-Ziel; Pacing-Plan und Taper-Vorschlag vor A-Rennen.
-- Routen `/triathlon`, `/races`, `/races/$id`, `/equipment`; Segment-Zeitstrahl in `/activities/$id`.
-
----
-
-## Etappe 6 — Datenschutz, Performance, Qualität
-
-- `/privacy` im angemeldeten Bereich, versionierte `consents`-Tabelle, vollständiger ZIP-Export (JSON + GPX), Kontolöschung inkl. Storage und Bestenlisten-Einträgen.
-- Performance: serverseitiges Downsampling der `activity_samples` auf ~500 Punkte pro Chart, Paginierung, Polyline-Previews, Indizes und EXPLAIN für Leaderboard-Abfragen.
-- Zuverlässigkeit: Vitest für Analytics, Matching, Parser, Leaderboard-Plausibilität; Import-Diagnose je Job.
-
----
+- `is_minor` (unter 16) aus dem Geburtsdatum, neues Feld `guardian_consent_at` in `profiles`, schlichte Bestätigungsseite für ein Elternteil.
+- Einwilligungsbasierte Funktionen (Bestenliste, Gesundheitsdaten) sind unter 16 ohne Elternbestätigung gesperrt; Training, Plan, Check-in und Trainer-Belastungssicht bleiben unberührt.
+- Öffentlich erreichbare Datenschutzerklärung in einfacher Sprache; die bestehende Export-/Löschseite bleibt im geschützten Bereich.
 
 ## Technische Hinweise
 
-- Alle neuen Tabellen: `user_id` → `auth.users` ON DELETE CASCADE, GRANTs an `authenticated`/`service_role`, RLS aktiviert, Coach-Lesezugriff ausschließlich über `coach_can_view_athlete(user_id)`.
-- Bestehende SECURITY-DEFINER-Helper werden wiederverwendet, nicht dupliziert.
-- Jede `*.functions.ts` bleibt eine dünne Hülle; Helfer liegen in `.server.ts`/`src/lib/`.
-- UI deutsch, metrisch, bestehende Tokens aus `src/styles.css`, keine neuen Farben.
-- Bekannte Risiken: FIT-SDK und ZIP-Entpacken müssen in der Worker-Laufzeit laufen (reines JS/WASM, kein Node-Binary); sehr große Konto-Exporte werden über Chunking und Streaming verarbeitet.
+- Neue Pakete: `qrcode`, `vite-plugin-pwa`, `web-push`. Serverlogik als TanStack-Serverfunktionen, kein Edge-Function-Code.
+- Jede Migration mit GRANTs, RLS und Policies; neue Datenbankfunktionen als SECURITY DEFINER mit fixem `search_path`.
+- Vitest für Token-/Redirect-Validierung, Belastung und ACWR, Countdown-Erzeugung (15:00 / 10:00 / 20:30, Anreise, Härtegrade, Torwart, fehlendes Gewicht, Zeitumstellung, kein Koffein unter 18) sowie die Makro-Gleichheit über die drei Oberflächen.
+- Nach jeder Etappe kurzer Test-Leitfaden (u. a. Beitritt mit Zweitkonto, Cockpit mit drei Testathleten, gelieferte Icon-Größen und VAPID-Erzeugung).

@@ -13,6 +13,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JoinTokenRouteImport } from './routes/join.$token'
 import { Route as GuidesNutritionForHybridAthletesRouteImport } from './routes/guides.nutrition-for-hybrid-athletes'
 import { Route as GuidesLegDayAndFootballRouteImport } from './routes/guides.leg-day-and-football'
 import { Route as GuidesHybridTrainingSplitsRouteImport } from './routes/guides.hybrid-training-splits'
@@ -70,6 +71,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinTokenRoute = JoinTokenRouteImport.update({
+  id: '/join/$token',
+  path: '/join/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidesNutritionForHybridAthletesRoute =
@@ -305,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
+  '/join/$token': typeof JoinTokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activities/$id': typeof AuthenticatedActivitiesIdRoute
@@ -349,6 +356,7 @@ export interface FileRoutesByTo {
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
+  '/join/$token': typeof JoinTokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activities/$id': typeof AuthenticatedActivitiesIdRoute
@@ -395,6 +403,7 @@ export interface FileRoutesById {
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
+  '/join/$token': typeof JoinTokenRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/activities/$id': typeof AuthenticatedActivitiesIdRoute
@@ -441,6 +450,7 @@ export interface FileRouteTypes {
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
+    | '/join/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/activities/$id'
@@ -485,6 +495,7 @@ export interface FileRouteTypes {
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
+    | '/join/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/activities/$id'
@@ -530,6 +541,7 @@ export interface FileRouteTypes {
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
+    | '/join/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/activities/$id'
@@ -558,6 +570,7 @@ export interface RootRouteChildren {
   GuidesHybridTrainingSplitsRoute: typeof GuidesHybridTrainingSplitsRoute
   GuidesLegDayAndFootballRoute: typeof GuidesLegDayAndFootballRoute
   GuidesNutritionForHybridAthletesRoute: typeof GuidesNutritionForHybridAthletesRoute
+  JoinTokenRoute: typeof JoinTokenRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -590,6 +603,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join/$token': {
+      id: '/join/$token'
+      path: '/join/$token'
+      fullPath: '/join/$token'
+      preLoaderRoute: typeof JoinTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/nutrition-for-hybrid-athletes': {
@@ -951,19 +971,10 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesHybridTrainingSplitsRoute: GuidesHybridTrainingSplitsRoute,
   GuidesLegDayAndFootballRoute: GuidesLegDayAndFootballRoute,
   GuidesNutritionForHybridAthletesRoute: GuidesNutritionForHybridAthletesRoute,
+  JoinTokenRoute: JoinTokenRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
