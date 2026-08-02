@@ -10,6 +10,7 @@ Disallow: /nutrition
 Disallow: /scan
 Disallow: /journal
 Disallow: /insights
+Disallow: /import
 Disallow: /invites
 Disallow: /chat
 Disallow: /team

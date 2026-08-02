@@ -249,6 +249,116 @@ export type Database = {
           },
         ]
       }
+      import_files: {
+        Row: {
+          content_hash: string
+          created_at: string
+          error: string | null
+          file_type: string
+          id: string
+          job_id: string
+          processed_at: string | null
+          relative_path: string
+          skip_reason: string | null
+          status: Database["public"]["Enums"]["import_status"]
+          storage_path: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_hash: string
+          created_at?: string
+          error?: string | null
+          file_type?: string
+          id?: string
+          job_id: string
+          processed_at?: string | null
+          relative_path: string
+          skip_reason?: string | null
+          status?: Database["public"]["Enums"]["import_status"]
+          storage_path?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_hash?: string
+          created_at?: string
+          error?: string | null
+          file_type?: string
+          id?: string
+          job_id?: string
+          processed_at?: string | null
+          relative_path?: string
+          skip_reason?: string | null
+          status?: Database["public"]["Enums"]["import_status"]
+          storage_path?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_files_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_jobs: {
+        Row: {
+          created_at: string
+          duplicate_files: number
+          error: string | null
+          failed_files: number
+          finished_at: string | null
+          id: string
+          imported_activities: number
+          kind: string
+          original_filename: string | null
+          processed_files: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["import_status"]
+          total_files: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duplicate_files?: number
+          error?: string | null
+          failed_files?: number
+          finished_at?: string | null
+          id?: string
+          imported_activities?: number
+          kind?: string
+          original_filename?: string | null
+          processed_files?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["import_status"]
+          total_files?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duplicate_files?: number
+          error?: string | null
+          failed_files?: number
+          finished_at?: string | null
+          id?: string
+          imported_activities?: number
+          kind?: string
+          original_filename?: string | null
+          processed_files?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["import_status"]
+          total_files?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           content: string
@@ -652,6 +762,7 @@ export type Database = {
         | "full"
         | "light"
         | "mobility"
+      import_status: "queued" | "processing" | "done" | "failed" | "skipped"
       intensity_level: "low" | "mid" | "high"
       match_hardness: "easy" | "normal" | "hard"
       meal_type: "breakfast" | "lunch" | "dinner" | "snack"
@@ -800,6 +911,7 @@ export const Constants = {
         "light",
         "mobility",
       ],
+      import_status: ["queued", "processing", "done", "failed", "skipped"],
       intensity_level: ["low", "mid", "high"],
       match_hardness: ["easy", "normal", "hard"],
       meal_type: ["breakfast", "lunch", "dinner", "snack"],
