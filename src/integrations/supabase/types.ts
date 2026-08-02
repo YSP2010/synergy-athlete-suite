@@ -1077,6 +1077,21 @@ export type Database = {
     }
     Functions: {
       coach_can_view_athlete: { Args: { _user_id: string }; Returns: boolean }
+      course_leaderboard: {
+        Args: { _course_id: string }
+        Returns: {
+          athlete_name: string
+          avg_hr: number
+          avg_speed_mps: number
+          distance_m: number
+          duration_s: number
+          effort_id: string
+          is_me: boolean
+          started_at: string
+          user_id: string
+          verified: boolean
+        }[]
+      }
       create_team_with_chat: { Args: { _name: string }; Returns: string }
       find_profile_by_email: {
         Args: { _email: string }
