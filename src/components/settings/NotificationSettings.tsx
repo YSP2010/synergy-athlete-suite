@@ -101,29 +101,44 @@ export function NotificationSettings() {
         </p>
       )}
 
-      {active && (
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true);
-            try {
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          try {
+            if (active) {
               const res = await test();
               toast[res.ok ? "success" : "error"](
                 res.ok ? "Testnachricht gesendet" : "Kein aktives Gerät gefunden",
               );
-            } catch (e) {
-              toast.error(humanError(e));
-            } finally {
-              setBusy(false);
+              return;
             }
-          }}
-        >
-          {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Testnachricht senden
-        </Button>
-      )}
+            const perm =
+              Notification.permission === "granted"
+                ? "granted"
+                : await Notification.requestPermission();
+            if (perm !== "granted") {
+              toast.error("Benachrichtigungen wurden im Browser blockiert.");
+              return;
+            }
+            new Notification("Synergy Athlete", {
+              body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
+              icon: "/icons/icon-192.png",
+            });
+            toast.success("Lokale Testnachricht ausgelöst");
+          } catch (e) {
+            toast.error(humanError(e));
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+        Test-Benachrichtigung senden
+      </Button>
+
     </div>
   );
 }
