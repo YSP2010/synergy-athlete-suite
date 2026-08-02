@@ -134,7 +134,7 @@ function LeaderboardPage() {
         _period: period,
         _period_start: start,
         _scope: scope,
-        _team_id: scope === "team" ? activeTeam : null,
+        _team_id: (scope === "team" ? activeTeam : null) ?? undefined,
         _limit: 100,
       });
       if (error) throw error;
