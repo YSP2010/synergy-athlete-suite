@@ -17,28 +17,34 @@ import { Route as GuidesNutritionForHybridAthletesRouteImport } from './routes/g
 import { Route as GuidesLegDayAndFootballRouteImport } from './routes/guides.leg-day-and-football'
 import { Route as GuidesHybridTrainingSplitsRouteImport } from './routes/guides.hybrid-training-splits'
 import { Route as Guides12WeekProgramRouteImport } from './routes/guides.12-week-program'
+import { Route as AuthenticatedTriathlonRouteImport } from './routes/_authenticated/triathlon'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
 import { Route as AuthenticatedRecordsRouteImport } from './routes/_authenticated/records'
+import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticated/privacy'
 import { Route as AuthenticatedPlanRouteImport } from './routes/_authenticated/plan'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNutritionRouteImport } from './routes/_authenticated/nutrition'
+import { Route as AuthenticatedLeaderboardRouteImport } from './routes/_authenticated/leaderboard'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedInvitesRouteImport } from './routes/_authenticated/invites'
 import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
 import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated/import'
+import { Route as AuthenticatedEquipmentRouteImport } from './routes/_authenticated/equipment'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCheckinRouteImport } from './routes/_authenticated/checkin'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedSportIndexRouteImport } from './routes/_authenticated/sport.index'
+import { Route as AuthenticatedRacesIndexRouteImport } from './routes/_authenticated/races.index'
 import { Route as AuthenticatedGymIndexRouteImport } from './routes/_authenticated/gym.index'
 import { Route as AuthenticatedCoursesIndexRouteImport } from './routes/_authenticated/courses.index'
 import { Route as AuthenticatedChatIndexRouteImport } from './routes/_authenticated/chat.index'
 import { Route as AuthenticatedActivitiesIndexRouteImport } from './routes/_authenticated/activities.index'
 import { Route as AuthenticatedSportIdRouteImport } from './routes/_authenticated/sport.$id'
+import { Route as AuthenticatedRacesIdRouteImport } from './routes/_authenticated/races.$id'
 import { Route as AuthenticatedGymIdRouteImport } from './routes/_authenticated/gym.$id'
 import { Route as AuthenticatedCoursesIdRouteImport } from './routes/_authenticated/courses.$id'
 import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
@@ -88,6 +94,11 @@ const Guides12WeekProgramRoute = Guides12WeekProgramRouteImport.update({
   path: '/guides/12-week-program',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedTriathlonRoute = AuthenticatedTriathlonRouteImport.update({
+  id: '/triathlon',
+  path: '/triathlon',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -108,6 +119,11 @@ const AuthenticatedRecordsRoute = AuthenticatedRecordsRouteImport.update({
   path: '/records',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPrivacyRoute = AuthenticatedPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlanRoute = AuthenticatedPlanRouteImport.update({
   id: '/plan',
   path: '/plan',
@@ -123,6 +139,12 @@ const AuthenticatedNutritionRoute = AuthenticatedNutritionRouteImport.update({
   path: '/nutrition',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLeaderboardRoute =
+  AuthenticatedLeaderboardRouteImport.update({
+    id: '/leaderboard',
+    path: '/leaderboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
   id: '/journal',
   path: '/journal',
@@ -141,6 +163,11 @@ const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
 const AuthenticatedImportRoute = AuthenticatedImportRouteImport.update({
   id: '/import',
   path: '/import',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEquipmentRoute = AuthenticatedEquipmentRouteImport.update({
+  id: '/equipment',
+  path: '/equipment',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -175,6 +202,11 @@ const AuthenticatedSportIndexRoute = AuthenticatedSportIndexRouteImport.update({
   path: '/sport/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRacesIndexRoute = AuthenticatedRacesIndexRouteImport.update({
+  id: '/races/',
+  path: '/races/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedGymIndexRoute = AuthenticatedGymIndexRouteImport.update({
   id: '/gym/',
   path: '/gym/',
@@ -200,6 +232,11 @@ const AuthenticatedActivitiesIndexRoute =
 const AuthenticatedSportIdRoute = AuthenticatedSportIdRouteImport.update({
   id: '/sport/$id',
   path: '/sport/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRacesIdRoute = AuthenticatedRacesIdRouteImport.update({
+  id: '/races/$id',
+  path: '/races/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedGymIdRoute = AuthenticatedGymIdRouteImport.update({
@@ -249,17 +286,21 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/equipment': typeof AuthenticatedEquipmentRoute
   '/import': typeof AuthenticatedImportRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
+  '/leaderboard': typeof AuthenticatedLeaderboardRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
+  '/privacy': typeof AuthenticatedPrivacyRoute
   '/records': typeof AuthenticatedRecordsRoute
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/triathlon': typeof AuthenticatedTriathlonRoute
   '/guides/12-week-program': typeof Guides12WeekProgramRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
@@ -271,11 +312,13 @@ export interface FileRoutesByFullPath {
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/courses/$id': typeof AuthenticatedCoursesIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
+  '/races/$id': typeof AuthenticatedRacesIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
   '/activities/': typeof AuthenticatedActivitiesIndexRoute
   '/chat/': typeof AuthenticatedChatIndexRoute
   '/courses/': typeof AuthenticatedCoursesIndexRoute
   '/gym/': typeof AuthenticatedGymIndexRoute
+  '/races/': typeof AuthenticatedRacesIndexRoute
   '/sport/': typeof AuthenticatedSportIndexRoute
 }
 export interface FileRoutesByTo {
@@ -287,17 +330,21 @@ export interface FileRoutesByTo {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/equipment': typeof AuthenticatedEquipmentRoute
   '/import': typeof AuthenticatedImportRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
+  '/leaderboard': typeof AuthenticatedLeaderboardRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
+  '/privacy': typeof AuthenticatedPrivacyRoute
   '/records': typeof AuthenticatedRecordsRoute
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/triathlon': typeof AuthenticatedTriathlonRoute
   '/guides/12-week-program': typeof Guides12WeekProgramRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
@@ -309,11 +356,13 @@ export interface FileRoutesByTo {
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/courses/$id': typeof AuthenticatedCoursesIdRoute
   '/gym/$id': typeof AuthenticatedGymIdRoute
+  '/races/$id': typeof AuthenticatedRacesIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
   '/activities': typeof AuthenticatedActivitiesIndexRoute
   '/chat': typeof AuthenticatedChatIndexRoute
   '/courses': typeof AuthenticatedCoursesIndexRoute
   '/gym': typeof AuthenticatedGymIndexRoute
+  '/races': typeof AuthenticatedRacesIndexRoute
   '/sport': typeof AuthenticatedSportIndexRoute
 }
 export interface FileRoutesById {
@@ -327,17 +376,21 @@ export interface FileRoutesById {
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/checkin': typeof AuthenticatedCheckinRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/equipment': typeof AuthenticatedEquipmentRoute
   '/_authenticated/import': typeof AuthenticatedImportRoute
   '/_authenticated/insights': typeof AuthenticatedInsightsRoute
   '/_authenticated/invites': typeof AuthenticatedInvitesRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
+  '/_authenticated/leaderboard': typeof AuthenticatedLeaderboardRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/plan': typeof AuthenticatedPlanRoute
+  '/_authenticated/privacy': typeof AuthenticatedPrivacyRoute
   '/_authenticated/records': typeof AuthenticatedRecordsRoute
   '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/_authenticated/triathlon': typeof AuthenticatedTriathlonRoute
   '/guides/12-week-program': typeof Guides12WeekProgramRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
@@ -349,11 +402,13 @@ export interface FileRoutesById {
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/courses/$id': typeof AuthenticatedCoursesIdRoute
   '/_authenticated/gym/$id': typeof AuthenticatedGymIdRoute
+  '/_authenticated/races/$id': typeof AuthenticatedRacesIdRoute
   '/_authenticated/sport/$id': typeof AuthenticatedSportIdRoute
   '/_authenticated/activities/': typeof AuthenticatedActivitiesIndexRoute
   '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
   '/_authenticated/courses/': typeof AuthenticatedCoursesIndexRoute
   '/_authenticated/gym/': typeof AuthenticatedGymIndexRoute
+  '/_authenticated/races/': typeof AuthenticatedRacesIndexRoute
   '/_authenticated/sport/': typeof AuthenticatedSportIndexRoute
 }
 export interface FileRouteTypes {
@@ -367,17 +422,21 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/checkin'
     | '/dashboard'
+    | '/equipment'
     | '/import'
     | '/insights'
     | '/invites'
     | '/journal'
+    | '/leaderboard'
     | '/nutrition'
     | '/onboarding'
     | '/plan'
+    | '/privacy'
     | '/records'
     | '/scan'
     | '/settings'
     | '/team'
+    | '/triathlon'
     | '/guides/12-week-program'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
@@ -389,11 +448,13 @@ export interface FileRouteTypes {
     | '/chat/$id'
     | '/courses/$id'
     | '/gym/$id'
+    | '/races/$id'
     | '/sport/$id'
     | '/activities/'
     | '/chat/'
     | '/courses/'
     | '/gym/'
+    | '/races/'
     | '/sport/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -405,17 +466,21 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/checkin'
     | '/dashboard'
+    | '/equipment'
     | '/import'
     | '/insights'
     | '/invites'
     | '/journal'
+    | '/leaderboard'
     | '/nutrition'
     | '/onboarding'
     | '/plan'
+    | '/privacy'
     | '/records'
     | '/scan'
     | '/settings'
     | '/team'
+    | '/triathlon'
     | '/guides/12-week-program'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
@@ -427,11 +492,13 @@ export interface FileRouteTypes {
     | '/chat/$id'
     | '/courses/$id'
     | '/gym/$id'
+    | '/races/$id'
     | '/sport/$id'
     | '/activities'
     | '/chat'
     | '/courses'
     | '/gym'
+    | '/races'
     | '/sport'
   id:
     | '__root__'
@@ -444,17 +511,21 @@ export interface FileRouteTypes {
     | '/_authenticated/analytics'
     | '/_authenticated/checkin'
     | '/_authenticated/dashboard'
+    | '/_authenticated/equipment'
     | '/_authenticated/import'
     | '/_authenticated/insights'
     | '/_authenticated/invites'
     | '/_authenticated/journal'
+    | '/_authenticated/leaderboard'
     | '/_authenticated/nutrition'
     | '/_authenticated/onboarding'
     | '/_authenticated/plan'
+    | '/_authenticated/privacy'
     | '/_authenticated/records'
     | '/_authenticated/scan'
     | '/_authenticated/settings'
     | '/_authenticated/team'
+    | '/_authenticated/triathlon'
     | '/guides/12-week-program'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
@@ -466,11 +537,13 @@ export interface FileRouteTypes {
     | '/_authenticated/chat/$id'
     | '/_authenticated/courses/$id'
     | '/_authenticated/gym/$id'
+    | '/_authenticated/races/$id'
     | '/_authenticated/sport/$id'
     | '/_authenticated/activities/'
     | '/_authenticated/chat/'
     | '/_authenticated/courses/'
     | '/_authenticated/gym/'
+    | '/_authenticated/races/'
     | '/_authenticated/sport/'
   fileRoutesById: FileRoutesById
 }
@@ -547,6 +620,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Guides12WeekProgramRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/triathlon': {
+      id: '/_authenticated/triathlon'
+      path: '/triathlon'
+      fullPath: '/triathlon'
+      preLoaderRoute: typeof AuthenticatedTriathlonRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/team': {
       id: '/_authenticated/team'
       path: '/team'
@@ -575,6 +655,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRecordsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/privacy': {
+      id: '/_authenticated/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof AuthenticatedPrivacyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/plan': {
       id: '/_authenticated/plan'
       path: '/plan'
@@ -594,6 +681,13 @@ declare module '@tanstack/react-router' {
       path: '/nutrition'
       fullPath: '/nutrition'
       preLoaderRoute: typeof AuthenticatedNutritionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/leaderboard': {
+      id: '/_authenticated/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof AuthenticatedLeaderboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/journal': {
@@ -622,6 +716,13 @@ declare module '@tanstack/react-router' {
       path: '/import'
       fullPath: '/import'
       preLoaderRoute: typeof AuthenticatedImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/equipment': {
+      id: '/_authenticated/equipment'
+      path: '/equipment'
+      fullPath: '/equipment'
+      preLoaderRoute: typeof AuthenticatedEquipmentRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -666,6 +767,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSportIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/races/': {
+      id: '/_authenticated/races/'
+      path: '/races'
+      fullPath: '/races/'
+      preLoaderRoute: typeof AuthenticatedRacesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/gym/': {
       id: '/_authenticated/gym/'
       path: '/gym'
@@ -699,6 +807,13 @@ declare module '@tanstack/react-router' {
       path: '/sport/$id'
       fullPath: '/sport/$id'
       preLoaderRoute: typeof AuthenticatedSportIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/races/$id': {
+      id: '/_authenticated/races/$id'
+      path: '/races/$id'
+      fullPath: '/races/$id'
+      preLoaderRoute: typeof AuthenticatedRacesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/gym/$id': {
@@ -757,27 +872,33 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedCheckinRoute: typeof AuthenticatedCheckinRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEquipmentRoute: typeof AuthenticatedEquipmentRoute
   AuthenticatedImportRoute: typeof AuthenticatedImportRoute
   AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
   AuthenticatedInvitesRoute: typeof AuthenticatedInvitesRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
+  AuthenticatedLeaderboardRoute: typeof AuthenticatedLeaderboardRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlanRoute: typeof AuthenticatedPlanRoute
+  AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRoute
   AuthenticatedRecordsRoute: typeof AuthenticatedRecordsRoute
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedTriathlonRoute: typeof AuthenticatedTriathlonRoute
   AuthenticatedActivitiesIdRoute: typeof AuthenticatedActivitiesIdRoute
   AuthenticatedAthletesIdRoute: typeof AuthenticatedAthletesIdRoute
   AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
   AuthenticatedCoursesIdRoute: typeof AuthenticatedCoursesIdRoute
   AuthenticatedGymIdRoute: typeof AuthenticatedGymIdRoute
+  AuthenticatedRacesIdRoute: typeof AuthenticatedRacesIdRoute
   AuthenticatedSportIdRoute: typeof AuthenticatedSportIdRoute
   AuthenticatedActivitiesIndexRoute: typeof AuthenticatedActivitiesIndexRoute
   AuthenticatedChatIndexRoute: typeof AuthenticatedChatIndexRoute
   AuthenticatedCoursesIndexRoute: typeof AuthenticatedCoursesIndexRoute
   AuthenticatedGymIndexRoute: typeof AuthenticatedGymIndexRoute
+  AuthenticatedRacesIndexRoute: typeof AuthenticatedRacesIndexRoute
   AuthenticatedSportIndexRoute: typeof AuthenticatedSportIndexRoute
 }
 
@@ -785,27 +906,33 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedCheckinRoute: AuthenticatedCheckinRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEquipmentRoute: AuthenticatedEquipmentRoute,
   AuthenticatedImportRoute: AuthenticatedImportRoute,
   AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
   AuthenticatedInvitesRoute: AuthenticatedInvitesRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
+  AuthenticatedLeaderboardRoute: AuthenticatedLeaderboardRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlanRoute: AuthenticatedPlanRoute,
+  AuthenticatedPrivacyRoute: AuthenticatedPrivacyRoute,
   AuthenticatedRecordsRoute: AuthenticatedRecordsRoute,
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedTriathlonRoute: AuthenticatedTriathlonRoute,
   AuthenticatedActivitiesIdRoute: AuthenticatedActivitiesIdRoute,
   AuthenticatedAthletesIdRoute: AuthenticatedAthletesIdRoute,
   AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
   AuthenticatedCoursesIdRoute: AuthenticatedCoursesIdRoute,
   AuthenticatedGymIdRoute: AuthenticatedGymIdRoute,
+  AuthenticatedRacesIdRoute: AuthenticatedRacesIdRoute,
   AuthenticatedSportIdRoute: AuthenticatedSportIdRoute,
   AuthenticatedActivitiesIndexRoute: AuthenticatedActivitiesIndexRoute,
   AuthenticatedChatIndexRoute: AuthenticatedChatIndexRoute,
   AuthenticatedCoursesIndexRoute: AuthenticatedCoursesIndexRoute,
   AuthenticatedGymIndexRoute: AuthenticatedGymIndexRoute,
+  AuthenticatedRacesIndexRoute: AuthenticatedRacesIndexRoute,
   AuthenticatedSportIndexRoute: AuthenticatedSportIndexRoute,
 }
 

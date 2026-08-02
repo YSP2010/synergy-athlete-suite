@@ -4,6 +4,7 @@ import { findDuplicate, fingerprintOf, type ActivityFingerprint } from "./import
 import { downsampleTrack } from "./import/downsample";
 import { geometryFromTrack, matchCourse, type CourseGeometry } from "./import/match";
 import type { ParsedActivity } from "./import/types";
+import { looksMultisport, segmentsFromLaps } from "./triathlon/segments";
 
 type DB = SupabaseClient<Database>;
 
@@ -142,7 +143,21 @@ export async function persistActivity(
     }));
     const { error: lapErr } = await db.from("activity_laps").insert(laps);
     if (lapErr) console.error("[import] laps failed", lapErr);
+
+    // Multisport: Runden zu Segmenten (Schwimmen/T1/Rad/T2/Laufen) zusammenfassen.
+    if (a.sport === "multisport" || looksMultisport(a.laps)) {
+      const segments = segmentsFromLaps(a.laps, a.startedAt ?? null).map((s) => ({
+        ...s,
+        activity_id: activityId,
+        user_id: userId,
+      }));
+      if (segments.length) {
+        const { error: segErr } = await db.from("multisport_segments").insert(segments);
+        if (segErr) console.error("[import] segments failed", segErr);
+      }
+    }
   }
+
 
   const { points, bounds } = downsampleTrack(a.samples);
   if (points.length) {

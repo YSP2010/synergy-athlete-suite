@@ -36,6 +36,7 @@ export type Database = {
           duration_s: number | null
           elevation_gain_m: number | null
           elevation_loss_m: number | null
+          equipment_id: string | null
           gct_balance_pct: number | null
           id: string
           import_file_id: string | null
@@ -76,6 +77,7 @@ export type Database = {
           duration_s?: number | null
           elevation_gain_m?: number | null
           elevation_loss_m?: number | null
+          equipment_id?: string | null
           gct_balance_pct?: number | null
           id?: string
           import_file_id?: string | null
@@ -116,6 +118,7 @@ export type Database = {
           duration_s?: number | null
           elevation_gain_m?: number | null
           elevation_loss_m?: number | null
+          equipment_id?: string | null
           gct_balance_pct?: number | null
           id?: string
           import_file_id?: string | null
@@ -136,6 +139,13 @@ export type Database = {
           verified?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "activities_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "activities_import_file_id_fkey"
             columns: ["import_file_id"]
@@ -343,6 +353,33 @@ export type Database = {
           },
         ]
       }
+      consents: {
+        Row: {
+          changed_at: string
+          granted: boolean
+          id: string
+          kind: string
+          user_id: string
+          version: string
+        }
+        Insert: {
+          changed_at?: string
+          granted: boolean
+          id?: string
+          kind: string
+          user_id: string
+          version?: string
+        }
+        Update: {
+          changed_at?: string
+          granted?: boolean
+          id?: string
+          kind?: string
+          user_id?: string
+          version?: string
+        }
+        Relationships: []
+      }
       course_efforts: {
         Row: {
           activity_id: string
@@ -510,6 +547,51 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      equipment: {
+        Row: {
+          brand: string | null
+          created_at: string
+          id: string
+          model: string | null
+          name: string
+          purchased_on: string | null
+          retire_at_distance_m: number | null
+          retired: boolean
+          total_distance_m: number
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          model?: string | null
+          name: string
+          purchased_on?: string | null
+          retire_at_distance_m?: number | null
+          retired?: boolean
+          total_distance_m?: number
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          model?: string | null
+          name?: string
+          purchased_on?: string | null
+          retire_at_distance_m?: number | null
+          retired?: boolean
+          total_distance_m?: number
+          type?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -787,6 +869,173 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          description_de: string
+          direction: string
+          key: string
+          label_de: string
+          min_sample_size: number
+          requires_health_consent: boolean
+          sort_order: number
+          sport: string | null
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description_de: string
+          direction: string
+          key: string
+          label_de: string
+          min_sample_size?: number
+          requires_health_consent?: boolean
+          sort_order?: number
+          sport?: string | null
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description_de?: string
+          direction?: string
+          key?: string
+          label_de?: string
+          min_sample_size?: number
+          requires_health_consent?: boolean
+          sort_order?: number
+          sport?: string | null
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      leaderboard_entries: {
+        Row: {
+          category_key: string
+          computed_at: string
+          created_at: string
+          flagged: boolean
+          id: string
+          period: Database["public"]["Enums"]["leaderboard_period"]
+          period_start: string
+          sample_count: number
+          supporting_activity_id: string | null
+          updated_at: string
+          user_id: string
+          value: number
+          verified: boolean
+        }
+        Insert: {
+          category_key: string
+          computed_at?: string
+          created_at?: string
+          flagged?: boolean
+          id?: string
+          period: Database["public"]["Enums"]["leaderboard_period"]
+          period_start: string
+          sample_count?: number
+          supporting_activity_id?: string | null
+          updated_at?: string
+          user_id: string
+          value: number
+          verified?: boolean
+        }
+        Update: {
+          category_key?: string
+          computed_at?: string
+          created_at?: string
+          flagged?: boolean
+          id?: string
+          period?: Database["public"]["Enums"]["leaderboard_period"]
+          period_start?: string
+          sample_count?: number
+          supporting_activity_id?: string | null
+          updated_at?: string
+          user_id?: string
+          value?: number
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaderboard_entries_category_key_fkey"
+            columns: ["category_key"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_categories"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "leaderboard_entries_supporting_activity_id_fkey"
+            columns: ["supporting_activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      multisport_segments: {
+        Row: {
+          activity_id: string
+          avg_cadence: number | null
+          avg_hr: number | null
+          avg_power_w: number | null
+          avg_speed_mps: number | null
+          created_at: string
+          distance_m: number | null
+          duration_s: number
+          id: string
+          segment_index: number
+          segment_type: string
+          sport: string | null
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          avg_cadence?: number | null
+          avg_hr?: number | null
+          avg_power_w?: number | null
+          avg_speed_mps?: number | null
+          created_at?: string
+          distance_m?: number | null
+          duration_s: number
+          id?: string
+          segment_index: number
+          segment_type: string
+          sport?: string | null
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          avg_cadence?: number | null
+          avg_hr?: number | null
+          avg_power_w?: number | null
+          avg_speed_mps?: number | null
+          created_at?: string
+          distance_m?: number | null
+          duration_s?: number
+          id?: string
+          segment_index?: number
+          segment_type?: string
+          sport?: string | null
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multisport_segments_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nutrition_logs: {
         Row: {
           carbs_g: number
@@ -889,6 +1138,9 @@ export type Database = {
           gym_days: number[] | null
           height_cm: number | null
           id: string
+          leaderboard_display_name: string | null
+          leaderboard_opt_in: boolean
+          leaderboard_share_health: boolean
           match_days: number[] | null
           name: string | null
           onboarded: boolean
@@ -909,6 +1161,9 @@ export type Database = {
           gym_days?: number[] | null
           height_cm?: number | null
           id: string
+          leaderboard_display_name?: string | null
+          leaderboard_opt_in?: boolean
+          leaderboard_share_health?: boolean
           match_days?: number[] | null
           name?: string | null
           onboarded?: boolean
@@ -929,6 +1184,9 @@ export type Database = {
           gym_days?: number[] | null
           height_cm?: number | null
           id?: string
+          leaderboard_display_name?: string | null
+          leaderboard_opt_in?: boolean
+          leaderboard_share_health?: boolean
           match_days?: number[] | null
           name?: string | null
           onboarded?: boolean
@@ -974,6 +1232,86 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      races: {
+        Row: {
+          bike_distance_m: number | null
+          created_at: string
+          goal_bike_s: number | null
+          goal_run_s: number | null
+          goal_swim_s: number | null
+          goal_t1_s: number | null
+          goal_t2_s: number | null
+          goal_time_s: number | null
+          id: string
+          location: string | null
+          name: string
+          notes: string | null
+          priority: string
+          race_date: string
+          race_type: string
+          result_activity_id: string | null
+          run_distance_m: number | null
+          status: string
+          swim_distance_m: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bike_distance_m?: number | null
+          created_at?: string
+          goal_bike_s?: number | null
+          goal_run_s?: number | null
+          goal_swim_s?: number | null
+          goal_t1_s?: number | null
+          goal_t2_s?: number | null
+          goal_time_s?: number | null
+          id?: string
+          location?: string | null
+          name: string
+          notes?: string | null
+          priority?: string
+          race_date: string
+          race_type: string
+          result_activity_id?: string | null
+          run_distance_m?: number | null
+          status?: string
+          swim_distance_m?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bike_distance_m?: number | null
+          created_at?: string
+          goal_bike_s?: number | null
+          goal_run_s?: number | null
+          goal_swim_s?: number | null
+          goal_t1_s?: number | null
+          goal_t2_s?: number | null
+          goal_time_s?: number | null
+          id?: string
+          location?: string | null
+          name?: string
+          notes?: string | null
+          priority?: string
+          race_date?: string
+          race_type?: string
+          result_activity_id?: string | null
+          run_distance_m?: number | null
+          status?: string
+          swim_distance_m?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "races_result_activity_id_fkey"
+            columns: ["result_activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sleep_logs: {
         Row: {
@@ -1043,6 +1381,72 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      swim_metrics: {
+        Row: {
+          activity_id: string
+          avg_pace_s_per_100m: number | null
+          avg_strokes_per_length: number | null
+          avg_swolf: number | null
+          best_swolf: number | null
+          created_at: string
+          css_pace_s_per_100m: number | null
+          id: string
+          open_water: boolean
+          pool_length_m: number | null
+          segment_id: string | null
+          stroke_type: string | null
+          total_strokes: number | null
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          avg_pace_s_per_100m?: number | null
+          avg_strokes_per_length?: number | null
+          avg_swolf?: number | null
+          best_swolf?: number | null
+          created_at?: string
+          css_pace_s_per_100m?: number | null
+          id?: string
+          open_water?: boolean
+          pool_length_m?: number | null
+          segment_id?: string | null
+          stroke_type?: string | null
+          total_strokes?: number | null
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          avg_pace_s_per_100m?: number | null
+          avg_strokes_per_length?: number | null
+          avg_swolf?: number | null
+          best_swolf?: number | null
+          created_at?: string
+          css_pace_s_per_100m?: number | null
+          id?: string
+          open_water?: boolean
+          pool_length_m?: number | null
+          segment_id?: string | null
+          stroke_type?: string | null
+          total_strokes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swim_metrics_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swim_metrics_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "multisport_segments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
@@ -1406,6 +1810,26 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"]
         }[]
       }
+      get_leaderboard: {
+        Args: {
+          _category_key: string
+          _limit?: number
+          _period: Database["public"]["Enums"]["leaderboard_period"]
+          _period_start: string
+          _scope?: Database["public"]["Enums"]["leaderboard_scope"]
+          _team_id?: string
+        }
+        Returns: {
+          activity_id: string
+          display_name: string
+          is_me: boolean
+          rank: number
+          sample_count: number
+          user_id: string
+          value: number
+          verified: boolean
+        }[]
+      }
       get_or_create_direct_chat: {
         Args: { _other_user_id: string }
         Returns: string
@@ -1432,6 +1856,8 @@ export type Database = {
         | "mobility"
       import_status: "queued" | "processing" | "done" | "failed" | "skipped"
       intensity_level: "low" | "mid" | "high"
+      leaderboard_period: "week" | "month" | "year" | "all_time"
+      leaderboard_scope: "global" | "team" | "friends"
       match_hardness: "easy" | "normal" | "hard"
       meal_type: "breakfast" | "lunch" | "dinner" | "snack"
       nutrition_source: "manual" | "scan"
@@ -1582,6 +2008,8 @@ export const Constants = {
       ],
       import_status: ["queued", "processing", "done", "failed", "skipped"],
       intensity_level: ["low", "mid", "high"],
+      leaderboard_period: ["week", "month", "year", "all_time"],
+      leaderboard_scope: ["global", "team", "friends"],
       match_hardness: ["easy", "normal", "hard"],
       meal_type: ["breakfast", "lunch", "dinner", "snack"],
       nutrition_source: ["manual", "scan"],

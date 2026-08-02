@@ -1,7 +1,7 @@
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import type { ReactNode } from "react";
-import { Activity, BookOpen, CalendarDays, Camera, Dumbbell, FileUp, Flag, HeartPulse, LayoutDashboard, LineChart, LogOut, Mail, MessageSquare, Settings, TrendingUp, Trophy, Users, Utensils, type LucideIcon } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { Activity, Bike, BookOpen, CalendarDays, Camera, Dumbbell, FileUp, Flag, HeartPulse, LayoutDashboard, LineChart, LogOut, Mail, Medal, MessageSquare, MoreHorizontal, Settings, ShieldCheck, TrendingUp, Trophy, Users, Utensils, Wrench, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,15 +28,21 @@ const ATHLETE_NAV: NavItem[] = [
   { to: "/courses", label: "Strecken", icon: Flag, shortLabel: "Strecken" },
   { to: "/analytics", label: "Analyse", icon: LineChart, shortLabel: "Analyse" },
   { to: "/records", label: "Bestleistungen", icon: Trophy, shortLabel: "PRs" },
+  { to: "/leaderboard", label: "Bestenliste", icon: Medal, shortLabel: "Rang" },
+  { to: "/triathlon", label: "Triathlon", icon: Bike, shortLabel: "Tri" },
+  { to: "/races", label: "Rennen", icon: Flag, shortLabel: "Rennen" },
+  { to: "/equipment", label: "Ausrüstung", icon: Wrench, shortLabel: "Gear" },
   { to: "/import", label: "Import", icon: FileUp, shortLabel: "Import" },
   { to: "/invites", label: "Einladungen", icon: Mail, shortLabel: "Invites" },
   { to: "/chat", label: "Chat", icon: MessageSquare, shortLabel: "Chat" },
+  { to: "/privacy", label: "Datenschutz", icon: ShieldCheck, shortLabel: "Daten" },
 ];
 
 const COACH_NAV: NavItem[] = [
   { to: "/team", label: "Teams", icon: Users, shortLabel: "Teams" },
   { to: "/chat", label: "Chat", icon: MessageSquare, shortLabel: "Chat" },
 ];
+
 
 export function AppShell({ children }: { children: ReactNode }) {
   const loc = useLocation();
@@ -57,6 +63,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     },
   });
 
+  const [moreOpen, setMoreOpen] = useState(false);
+
   const NAV = role === "coach" ? COACH_NAV : ATHLETE_NAV;
   // Kern-Tabs für die mobile Bottom-Nav (benannt, statt Magic-Index-Zugriffe).
   const findNav = (to: string) => ATHLETE_NAV.find((n) => n.to === to)!;
@@ -68,8 +76,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           findNav("/plan"),
           findNav("/gym"),
           findNav("/nutrition"),
-          findNav("/chat"),
         ];
+  const MORE_NAV = role === "coach" ? [] : NAV.filter((n) => !MOBILE_NAV.includes(n));
+
 
   async function signOut() {
     await qc.cancelQueries();
@@ -142,13 +151,50 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-8 md:px-8">{children}</div>
       </main>
 
+      {moreOpen && MORE_NAV.length > 0 && (
+        <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMoreOpen(false)}>
+          <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
+          <div
+            className="absolute inset-x-0 bottom-16 max-h-[60vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card p-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grid grid-cols-3 gap-2">
+              {MORE_NAV.map((n) => {
+                const Icon = n.icon;
+                return (
+                  <Link
+                    key={n.to}
+                    to={n.to}
+                    onClick={() => setMoreOpen(false)}
+                    className="flex flex-col items-center gap-1.5 rounded-lg bg-elevated px-2 py-3 text-xs font-medium text-muted-foreground"
+                  >
+                    <Icon className="h-5 w-5 text-neon" />
+                    <span className="text-center leading-tight">{n.label}</span>
+                  </Link>
+                );
+              })}
+              <Link
+                to="/settings"
+                onClick={() => setMoreOpen(false)}
+                className="flex flex-col items-center gap-1.5 rounded-lg bg-elevated px-2 py-3 text-xs font-medium text-muted-foreground"
+              >
+                <Settings className="h-5 w-5 text-neon" />
+                Einstellungen
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/90 backdrop-blur md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div
           className="grid"
-          style={{ gridTemplateColumns: `repeat(${MOBILE_NAV.length}, minmax(0, 1fr))` }}
+          style={{
+            gridTemplateColumns: `repeat(${MOBILE_NAV.length + (MORE_NAV.length ? 1 : 0)}, minmax(0, 1fr))`,
+          }}
         >
           {MOBILE_NAV.map((n) => {
             const active = loc.pathname.startsWith(n.to);
@@ -157,6 +203,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={n.to}
                 to={n.to}
+                onClick={() => setMoreOpen(false)}
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 py-2 text-xs font-medium",
                   active ? "text-neon" : "text-muted-foreground",
@@ -167,8 +214,24 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             );
           })}
+          {MORE_NAV.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setMoreOpen((v) => !v)}
+              aria-label="Weitere Bereiche anzeigen"
+              aria-expanded={moreOpen}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 py-2 text-xs font-medium",
+                moreOpen ? "text-neon" : "text-muted-foreground",
+              )}
+            >
+              <MoreHorizontal className="h-5 w-5" />
+              Mehr
+            </button>
+          )}
         </div>
       </nav>
+
     </div>
   );
 }

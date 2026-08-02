@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,10 @@ import { toast } from "sonner";
 import { WEEKDAY_LABELS } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { Goal } from "@/lib/planner";
-import { LogOut } from "lucide-react";
+import { Loader2, LogOut, RefreshCw, ShieldCheck } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { useServerFn } from "@tanstack/react-start";
+import { recomputeMyLeaderboard } from "@/lib/leaderboard.functions";
 import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -149,6 +152,16 @@ function SettingsPage() {
         </Button>
       </div>
 
+      <LeaderboardSettings />
+
+      <Link
+        to="/privacy"
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground hover:bg-elevated"
+      >
+        <ShieldCheck className="h-4 w-4" /> Datenschutz, Export & Kontolöschung
+      </Link>
+
+
       <button
         onClick={signOut}
         className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm text-danger hover:bg-elevated"
@@ -190,6 +203,143 @@ function DayPicker({
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+/** Abschnitt „Bestenliste & Sichtbarkeit" – Einwilligungen inklusive Protokoll. */
+function LeaderboardSettings() {
+  const qc = useQueryClient();
+  const recompute = useServerFn(recomputeMyLeaderboard);
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile-leaderboard"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, name, leaderboard_opt_in, leaderboard_display_name, leaderboard_share_health")
+        .eq("id", u.user.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const [displayName, setDisplayName] = useState("");
+  useEffect(() => {
+    if (profile) setDisplayName(profile.leaderboard_display_name ?? "");
+  }, [profile]);
+
+  const update = useMutation({
+    mutationFn: async (
+      patch: {
+        leaderboard_opt_in?: boolean;
+        leaderboard_share_health?: boolean;
+        leaderboard_display_name?: string | null;
+      } & { consentKind?: string; consentValue?: boolean },
+    ) => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("no user");
+      const { consentKind, consentValue, ...fields } = patch;
+      const { error } = await supabase.from("profiles").update(fields).eq("id", u.user.id);
+      if (error) throw error;
+      if (consentKind) {
+        await supabase.from("consents").insert({
+          user_id: u.user.id,
+          kind: consentKind,
+          granted: consentValue === true,
+          version: "v1",
+        });
+      }
+      if (fields.leaderboard_opt_in === true || consentValue === true) {
+        await recompute({ data: undefined });
+      }
+    },
+    onSuccess: () => {
+      toast.success("Gespeichert");
+      qc.invalidateQueries({ queryKey: ["profile-leaderboard"] });
+      qc.invalidateQueries({ queryKey: ["lb-me"] });
+      qc.invalidateQueries({ queryKey: ["lb-rows"] });
+    },
+    onError: (e) => toast.error(humanError(e)),
+  });
+
+  const optedIn = profile?.leaderboard_opt_in === true;
+  const preview = displayName.trim() || profile?.name || "Athlet";
+
+  return (
+    <div className="card-elevated space-y-4 p-5">
+      <h2 className="font-display text-lg font-semibold">Bestenliste & Sichtbarkeit</h2>
+
+      <label className="flex items-start justify-between gap-4">
+        <span className="text-sm">
+          <span className="font-medium">An der Bestenliste teilnehmen</span>
+          <span className="block text-xs text-muted-foreground">
+            Andere angemeldete Nutzer sehen deinen Anzeigenamen und deine Werte in Lauf-, Rad-, Schwimm- und
+            Konsistenz-Kategorien.
+          </span>
+        </span>
+        <Switch
+          checked={optedIn}
+          onCheckedChange={(v) =>
+            update.mutate({ leaderboard_opt_in: v, consentKind: "leaderboard", consentValue: v })
+          }
+        />
+      </label>
+
+      <label className="flex items-start justify-between gap-4">
+        <span className="text-sm">
+          <span className="font-medium">Gesundheitsdaten in Wertungen freigeben</span>
+          <span className="block text-xs text-muted-foreground">
+            Zusätzliche Zustimmung für Schlaf-Score, HRV-Konstanz und Ruhepuls. Jederzeit widerrufbar – die
+            Einträge werden dann sofort gelöscht.
+          </span>
+        </span>
+        <Switch
+          checked={profile?.leaderboard_share_health === true}
+          disabled={!optedIn}
+          onCheckedChange={(v) =>
+            update.mutate({ leaderboard_share_health: v, consentKind: "leaderboard_health", consentValue: v })
+          }
+        />
+      </label>
+
+      <div>
+        <Label>Anzeigename in der Rangliste</Label>
+        <Input
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          placeholder="Pseudonym erlaubt"
+          maxLength={40}
+        />
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          Vorschau: andere sehen dich als <strong className="text-foreground">{preview}</strong>
+          {optedIn ? "" : " – aktuell erscheinst du nirgends."}
+        </p>
+      </div>
+
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          className="flex-1"
+          onClick={() => update.mutate({ leaderboard_display_name: displayName.trim() || null })}
+          disabled={update.isPending}
+        >
+          Anzeigename speichern
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={async () => {
+            const res = await recompute({ data: undefined });
+            toast.success(res?.skipped === "rate_limit" ? "Kürzlich schon berechnet" : "Werte aktualisiert");
+          }}
+          disabled={!optedIn}
+          aria-label="Bestenlisten-Werte neu berechnen"
+        >
+          {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+        </Button>
       </div>
     </div>
   );

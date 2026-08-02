@@ -47,16 +47,22 @@ function ActivityDetail() {
   const { data, isLoading } = useQuery({
     queryKey: ["activity", id],
     queryFn: async () => {
-      const [act, track, laps] = await Promise.all([
+      const [act, track, laps, segs] = await Promise.all([
         supabase.from("activities").select("*").eq("id", id).maybeSingle(),
         supabase.from("activity_tracks").select("points, bounds").eq("activity_id", id).maybeSingle(),
         supabase.from("activity_laps").select("*").eq("activity_id", id).order("lap_index"),
+        supabase
+          .from("multisport_segments")
+          .select("*")
+          .eq("activity_id", id)
+          .order("segment_index"),
       ]);
       if (act.error) throw act.error;
       return {
         activity: act.data,
         points: ((track.data?.points as unknown as TrackPoint[]) ?? []),
         laps: laps.data ?? [],
+        segments: segs.data ?? [],
       };
     },
   });
@@ -64,6 +70,38 @@ function ActivityDetail() {
   const points = data?.points ?? [];
   const a = data?.activity;
   const chart = useMemo(() => toChartData(points, a?.distance_m ?? null), [points, a?.distance_m]);
+
+  const { data: gear } = useQuery({
+    queryKey: ["equipment-options"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("equipment")
+        .select("id, name, type, retired")
+        .eq("retired", false)
+        .order("name");
+      return data ?? [];
+    },
+  });
+
+  /** Weist Ausrüstung zu und schreibt den Kilometerstand aus allen Aktivitäten fort. */
+  const assignGear = useMutation({
+    mutationFn: async (equipmentId: string | null) => {
+      const { error } = await supabase.from("activities").update({ equipment_id: equipmentId }).eq("id", id);
+      if (error) throw error;
+      const affected = [equipmentId, a?.equipment_id].filter(Boolean) as string[];
+      for (const gid of [...new Set(affected)]) {
+        const { data: rows } = await supabase.from("activities").select("distance_m").eq("equipment_id", gid);
+        const total = (rows ?? []).reduce((s, r) => s + Number(r.distance_m ?? 0), 0);
+        await supabase.from("equipment").update({ total_distance_m: total }).eq("id", gid);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Ausrüstung aktualisiert");
+      qc.invalidateQueries({ queryKey: ["activity", id] });
+      qc.invalidateQueries({ queryKey: ["equipment"] });
+    },
+    onError: () => toast.error("Zuweisung fehlgeschlagen"),
+  });
 
   const createCourse = useMutation({
     mutationFn: async () => {
@@ -190,6 +228,55 @@ function ActivityDetail() {
         </div>
       )}
 
+      {(gear ?? []).length > 0 && (
+        <section className="rounded-lg border border-border bg-card p-4">
+          <h2 className="mb-2 font-semibold">Ausrüstung</h2>
+          <select
+            aria-label="Ausrüstung dieser Aktivität"
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            value={a?.equipment_id ?? ""}
+            onChange={(e) => assignGear.mutate(e.target.value || null)}
+            disabled={assignGear.isPending}
+          >
+            <option value="">Keine Zuordnung</option>
+            {(gear ?? []).map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Der Kilometerstand der Ausrüstung wird automatisch neu berechnet.
+          </p>
+        </section>
+      )}
+
+      {data!.segments.length > 0 && (
+        <section className="rounded-lg border border-border bg-card p-4">
+          <h2 className="mb-3 font-semibold">Multisport-Segmente</h2>
+          <ol className="space-y-2">
+            {data!.segments.map((s) => {
+              const transition = s.segment_type === "t1" || s.segment_type === "t2";
+              return (
+                <li
+                  key={s.id}
+                  className={`flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm ${
+                    transition ? "bg-muted/40" : ""
+                  }`}
+                >
+                  <span className="font-medium">{SEGMENT_LABEL[s.segment_type] ?? s.segment_type}</span>
+                  <span className="tabular-nums text-muted-foreground">
+                    {fmtDuration(s.duration_s)}
+                    {s.distance_m ? ` · ${fmtDistance(s.distance_m)}` : ""}
+                    {s.avg_hr ? ` · ${s.avg_hr} bpm` : ""}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      )}
+
       {data!.laps.length > 0 && (
         <section className="rounded-lg border border-border bg-card p-4">
           <h2 className="mb-3 font-semibold">Runden</h2>
@@ -278,3 +365,13 @@ function ChartCard({ title, children }: { title: string; children: React.ReactEl
     </div>
   );
 }
+
+/** Deutsche Bezeichnungen für Multisport-Segmente. */
+const SEGMENT_LABEL: Record<string, string> = {
+  swim: "Schwimmen",
+  t1: "Wechsel 1",
+  bike: "Radfahren",
+  t2: "Wechsel 2",
+  run: "Laufen",
+  other: "Sonstiges",
+};
