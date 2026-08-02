@@ -154,6 +154,9 @@ function SettingsPage() {
 
       <LeaderboardSettings />
 
+      <NotificationSettings />
+
+
       <Link
         to="/privacy"
         className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground hover:bg-elevated"
