@@ -63,6 +63,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     },
   });
 
+  const [moreOpen, setMoreOpen] = useState(false);
+
   const NAV = role === "coach" ? COACH_NAV : ATHLETE_NAV;
   // Kern-Tabs für die mobile Bottom-Nav (benannt, statt Magic-Index-Zugriffe).
   const findNav = (to: string) => ATHLETE_NAV.find((n) => n.to === to)!;
@@ -74,8 +76,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           findNav("/plan"),
           findNav("/gym"),
           findNav("/nutrition"),
-          findNav("/chat"),
         ];
+  const MORE_NAV = role === "coach" ? [] : NAV.filter((n) => !MOBILE_NAV.includes(n));
+
 
   async function signOut() {
     await qc.cancelQueries();
