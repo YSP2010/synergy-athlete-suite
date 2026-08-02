@@ -16,6 +16,7 @@ import {
   MessageSquare,
   Mail,
   TrendingUp,
+  FileUp,
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
