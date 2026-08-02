@@ -7,6 +7,8 @@ import { addDays, isoDow, startOfWeek, toISODate, WEEKDAY_LONG } from "@/lib/dat
 import {
   applyOverrides,
   calcRecovery,
+  needsDeload,
+  deloadReason,
   generateWeekPlan,
   toAthleteProfile,
   type DailyStat,
