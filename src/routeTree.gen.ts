@@ -27,6 +27,7 @@ import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPlanRouteImport } from './routes/_authenticated/plan'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNutritionRouteImport } from './routes/_authenticated/nutrition'
+import { Route as AuthenticatedMatchdayRouteImport } from './routes/_authenticated/matchday'
 import { Route as AuthenticatedLeaderboardRouteImport } from './routes/_authenticated/leaderboard'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedInvitesRouteImport } from './routes/_authenticated/invites'
@@ -143,6 +144,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
 const AuthenticatedNutritionRoute = AuthenticatedNutritionRouteImport.update({
   id: '/nutrition',
   path: '/nutrition',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMatchdayRoute = AuthenticatedMatchdayRouteImport.update({
+  id: '/matchday',
+  path: '/matchday',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLeaderboardRoute =
@@ -298,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
+  '/matchday': typeof AuthenticatedMatchdayRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
@@ -343,6 +350,7 @@ export interface FileRoutesByTo {
   '/invites': typeof AuthenticatedInvitesRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
+  '/matchday': typeof AuthenticatedMatchdayRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/plan': typeof AuthenticatedPlanRoute
@@ -390,6 +398,7 @@ export interface FileRoutesById {
   '/_authenticated/invites': typeof AuthenticatedInvitesRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/leaderboard': typeof AuthenticatedLeaderboardRoute
+  '/_authenticated/matchday': typeof AuthenticatedMatchdayRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/plan': typeof AuthenticatedPlanRoute
@@ -437,6 +446,7 @@ export interface FileRouteTypes {
     | '/invites'
     | '/journal'
     | '/leaderboard'
+    | '/matchday'
     | '/nutrition'
     | '/onboarding'
     | '/plan'
@@ -482,6 +492,7 @@ export interface FileRouteTypes {
     | '/invites'
     | '/journal'
     | '/leaderboard'
+    | '/matchday'
     | '/nutrition'
     | '/onboarding'
     | '/plan'
@@ -528,6 +539,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invites'
     | '/_authenticated/journal'
     | '/_authenticated/leaderboard'
+    | '/_authenticated/matchday'
     | '/_authenticated/nutrition'
     | '/_authenticated/onboarding'
     | '/_authenticated/plan'
@@ -701,6 +713,13 @@ declare module '@tanstack/react-router' {
       path: '/nutrition'
       fullPath: '/nutrition'
       preLoaderRoute: typeof AuthenticatedNutritionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/matchday': {
+      id: '/_authenticated/matchday'
+      path: '/matchday'
+      fullPath: '/matchday'
+      preLoaderRoute: typeof AuthenticatedMatchdayRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/leaderboard': {
@@ -898,6 +917,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInvitesRoute: typeof AuthenticatedInvitesRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedLeaderboardRoute: typeof AuthenticatedLeaderboardRoute
+  AuthenticatedMatchdayRoute: typeof AuthenticatedMatchdayRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlanRoute: typeof AuthenticatedPlanRoute
@@ -932,6 +952,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInvitesRoute: AuthenticatedInvitesRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedLeaderboardRoute: AuthenticatedLeaderboardRoute,
+  AuthenticatedMatchdayRoute: AuthenticatedMatchdayRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlanRoute: AuthenticatedPlanRoute,
