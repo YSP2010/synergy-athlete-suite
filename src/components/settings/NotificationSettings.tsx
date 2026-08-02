@@ -11,6 +11,7 @@ import {
   sendTestPush,
 } from "@/lib/push.functions";
 import { pushSupported, subscribeToPush, unsubscribeFromPush } from "@/lib/pwa/push";
+import { registerServiceWorker } from "@/lib/pwa/register";
 import { humanError } from "@/lib/errors";
 
 /** Ein-/Ausschalten der Push-Benachrichtigungen für dieses Gerät. */
@@ -26,11 +27,18 @@ export function NotificationSettings() {
   const test = useServerFn(sendTestPush);
 
   useEffect(() => {
-    setSupported(pushSupported());
-    if (!pushSupported()) return;
-    navigator.serviceWorker.getRegistration().then(async (reg) => {
+    const canPush = pushSupported();
+    setSupported(canPush);
+    if (!canPush) return;
+    let mounted = true;
+    void (async () => {
+      // Wartet hier explizit auf die Registrierung. Zuvor konnte diese Prüfung
+      // schneller sein als die globale PWA-Registrierung und blieb dann dauerhaft false.
+      const reg = (await registerServiceWorker()) ?? (await navigator.serviceWorker.getRegistration());
+      if (!mounted) return;
       setInstalled(!!reg);
       const sub = await reg?.pushManager.getSubscription();
+      if (!mounted) return;
       setActive(!!sub);
       if (!sub) return;
       // Vorhandene Abos erneut speichern, damit alte, falsch kodierte Schlüssel korrigiert werden.
@@ -42,7 +50,10 @@ export function NotificationSettings() {
       } catch {
         // Nicht kritisch – der Nutzer kann Push manuell neu aktivieren.
       }
-    });
+    })();
+    return () => {
+      mounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -135,7 +146,9 @@ export function NotificationSettings() {
               toast.error("Benachrichtigungen wurden im Browser blockiert.");
               return;
             }
-            const reg = await navigator.serviceWorker?.getRegistration();
+            const reg =
+              (await registerServiceWorker()) ??
+              (await navigator.serviceWorker?.getRegistration());
             if (reg) {
               // Android/Chrome erlaubt nur Notifications über den Service Worker.
               await reg.showNotification("Synergy Athlete", {
