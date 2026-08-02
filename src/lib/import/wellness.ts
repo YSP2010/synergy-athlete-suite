@@ -277,7 +277,7 @@ function mapSleep(rec: Rec, date: string): SleepRow | null {
 function mapHrv(rec: Rec, date: string): HrvRow | null {
   const row: HrvRow = {
     date,
-    last_night_avg_ms: num(rec, "lastNightAvg", "lastNightAvgHrv", "weeklyAvgHrv" in rec ? "lastNightAvg" : "avgHrv"),
+    last_night_avg_ms: num(rec, "lastNightAvg", "lastNightAvgHrv", "avgHrv"),
     last_night_5min_high_ms: num(rec, "lastNight5MinHigh", "lastNightHigh"),
     weekly_avg_ms: num(rec, "weeklyAvg", "weeklyAvgHrv"),
     baseline_low_ms: num(rec, "baselineLowUpper", "baselineLow"),
@@ -304,7 +304,7 @@ function mapMetrics(rec: Rec, date: string): UserMetricRow | null {
     lactate_threshold_hr: num(rec, "lactateThresholdHeartRate", "lactateThresholdHeartRateValue"),
     lactate_threshold_speed_mps: num(rec, "lactateThresholdSpeed", "lactateThresholdSpeedValue"),
     ftp_w: num(rec, "functionalThresholdPower", "ftp", "ftpValue"),
-    training_readiness: num(rec, "trainingReadinessScore", "trainingReadiness", "score"),
+    training_readiness: num(rec, "trainingReadinessScore", "trainingReadiness"),
     training_status: str(rec, "trainingStatus", "trainingStatusValue"),
     acute_load: num(rec, "acuteTrainingLoad", "acuteLoad"),
     chronic_load: num(rec, "chronicTrainingLoad", "chronicLoad"),
