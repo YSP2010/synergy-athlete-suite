@@ -72,9 +72,9 @@ export const exportMyTracks = createServerFn({ method: "POST" })
       .limit(1000);
     if (error) {
       console.error("[export] tracks failed", error);
-      return { tracks: [] };
+      return { tracksJson: "[]" };
     }
-    return { tracks: data ?? [] };
+    return { tracksJson: JSON.stringify(data ?? []) };
   });
 
 export const deleteMyAccount = createServerFn({ method: "POST" })
