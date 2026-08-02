@@ -40,6 +40,7 @@ const ATHLETE_NAV: NavItem[] = [
   { to: "/scan", label: "Scanner", icon: Camera, shortLabel: "Scan" },
   { to: "/journal", label: "Tagebuch", icon: BookOpen, shortLabel: "Diary" },
   { to: "/insights", label: "Fortschritt", icon: TrendingUp, shortLabel: "Trend" },
+  { to: "/import", label: "Import", icon: FileUp, shortLabel: "Import" },
   { to: "/invites", label: "Einladungen", icon: Mail, shortLabel: "Invites" },
   { to: "/chat", label: "Chat", icon: MessageSquare, shortLabel: "Chat" },
 ];
