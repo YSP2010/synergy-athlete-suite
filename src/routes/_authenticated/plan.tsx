@@ -350,7 +350,7 @@ function PlanPage() {
     locked && planner?.plan?.snapshot
       ? planner.plan.snapshot
       : applyOverrides(
-          generateWeekPlan(ath, weekStart, hardnessMap, data.recoveryScore),
+          generateWeekPlan(ath, weekStart, hardnessMap, data.recoveryScore, data.signals),
           overrides,
         );
   const todayIso = toISODate(new Date());
