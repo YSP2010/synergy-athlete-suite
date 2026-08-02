@@ -71,6 +71,38 @@ function ActivityDetail() {
   const a = data?.activity;
   const chart = useMemo(() => toChartData(points, a?.distance_m ?? null), [points, a?.distance_m]);
 
+  const { data: gear } = useQuery({
+    queryKey: ["equipment-options"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("equipment")
+        .select("id, name, type, retired")
+        .eq("retired", false)
+        .order("name");
+      return data ?? [];
+    },
+  });
+
+  /** Weist Ausrüstung zu und schreibt den Kilometerstand aus allen Aktivitäten fort. */
+  const assignGear = useMutation({
+    mutationFn: async (equipmentId: string | null) => {
+      const { error } = await supabase.from("activities").update({ equipment_id: equipmentId }).eq("id", id);
+      if (error) throw error;
+      const affected = [equipmentId, a?.equipment_id].filter(Boolean) as string[];
+      for (const gid of [...new Set(affected)]) {
+        const { data: rows } = await supabase.from("activities").select("distance_m").eq("equipment_id", gid);
+        const total = (rows ?? []).reduce((s, r) => s + Number(r.distance_m ?? 0), 0);
+        await supabase.from("equipment").update({ total_distance_m: total }).eq("id", gid);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Ausrüstung aktualisiert");
+      qc.invalidateQueries({ queryKey: ["activity", id] });
+      qc.invalidateQueries({ queryKey: ["equipment"] });
+    },
+    onError: () => toast.error("Zuweisung fehlgeschlagen"),
+  });
+
   const createCourse = useMutation({
     mutationFn: async () => {
       const { data: auth } = await supabase.auth.getUser();
