@@ -11,6 +11,8 @@ Disallow: /scan
 Disallow: /journal
 Disallow: /insights
 Disallow: /import
+Disallow: /activities
+Disallow: /courses
 Disallow: /invites
 Disallow: /chat
 Disallow: /team
