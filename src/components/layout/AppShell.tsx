@@ -18,6 +18,7 @@ const ATHLETE_NAV: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, shortLabel: "Home" },
   { to: "/plan", label: "Wochenplan", icon: CalendarDays, shortLabel: "Plan" },
   { to: "/checkin", label: "Check-in", icon: HeartPulse, shortLabel: "Check" },
+  { to: "/matchday", label: "Spieltag", icon: Timer, shortLabel: "Spieltag" },
   { to: "/gym", label: "Gym-Log", icon: Dumbbell, shortLabel: "Gym" },
   { to: "/sport", label: "Sport-Log", icon: Trophy, shortLabel: "Sport" },
   { to: "/nutrition", label: "Ernährung", icon: Utensils, shortLabel: "Food" },
