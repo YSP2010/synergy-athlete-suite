@@ -365,6 +365,20 @@ function PlanPage() {
         </p>
       </div>
 
+      {needsDeload(data.signals) && (
+        <div className="card-elevated flex items-start gap-2 border-l-4 border-l-[color:var(--warn)] p-4 text-sm">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--warn)]" />
+          <div>
+            <div className="font-medium">{deloadReason(data.signals)}</div>
+            <p className="text-xs text-muted-foreground">
+              Deine Belastung ist zuletzt schneller gestiegen, als dein Körper sie verarbeitet.
+              Harte Einheiten wurden durch lockere ersetzt – Details unter Analyse.
+            </p>
+          </div>
+        </div>
+      )}
+
+
       <div className="card-elevated flex items-center justify-between p-4">
         <div>
           <div className="flex items-center gap-2 text-sm font-medium">
