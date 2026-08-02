@@ -91,13 +91,16 @@ export function NotificationSettings() {
             Erinnerungen zu Check-in, Planänderungen und Spieltagen – nur auf diesem Gerät.
           </p>
         </div>
-        <Switch checked={active} disabled={busy} onCheckedChange={toggle} aria-label="Benachrichtigungen aktivieren" />
+        <Switch checked={active} disabled={busy || !installed} onCheckedChange={toggle} aria-label="Benachrichtigungen aktivieren" />
       </div>
       {!installed && (
-        <p className="text-xs text-muted-foreground">
-          Hinweis: Push funktioniert erst in der installierten bzw. veröffentlichten App.
+        <p className="rounded-lg border border-border bg-elevated p-3 text-xs text-muted-foreground">
+          In der Vorschau ist der Service Worker deaktiviert, deshalb lässt sich Push hier nicht
+          einschalten. Öffne die veröffentlichte App (oder installiere sie auf dem Home-Bildschirm)
+          und aktiviere die Benachrichtigungen dort.
         </p>
       )}
+
       {active && (
         <Button
           variant="outline"
