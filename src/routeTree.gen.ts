@@ -17,6 +17,7 @@ import { Route as GuidesNutritionForHybridAthletesRouteImport } from './routes/g
 import { Route as GuidesLegDayAndFootballRouteImport } from './routes/guides.leg-day-and-football'
 import { Route as GuidesHybridTrainingSplitsRouteImport } from './routes/guides.hybrid-training-splits'
 import { Route as Guides12WeekProgramRouteImport } from './routes/guides.12-week-program'
+import { Route as AuthenticatedTriathlonRouteImport } from './routes/_authenticated/triathlon'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedScanRouteImport } from './routes/_authenticated/scan'
@@ -91,6 +92,11 @@ const Guides12WeekProgramRoute = Guides12WeekProgramRouteImport.update({
   id: '/guides/12-week-program',
   path: '/guides/12-week-program',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedTriathlonRoute = AuthenticatedTriathlonRouteImport.update({
+  id: '/triathlon',
+  path: '/triathlon',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   id: '/team',
@@ -287,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/triathlon': typeof AuthenticatedTriathlonRoute
   '/guides/12-week-program': typeof Guides12WeekProgramRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/scan': typeof AuthenticatedScanRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/triathlon': typeof AuthenticatedTriathlonRoute
   '/guides/12-week-program': typeof Guides12WeekProgramRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
@@ -373,6 +381,7 @@ export interface FileRoutesById {
   '/_authenticated/scan': typeof AuthenticatedScanRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/_authenticated/triathlon': typeof AuthenticatedTriathlonRoute
   '/guides/12-week-program': typeof Guides12WeekProgramRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
@@ -417,6 +426,7 @@ export interface FileRouteTypes {
     | '/scan'
     | '/settings'
     | '/team'
+    | '/triathlon'
     | '/guides/12-week-program'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/scan'
     | '/settings'
     | '/team'
+    | '/triathlon'
     | '/guides/12-week-program'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
@@ -502,6 +513,7 @@ export interface FileRouteTypes {
     | '/_authenticated/scan'
     | '/_authenticated/settings'
     | '/_authenticated/team'
+    | '/_authenticated/triathlon'
     | '/guides/12-week-program'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
@@ -595,6 +607,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/guides/12-week-program'
       preLoaderRoute: typeof Guides12WeekProgramRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/triathlon': {
+      id: '/_authenticated/triathlon'
+      path: '/triathlon'
+      fullPath: '/triathlon'
+      preLoaderRoute: typeof AuthenticatedTriathlonRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/team': {
       id: '/_authenticated/team'
@@ -847,6 +866,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedScanRoute: typeof AuthenticatedScanRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedTriathlonRoute: typeof AuthenticatedTriathlonRoute
   AuthenticatedActivitiesIdRoute: typeof AuthenticatedActivitiesIdRoute
   AuthenticatedAthletesIdRoute: typeof AuthenticatedAthletesIdRoute
   AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
@@ -879,6 +899,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedScanRoute: AuthenticatedScanRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedTriathlonRoute: AuthenticatedTriathlonRoute,
   AuthenticatedActivitiesIdRoute: AuthenticatedActivitiesIdRoute,
   AuthenticatedAthletesIdRoute: AuthenticatedAthletesIdRoute,
   AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
