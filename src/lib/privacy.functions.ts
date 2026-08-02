@@ -37,11 +37,14 @@ export const exportMyData = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const out: Record<string, unknown[]> = {};
+    const out: Record<string, unknown> = {};
 
     for (const table of EXPORT_TABLES) {
       const column = table === "profiles" ? "id" : "user_id";
-      const { data, error } = await supabase.from(table).select("*").eq(column, userId).limit(5000);
+      const query = supabase.from(table).select("*") as unknown as {
+        eq: (col: string, val: string) => { limit: (n: number) => Promise<{ data: unknown[] | null; error: unknown }> };
+      };
+      const { data, error } = await query.eq(column, userId).limit(5000);
       if (error) {
         console.error("[export] failed", table, error);
         continue;
@@ -52,7 +55,8 @@ export const exportMyData = createServerFn({ method: "POST" })
     return {
       exportedAt: new Date().toISOString(),
       userId,
-      tables: out,
+      // Als JSON-Text, damit der Export beliebige Tabellenformen transportieren kann.
+      tablesJson: JSON.stringify(out),
     };
   });
 
