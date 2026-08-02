@@ -228,6 +228,29 @@ function ActivityDetail() {
         </div>
       )}
 
+      {(gear ?? []).length > 0 && (
+        <section className="rounded-lg border border-border bg-card p-4">
+          <h2 className="mb-2 font-semibold">Ausrüstung</h2>
+          <select
+            aria-label="Ausrüstung dieser Aktivität"
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            value={a?.equipment_id ?? ""}
+            onChange={(e) => assignGear.mutate(e.target.value || null)}
+            disabled={assignGear.isPending}
+          >
+            <option value="">Keine Zuordnung</option>
+            {(gear ?? []).map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Der Kilometerstand der Ausrüstung wird automatisch neu berechnet.
+          </p>
+        </section>
+      )}
+
       {data!.segments.length > 0 && (
         <section className="rounded-lg border border-border bg-card p-4">
           <h2 className="mb-3 font-semibold">Multisport-Segmente</h2>
