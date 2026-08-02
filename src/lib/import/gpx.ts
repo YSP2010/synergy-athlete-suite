@@ -8,9 +8,13 @@ const parser = new XMLParser({
   removeNSPrefix: true,
 });
 
-function asArray<T>(v: T | T[] | undefined | null): T[] {
+type Node = Record<string, unknown>;
+
+/** Normalisiert XML-Knoten zu einer Liste (fast-xml-parser liefert Einzelobjekte). */
+function arr(v: unknown): Node[] {
   if (v === undefined || v === null) return [];
-  return Array.isArray(v) ? v : [v];
+  const list = Array.isArray(v) ? v : [v];
+  return list.filter((x): x is Node => typeof x === "object" && x !== null);
 }
 
 function num(v: unknown): number | null {
@@ -95,26 +99,26 @@ function finalize(
 
 /** Parst eine GPX-Datei. Ohne <time>-Elemente gilt sie als reine Route. */
 export function parseGpx(xml: string): ParsedActivity {
-  const doc = parser.parse(xml) as Record<string, unknown>;
-  const gpx = doc["gpx"] as Record<string, unknown> | undefined;
+  const doc = parser.parse(xml) as Node;
+  const gpx = doc["gpx"] as Node | undefined;
   if (!gpx) throw new ParseError("Kein <gpx>-Element gefunden");
 
-  const tracks = asArray(gpx["trk"] as Record<string, unknown> | Record<string, unknown>[]);
-  const routes = asArray(gpx["rte"] as Record<string, unknown> | Record<string, unknown>[]);
+  const tracks = arr(gpx["trk"]);
+  const routes = arr(gpx["rte"]);
   const name =
     (tracks[0]?.["name"] as string | undefined) ??
     (routes[0]?.["name"] as string | undefined) ??
-    (gpx["metadata"] as Record<string, unknown> | undefined)?.["name"] ??
+    (gpx["metadata"] as Node | undefined)?.["name"] ??
     null;
 
-  const points: Record<string, unknown>[] = [];
+  const points: Node[] = [];
   for (const trk of tracks) {
-    for (const seg of asArray(trk["trkseg"] as Record<string, unknown>)) {
-      points.push(...asArray(seg["trkpt"] as Record<string, unknown>));
+    for (const seg of arr(trk["trkseg"])) {
+      points.push(...arr(seg["trkpt"]));
     }
   }
   for (const rte of routes) {
-    points.push(...asArray(rte["rtept"] as Record<string, unknown>));
+    points.push(...arr(rte["rtept"]));
   }
   if (!points.length) throw new ParseError("GPX enthält keine Punkte");
 
@@ -135,8 +139,8 @@ export function parseGpx(xml: string): ParsedActivity {
         t = Math.round((ms - startMs) / 1000);
       }
     }
-    const ext = p["extensions"] as Record<string, unknown> | undefined;
-    const tpe = ext?.["TrackPointExtension"] as Record<string, unknown> | undefined;
+    const ext = p["extensions"] as Node | undefined;
+    const tpe = ext?.["TrackPointExtension"] as Node | undefined;
     samples.push({
       tOffsetS: t,
       lat,
@@ -154,11 +158,11 @@ export function parseGpx(xml: string): ParsedActivity {
 
 /** Parst eine TCX-Datei (Garmin Training Center). */
 export function parseTcx(xml: string): ParsedActivity {
-  const doc = parser.parse(xml) as Record<string, unknown>;
-  const db = doc["TrainingCenterDatabase"] as Record<string, unknown> | undefined;
+  const doc = parser.parse(xml) as Node;
+  const db = doc["TrainingCenterDatabase"] as Node | undefined;
   if (!db) throw new ParseError("Kein <TrainingCenterDatabase>-Element gefunden");
-  const activities = db["Activities"] as Record<string, unknown> | undefined;
-  const activity = asArray(activities?.["Activity"] as Record<string, unknown>)[0];
+  const activities = db["Activities"] as Node | undefined;
+  const activity = arr(activities?.["Activity"])[0] as Node | undefined;
   if (!activity) throw new ParseError("TCX enthält keine Aktivität");
 
   const sportRaw = String(activity["@Sport"] ?? "other").toLowerCase();
@@ -170,11 +174,11 @@ export function parseTcx(xml: string): ParsedActivity {
   let totalDistance = 0;
   let calories = 0;
 
-  for (const lap of asArray(activity["Lap"] as Record<string, unknown>)) {
+  for (const lap of arr(activity["Lap"])) {
     totalDistance += num(lap["DistanceMeters"]) ?? 0;
     calories += num(lap["Calories"]) ?? 0;
-    for (const track of asArray(lap["Track"] as Record<string, unknown>)) {
-      for (const tp of asArray(track["Trackpoint"] as Record<string, unknown>)) {
+    for (const track of arr(lap["Track"])) {
+      for (const tp of arr(track["Trackpoint"])) {
         const ms = Date.parse(String(tp["Time"] ?? ""));
         let t = 0;
         if (Number.isFinite(ms)) {
@@ -182,10 +186,10 @@ export function parseTcx(xml: string): ParsedActivity {
           if (startMs == null) startMs = ms;
           t = Math.round((ms - startMs) / 1000);
         }
-        const pos = tp["Position"] as Record<string, unknown> | undefined;
-        const hrNode = tp["HeartRateBpm"] as Record<string, unknown> | undefined;
-        const ext = tp["Extensions"] as Record<string, unknown> | undefined;
-        const tpx = ext?.["TPX"] as Record<string, unknown> | undefined;
+        const pos = tp["Position"] as Node | undefined;
+        const hrNode = tp["HeartRateBpm"] as Node | undefined;
+        const ext = tp["Extensions"] as Node | undefined;
+        const tpx = ext?.["TPX"] as Node | undefined;
         samples.push({
           tOffsetS: t,
           lat: num(pos?.["LatitudeDegrees"]),
