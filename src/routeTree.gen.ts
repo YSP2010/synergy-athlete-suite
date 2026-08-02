@@ -33,6 +33,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedSportIndexRouteImport } from './routes/_authenticated/sport.index'
 import { Route as AuthenticatedGymIndexRouteImport } from './routes/_authenticated/gym.index'
+import { Route as AuthenticatedCoursesIndexRouteImport } from './routes/_authenticated/courses.index'
 import { Route as AuthenticatedChatIndexRouteImport } from './routes/_authenticated/chat.index'
 import { Route as AuthenticatedActivitiesIndexRouteImport } from './routes/_authenticated/activities.index'
 import { Route as AuthenticatedSportIdRouteImport } from './routes/_authenticated/sport.$id'
@@ -166,6 +167,12 @@ const AuthenticatedGymIndexRoute = AuthenticatedGymIndexRouteImport.update({
   path: '/gym/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCoursesIndexRoute =
+  AuthenticatedCoursesIndexRouteImport.update({
+    id: '/courses/',
+    path: '/courses/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedChatIndexRoute = AuthenticatedChatIndexRouteImport.update({
   id: '/chat/',
   path: '/chat/',
@@ -246,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/sport/$id': typeof AuthenticatedSportIdRoute
   '/activities/': typeof AuthenticatedActivitiesIndexRoute
   '/chat/': typeof AuthenticatedChatIndexRoute
+  '/courses/': typeof AuthenticatedCoursesIndexRoute
   '/gym/': typeof AuthenticatedGymIndexRoute
   '/sport/': typeof AuthenticatedSportIndexRoute
 }
@@ -280,6 +288,7 @@ export interface FileRoutesByTo {
   '/sport/$id': typeof AuthenticatedSportIdRoute
   '/activities': typeof AuthenticatedActivitiesIndexRoute
   '/chat': typeof AuthenticatedChatIndexRoute
+  '/courses': typeof AuthenticatedCoursesIndexRoute
   '/gym': typeof AuthenticatedGymIndexRoute
   '/sport': typeof AuthenticatedSportIndexRoute
 }
@@ -316,6 +325,7 @@ export interface FileRoutesById {
   '/_authenticated/sport/$id': typeof AuthenticatedSportIdRoute
   '/_authenticated/activities/': typeof AuthenticatedActivitiesIndexRoute
   '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
+  '/_authenticated/courses/': typeof AuthenticatedCoursesIndexRoute
   '/_authenticated/gym/': typeof AuthenticatedGymIndexRoute
   '/_authenticated/sport/': typeof AuthenticatedSportIndexRoute
 }
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/sport/$id'
     | '/activities/'
     | '/chat/'
+    | '/courses/'
     | '/gym/'
     | '/sport/'
   fileRoutesByTo: FileRoutesByTo
@@ -386,6 +397,7 @@ export interface FileRouteTypes {
     | '/sport/$id'
     | '/activities'
     | '/chat'
+    | '/courses'
     | '/gym'
     | '/sport'
   id:
@@ -421,6 +433,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sport/$id'
     | '/_authenticated/activities/'
     | '/_authenticated/chat/'
+    | '/_authenticated/courses/'
     | '/_authenticated/gym/'
     | '/_authenticated/sport/'
   fileRoutesById: FileRoutesById
@@ -610,6 +623,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGymIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/courses/': {
+      id: '/_authenticated/courses/'
+      path: '/courses'
+      fullPath: '/courses/'
+      preLoaderRoute: typeof AuthenticatedCoursesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/chat/': {
       id: '/_authenticated/chat/'
       path: '/chat'
@@ -696,6 +716,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSportIdRoute: typeof AuthenticatedSportIdRoute
   AuthenticatedActivitiesIndexRoute: typeof AuthenticatedActivitiesIndexRoute
   AuthenticatedChatIndexRoute: typeof AuthenticatedChatIndexRoute
+  AuthenticatedCoursesIndexRoute: typeof AuthenticatedCoursesIndexRoute
   AuthenticatedGymIndexRoute: typeof AuthenticatedGymIndexRoute
   AuthenticatedSportIndexRoute: typeof AuthenticatedSportIndexRoute
 }
@@ -720,6 +741,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSportIdRoute: AuthenticatedSportIdRoute,
   AuthenticatedActivitiesIndexRoute: AuthenticatedActivitiesIndexRoute,
   AuthenticatedChatIndexRoute: AuthenticatedChatIndexRoute,
+  AuthenticatedCoursesIndexRoute: AuthenticatedCoursesIndexRoute,
   AuthenticatedGymIndexRoute: AuthenticatedGymIndexRoute,
   AuthenticatedSportIndexRoute: AuthenticatedSportIndexRoute,
 }
