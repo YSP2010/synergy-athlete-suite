@@ -196,6 +196,32 @@ function ActivityDetail() {
         </div>
       )}
 
+      {data!.segments.length > 0 && (
+        <section className="rounded-lg border border-border bg-card p-4">
+          <h2 className="mb-3 font-semibold">Multisport-Segmente</h2>
+          <ol className="space-y-2">
+            {data!.segments.map((s) => {
+              const transition = s.discipline === "t1" || s.discipline === "t2";
+              return (
+                <li
+                  key={s.id}
+                  className={`flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm ${
+                    transition ? "bg-muted/40" : ""
+                  }`}
+                >
+                  <span className="font-medium">{DISCIPLINE_LABEL[s.discipline] ?? s.discipline}</span>
+                  <span className="tabular-nums text-muted-foreground">
+                    {fmtDuration(s.duration_s)}
+                    {s.distance_m ? ` · ${fmtDistance(s.distance_m)}` : ""}
+                    {s.avg_hr ? ` · ${s.avg_hr} bpm` : ""}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      )}
+
       {data!.laps.length > 0 && (
         <section className="rounded-lg border border-border bg-card p-4">
           <h2 className="mb-3 font-semibold">Runden</h2>
