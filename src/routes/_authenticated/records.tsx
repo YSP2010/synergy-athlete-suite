@@ -36,6 +36,7 @@ const METRIC_LABELS: Record<string, string> = {
   most_elevation: "Meiste Höhenmeter",
   max_power: "Höchste Leistung",
   max_speed: "Höchstes Tempo",
+  best_20min_power: "Beste 20-Minuten-Leistung",
 };
 
 /** Klarname für eine Rekord-Kennzahl. */
@@ -43,7 +44,7 @@ function metricLabel(metric: string): string {
   return METRIC_LABELS[metric] ?? metric.replace(/_/g, " ");
 }
 
-function fmtValue(value: number, unit: string): string {
+function fmtValue(value: number, unit: string, metric = ""): string {
   if (unit === "s") {
     const h = Math.floor(value / 3600);
     const m = Math.floor((value % 3600) / 60);
@@ -52,7 +53,11 @@ function fmtValue(value: number, unit: string): string {
       ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")} h`
       : `${m}:${String(s).padStart(2, "0")} min`;
   }
-  if (unit === "m") return `${(value / 1000).toFixed(2)} km`;
+  if (unit === "m") {
+    return metric === "most_elevation"
+      ? `${Math.round(value)} hm`
+      : `${(value / 1000).toFixed(2)} km`;
+  }
   return `${Math.round(value)} ${unit}`;
 }
 
@@ -118,7 +123,7 @@ function RecordsPage() {
                       </Badge>
                     </div>
                     <div className="font-mono text-xl font-bold tabular-nums">
-                      {fmtValue(Number(r.value), r.unit)}
+                      {fmtValue(Number(r.value), r.unit, r.metric)}
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>
