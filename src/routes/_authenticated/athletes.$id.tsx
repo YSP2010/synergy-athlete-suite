@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { AnalyticsView } from "@/components/analytics/AnalyticsView";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
