@@ -19,6 +19,7 @@ import { Route as GuidesRunningAndLegDayRouteImport } from './routes/guides.runn
 import { Route as GuidesNutritionForHybridAthletesRouteImport } from './routes/guides.nutrition-for-hybrid-athletes'
 import { Route as GuidesLegDayAndFootballRouteImport } from './routes/guides.leg-day-and-football'
 import { Route as GuidesHybridTrainingSplitsRouteImport } from './routes/guides.hybrid-training-splits'
+import { Route as GuidesBestHybridAthleteProgramsRouteImport } from './routes/guides.best-hybrid-athlete-programs'
 import { Route as Guides12WeekProgramRouteImport } from './routes/guides.12-week-program'
 import { Route as AuthenticatedTriathlonRouteImport } from './routes/_authenticated/triathlon'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
@@ -107,6 +108,12 @@ const GuidesHybridTrainingSplitsRoute =
   GuidesHybridTrainingSplitsRouteImport.update({
     id: '/guides/hybrid-training-splits',
     path: '/guides/hybrid-training-splits',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesBestHybridAthleteProgramsRoute =
+  GuidesBestHybridAthleteProgramsRouteImport.update({
+    id: '/guides/best-hybrid-athlete-programs',
+    path: '/guides/best-hybrid-athlete-programs',
     getParentRoute: () => rootRouteImport,
   } as any)
 const Guides12WeekProgramRoute = Guides12WeekProgramRouteImport.update({
@@ -328,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/team': typeof AuthenticatedTeamRoute
   '/triathlon': typeof AuthenticatedTriathlonRoute
   '/guides/12-week-program': typeof Guides12WeekProgramRoute
+  '/guides/best-hybrid-athlete-programs': typeof GuidesBestHybridAthleteProgramsRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
@@ -376,6 +384,7 @@ export interface FileRoutesByTo {
   '/team': typeof AuthenticatedTeamRoute
   '/triathlon': typeof AuthenticatedTriathlonRoute
   '/guides/12-week-program': typeof Guides12WeekProgramRoute
+  '/guides/best-hybrid-athlete-programs': typeof GuidesBestHybridAthleteProgramsRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
@@ -426,6 +435,7 @@ export interface FileRoutesById {
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/triathlon': typeof AuthenticatedTriathlonRoute
   '/guides/12-week-program': typeof Guides12WeekProgramRoute
+  '/guides/best-hybrid-athlete-programs': typeof GuidesBestHybridAthleteProgramsRoute
   '/guides/hybrid-training-splits': typeof GuidesHybridTrainingSplitsRoute
   '/guides/leg-day-and-football': typeof GuidesLegDayAndFootballRoute
   '/guides/nutrition-for-hybrid-athletes': typeof GuidesNutritionForHybridAthletesRoute
@@ -476,6 +486,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/triathlon'
     | '/guides/12-week-program'
+    | '/guides/best-hybrid-athlete-programs'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/triathlon'
     | '/guides/12-week-program'
+    | '/guides/best-hybrid-athlete-programs'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
@@ -573,6 +585,7 @@ export interface FileRouteTypes {
     | '/_authenticated/team'
     | '/_authenticated/triathlon'
     | '/guides/12-week-program'
+    | '/guides/best-hybrid-athlete-programs'
     | '/guides/hybrid-training-splits'
     | '/guides/leg-day-and-football'
     | '/guides/nutrition-for-hybrid-athletes'
@@ -604,6 +617,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   Guides12WeekProgramRoute: typeof Guides12WeekProgramRoute
+  GuidesBestHybridAthleteProgramsRoute: typeof GuidesBestHybridAthleteProgramsRoute
   GuidesHybridTrainingSplitsRoute: typeof GuidesHybridTrainingSplitsRoute
   GuidesLegDayAndFootballRoute: typeof GuidesLegDayAndFootballRoute
   GuidesNutritionForHybridAthletesRoute: typeof GuidesNutritionForHybridAthletesRoute
@@ -684,6 +698,13 @@ declare module '@tanstack/react-router' {
       path: '/guides/hybrid-training-splits'
       fullPath: '/guides/hybrid-training-splits'
       preLoaderRoute: typeof GuidesHybridTrainingSplitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/best-hybrid-athlete-programs': {
+      id: '/guides/best-hybrid-athlete-programs'
+      path: '/guides/best-hybrid-athlete-programs'
+      fullPath: '/guides/best-hybrid-athlete-programs'
+      preLoaderRoute: typeof GuidesBestHybridAthleteProgramsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/12-week-program': {
@@ -1030,6 +1051,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   Guides12WeekProgramRoute: Guides12WeekProgramRoute,
+  GuidesBestHybridAthleteProgramsRoute: GuidesBestHybridAthleteProgramsRoute,
   GuidesHybridTrainingSplitsRoute: GuidesHybridTrainingSplitsRoute,
   GuidesLegDayAndFootballRoute: GuidesLegDayAndFootballRoute,
   GuidesNutritionForHybridAthletesRoute: GuidesNutritionForHybridAthletesRoute,
