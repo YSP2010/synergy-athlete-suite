@@ -4,6 +4,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { computeAllEntries, type LbInput } from "@/lib/leaderboard/compute";
+import { GUARDIAN_CONSENT_KIND, isMinor } from "@/lib/youth";
 
 /** Mindestabstand zwischen zwei Neuberechnungen (Missbrauchsschutz). */
 const RATE_LIMIT_MS = 5 * 60 * 1000;
@@ -15,9 +16,25 @@ export const recomputeMyLeaderboard = createServerFn({ method: "POST" })
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("leaderboard_opt_in, leaderboard_share_health, weight_kg")
+      .select("leaderboard_opt_in, leaderboard_share_health, weight_kg, birth_date")
       .eq("id", userId)
       .maybeSingle();
+
+    // Jugendschutz (DSGVO Art. 8): unter 16 nur mit Einwilligung der Erziehungsberechtigten.
+    if (profile?.birth_date && isMinor(profile.birth_date)) {
+      const { data: consent } = await supabase
+        .from("consents")
+        .select("granted")
+        .eq("user_id", userId)
+        .eq("kind", GUARDIAN_CONSENT_KIND)
+        .order("changed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (consent?.granted !== true) {
+        await supabase.from("leaderboard_entries").delete().eq("user_id", userId);
+        return { ok: true, entries: 0, skipped: "guardian_consent_missing" as const };
+      }
+    }
 
     if (!profile?.leaderboard_opt_in) {
       await supabase.from("leaderboard_entries").delete().eq("user_id", userId);
