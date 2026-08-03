@@ -5,7 +5,8 @@ import { unzipRecursive } from "./import/zip";
 import { parseGpx, parseTcx } from "./import/gpx";
 import { parseFitMessages, mapFitSport } from "./import/fit";
 import { fingerprintOf } from "./import/duplicates";
-import { parseWellnessJson, bundleSize, type WellnessBundle } from "./import/wellness";
+import { bundleSize, type WellnessBundle } from "./import/wellness";
+import { parseWellnessFile } from "./import/wellness-dispatch";
 import type { ImportFileType, ParsedActivity } from "./import/types";
 
 export const IMPORT_BUCKET = "imports";
@@ -27,8 +28,10 @@ export interface BatchResult {
   remaining: number;
 }
 
-/** Dateitypen, die die Pipeline auswertet. */
+/** Dateitypen, die die Pipeline als Aktivität auswertet. */
 const PARSEABLE: ImportFileType[] = ["fit", "gpx", "tcx"];
+/** Dateitypen, die Wellness-Tageswerte liefern. */
+const WELLNESS_TYPES: ImportFileType[] = ["json", "csv", "apple_health"];
 
 async function decodeFit(bytes: Uint8Array): Promise<ParsedActivity> {
   const { Decoder, Stream } = await import("@garmin/fitsdk");
@@ -65,18 +68,18 @@ interface FileOutcome {
   skipReason?: string;
   error?: string;
   activity?: ParsedActivity;
-  /** Tageswerte aus den JSON-Dateien des Konto-Exports (Etappe 3). */
+  /** Tageswerte aus Wellness-Dateien (Garmin, Apple, Samsung, Google/Fitbit). */
   wellness?: WellnessBundle;
 }
 
 /** Verarbeitet einen einzelnen Datei-Inhalt (ohne DB-Zugriff) – gut testbar. */
-export async function evaluateFile(bytes: Uint8Array): Promise<FileOutcome> {
-  const fileType = sniffFileType(bytes);
+export async function evaluateFile(bytes: Uint8Array, filename?: string): Promise<FileOutcome> {
+  const fileType = sniffFileType(bytes, filename);
   const contentHash = await sha256Hex(bytes);
-  if (fileType === "json") {
+
+  if (WELLNESS_TYPES.includes(fileType)) {
     try {
-      const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
-      const wellness = parseWellnessJson(text);
+      const wellness = await parseWellnessFile(fileType, bytes, filename);
       if (bundleSize(wellness) === 0) {
         return { status: "skipped", fileType, contentHash, skipReason: "no_wellness_data" };
       }
@@ -85,6 +88,7 @@ export async function evaluateFile(bytes: Uint8Array): Promise<FileOutcome> {
       return { status: "failed", fileType, contentHash, error: (e as Error).message.slice(0, 300) };
     }
   }
+
   if (!PARSEABLE.includes(fileType)) {
     return { status: "skipped", fileType, contentHash, skipReason: `unsupported_${fileType}` };
   }
@@ -203,7 +207,7 @@ async function handleZip(
   const slice = entries.slice(offset, offset + BATCH_ZIP_ENTRIES);
 
   for (const entry of slice) {
-    const outcome = await evaluateFile(entry.bytes);
+    const outcome = await evaluateFile(entry.bytes, entry.relativePath);
     const result = await insertChildRow(db, userId, jobId, entry.relativePath, outcome);
     counters.processed += 1;
     if (result === "duplicate") counters.duplicates += 1;
@@ -284,7 +288,7 @@ export async function runJobBatch(db: DB, userId: string, jobId: string): Promis
         break;
       }
 
-      const outcome = await evaluateFile(bytes);
+      const outcome = await evaluateFile(bytes, row.relative_path);
       const { error } = await db
         .from("import_files")
         .update({
