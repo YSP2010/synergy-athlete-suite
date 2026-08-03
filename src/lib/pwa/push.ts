@@ -33,11 +33,16 @@ function keyToBase64(sub: PushSubscription, name: "p256dh" | "auth"): string {
 
 /** Meldet den Browser beim Push-Dienst an und liefert die Schlüssel. */
 export async function subscribeToPush(vapidKey: string): Promise<SubscriptionKeys> {
-  // Ohne registrierten Service Worker würde `ready` ewig warten (z. B. in der Vorschau).
-  const existingReg = await navigator.serviceWorker.getRegistration();
+  if (!vapidKey) {
+    throw new Error("Auf dem Server fehlt der VAPID-Schlüssel – Push ist nicht konfiguriert.");
+  }
+  // Registrierung notfalls direkt hier anstoßen, statt den Nutzer auszusperren.
+  const { registerServiceWorker } = await import("./register");
+  const existingReg =
+    (await navigator.serviceWorker.getRegistration()) ?? (await registerServiceWorker());
   if (!existingReg) {
     throw new Error(
-      "Push funktioniert erst in der veröffentlichten bzw. installierten App – in der Vorschau ist der Service Worker deaktiviert.",
+      "Der Service Worker konnte nicht registriert werden. Bitte die Seite neu laden (HTTPS erforderlich).",
     );
   }
   const reg = await Promise.race([
@@ -50,12 +55,21 @@ export async function subscribeToPush(vapidKey: string): Promise<SubscriptionKey
     ),
   ]);
   const existing = await reg.pushManager.getSubscription();
-  const sub =
-    existing ??
-    (await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
-    }));
+  let sub = existing;
+  if (!sub) {
+    try {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
+      });
+    } catch (e) {
+      console.error("[push] subscribe fehlgeschlagen", e);
+      throw new Error(
+        `Anmeldung beim Push-Dienst fehlgeschlagen: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
+  }
+
 
   return {
     endpoint: sub.endpoint,
