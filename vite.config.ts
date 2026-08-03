@@ -7,7 +7,6 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 import { VitePWA } from "vite-plugin-pwa";
-
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
@@ -54,6 +53,14 @@ export default defineConfig({
           cleanupOutdatedCaches: true,
           clientsClaim: true,
           skipWaiting: true,
+          // Der Build legt die Client-Assets unter "client/…" ab, ausgeliefert
+          // werden sie aber am Root. Ohne diese Korrektur zeigt das
+          // Precache-Manifest auf "client/…"-Pfade, die alle 404 liefern – der
+          // Service-Worker-Install bricht dann mit "bad-precaching-response"
+          // ab und der Worker wird "redundant".
+          modifyURLPrefix: { "client/": "" },
+          // Bereits gehashte Dateien brauchen kein zusätzliches Cache-Busting.
+          dontCacheBustURLsMatching: /-[A-Za-z0-9_]{8}\.(?:js|css)$/,
           runtimeCaching: [
             {
               // Seitenaufrufe immer zuerst aus dem Netz – niemals cache-first.
