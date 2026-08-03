@@ -49,8 +49,17 @@ export function NotificationSettings() {
       if (!mounted) return;
       setInstalled(!!reg);
       // Erst wenn der Worker aktiv ist, liefert getSubscription() verlässliche Werte.
-      const readyReg = reg ? await navigator.serviceWorker.ready.catch(() => reg) : null;
+      // Max. 3 Sekunden warten, damit die Seite nie blockiert.
+      const readyReg = reg
+        ? await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise<ServiceWorkerRegistration>((resolve) =>
+              window.setTimeout(() => resolve(reg), 3000),
+            ),
+          ]).catch(() => reg)
+        : null;
       const sub = await readyReg?.pushManager.getSubscription();
+
       if (!mounted) return;
       setActive(!!sub);
       if (!sub) return;
@@ -151,10 +160,11 @@ export function NotificationSettings() {
         navigator.serviceWorker.ready,
         new Promise<never>((_, reject) =>
           window.setTimeout(
-            () => reject(new Error("Der Service Worker reagiert nicht.")),
-            3500,
+            () => reject(new Error("Der Service Worker reagiert nicht (Timeout nach 3 Sekunden).")),
+            3000,
           ),
         ),
+
       ]);
       await readyRegistration.showNotification("Synergy Athlete", {
         body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
