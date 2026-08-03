@@ -1,6 +1,14 @@
 /** Gemeinsame Typen der Import-Pipeline (Etappe 1). */
 
-export type ImportFileType = "fit" | "gpx" | "tcx" | "json" | "zip" | "unknown";
+export type ImportFileType =
+  | "fit"
+  | "gpx"
+  | "tcx"
+  | "json"
+  | "csv"
+  | "apple_health"
+  | "zip"
+  | "unknown";
 
 /** Ein einzelner Messpunkt einer Aktivität (Rohwerte, SI-Einheiten). */
 export interface ParsedSample {
@@ -80,4 +88,5 @@ export class ParseError extends Error {
     super(message);
     this.name = "ParseError";
   }
+}
 }
