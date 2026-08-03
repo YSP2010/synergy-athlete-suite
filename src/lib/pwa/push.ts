@@ -36,31 +36,10 @@ export async function subscribeToPush(vapidKey: string): Promise<SubscriptionKey
   if (!vapidKey) {
     throw new Error("Auf dem Server fehlt der VAPID-Schlüssel – Push ist nicht konfiguriert.");
   }
-  // Registrierung notfalls direkt hier anstoßen, statt den Nutzer auszusperren.
-  const { registerServiceWorker } = await import("./register");
-  const existingReg =
-    (await navigator.serviceWorker.getRegistration()) ?? (await registerServiceWorker());
-  if (!existingReg) {
-    throw new Error(
-      "Der Service Worker konnte nicht registriert werden. Bitte die Seite neu laden (HTTPS erforderlich).",
-    );
-  }
-  // Auf einen aktiven Worker warten – aber höchstens 3 Sekunden, damit die App
-  // nie hängen bleibt, wenn der Worker auf dem Smartphone nicht bereit wird.
-  const reg = await Promise.race([
-    navigator.serviceWorker.ready,
-    new Promise<never>((_, reject) =>
-      setTimeout(
-        () =>
-          reject(
-            new Error(
-              "Der Service Worker wurde nicht rechtzeitig bereit. Bitte App vollständig schließen, neu öffnen und erneut versuchen.",
-            ),
-          ),
-        3000,
-      ),
-    ),
-  ]);
+  // Nutzt den tatsächlichen Aktivierungsstatus statt nur Androids teils
+  // verzögert auflösendem `navigator.serviceWorker.ready`.
+  const { getReadyServiceWorkerRegistration } = await import("./register");
+  const reg = await getReadyServiceWorkerRegistration();
 
   const existing = await reg.pushManager.getSubscription();
   let sub = existing;

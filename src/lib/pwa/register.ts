@@ -5,6 +5,7 @@
  * Nur `?sw=off` hebt die Registrierung bewusst wieder auf (Notausstieg).
  */
 const SW_URL = "/sw.js";
+const SW_READY_TIMEOUT_MS = 8000;
 
 function killSwitchActive(): boolean {
   if (typeof window === "undefined") return false;
@@ -46,7 +47,10 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
       );
       return (await navigator.serviceWorker.getRegistration()) ?? null;
     }
-    const reg = await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+    const reg = await navigator.serviceWorker.register(SW_URL, {
+      scope: "/",
+      updateViaCache: "none",
+    });
     // Die Aktivierung wird beim jeweiligen Push-Vorgang mit einem festen Timeout
     // abgewartet. Hier darf `ready` die Oberfläche nicht unbegrenzt blockieren.
     console.info("[pwa] Service Worker registriert:", reg.scope);
@@ -54,6 +58,78 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   } catch (e) {
     console.error("[pwa] Service Worker konnte nicht registriert werden:", e);
     return (await navigator.serviceWorker.getRegistration()) ?? null;
+  }
+}
+
+function waitForActivation(
+  registration: ServiceWorkerRegistration,
+): Promise<ServiceWorkerRegistration> {
+  if (registration.active?.state === "activated") return Promise.resolve(registration);
+
+  return new Promise((resolve, reject) => {
+    let worker = registration.installing ?? registration.waiting;
+    const timeoutId = window.setTimeout(() => {
+      cleanup();
+      const state = worker?.state ?? "kein Worker vorhanden";
+      reject(
+        new Error(
+          `Der Service Worker konnte nicht aktiviert werden (Status: ${state}). Bitte prüfe, ob /sw.js in der veröffentlichten App erreichbar ist.`,
+        ),
+      );
+    }, SW_READY_TIMEOUT_MS);
+
+    const onStateChange = () => {
+      if (worker?.state === "activated" || registration.active?.state === "activated") {
+        cleanup();
+        resolve(registration);
+      } else if (worker?.state === "redundant") {
+        cleanup();
+        reject(new Error("Die Service-Worker-Installation wurde vom Browser verworfen."));
+      }
+    };
+    const onUpdateFound = () => {
+      worker?.removeEventListener("statechange", onStateChange);
+      worker = registration.installing ?? registration.waiting;
+      worker?.addEventListener("statechange", onStateChange);
+      onStateChange();
+    };
+    const cleanup = () => {
+      window.clearTimeout(timeoutId);
+      worker?.removeEventListener("statechange", onStateChange);
+      registration.removeEventListener("updatefound", onUpdateFound);
+    };
+
+    worker?.addEventListener("statechange", onStateChange);
+    registration.addEventListener("updatefound", onUpdateFound);
+    onStateChange();
+  });
+}
+
+/** Liefert eine tatsächlich aktive Registrierung, auch wenn Android `ready` verzögert. */
+export async function getReadyServiceWorkerRegistration(): Promise<ServiceWorkerRegistration> {
+  const registration =
+    (await navigator.serviceWorker.getRegistration("/")) ?? (await registerServiceWorker());
+  if (!registration) {
+    throw new Error(
+      "Der Service Worker konnte nicht registriert werden. Öffne die veröffentlichte App über HTTPS und lade sie neu.",
+    );
+  }
+  if (registration.active?.state === "activated") return registration;
+
+  try {
+    return await Promise.race([
+      navigator.serviceWorker.ready,
+      waitForActivation(registration),
+    ]);
+  } catch (error) {
+    console.error("[pwa] Service Worker nicht bereit:", {
+      error,
+      scope: registration.scope,
+      active: registration.active?.state ?? null,
+      installing: registration.installing?.state ?? null,
+      waiting: registration.waiting?.state ?? null,
+    });
+    throw error;
   }
 }
 
