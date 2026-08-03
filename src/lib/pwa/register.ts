@@ -47,8 +47,8 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
       return (await navigator.serviceWorker.getRegistration()) ?? null;
     }
     const reg = await navigator.serviceWorker.register(SW_URL, { scope: "/" });
-    // Auf Aktivierung warten, damit Push-Abfragen direkt danach funktionieren.
-    await navigator.serviceWorker.ready.catch(() => undefined);
+    // Die Aktivierung wird beim jeweiligen Push-Vorgang mit einem festen Timeout
+    // abgewartet. Hier darf `ready` die Oberfläche nicht unbegrenzt blockieren.
     console.info("[pwa] Service Worker registriert:", reg.scope);
     return reg;
   } catch (e) {
