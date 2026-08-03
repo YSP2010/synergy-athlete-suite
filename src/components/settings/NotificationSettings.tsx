@@ -118,11 +118,11 @@ export function NotificationSettings() {
       </div>
       {!installed && (
         <p className="rounded-lg border border-border bg-elevated p-3 text-xs text-muted-foreground">
-          In der Vorschau ist der Service Worker deaktiviert, deshalb lässt sich Push hier nicht
-          einschalten. Öffne die veröffentlichte App (oder installiere sie auf dem Home-Bildschirm)
-          und aktiviere die Benachrichtigungen dort.
+          Der Service Worker ist noch nicht aktiv. Lade die Seite neu – Push braucht HTTPS und eine
+          erfolgreiche Registrierung. Details stehen in der Browser-Konsole.
         </p>
       )}
+
 
       <Button
         variant="outline"
@@ -165,11 +165,13 @@ export function NotificationSettings() {
                 icon: "/pwa-192.png",
               });
               toast.success("Lokale Testnachricht ausgelöst");
-            } catch {
+            } catch (err) {
+              console.error("[push] Testbenachrichtigung fehlgeschlagen", err);
               toast.error(
-                "Testnachricht braucht die installierte bzw. veröffentlichte App – in der Vorschau ist der Service Worker deaktiviert.",
+                "Testnachricht fehlgeschlagen – der Service Worker ist nicht aktiv. Seite neu laden (HTTPS erforderlich).",
               );
             }
+
 
           } catch (e) {
             toast.error(humanError(e));
