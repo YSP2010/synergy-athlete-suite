@@ -45,16 +45,23 @@ export async function subscribeToPush(vapidKey: string): Promise<SubscriptionKey
       "Der Service Worker konnte nicht registriert werden. Bitte die Seite neu laden (HTTPS erforderlich).",
     );
   }
-  // Immer auf einen aktiven Worker warten – Push-Abos brauchen ihn.
+  // Auf einen aktiven Worker warten – aber höchstens 3 Sekunden, damit die App
+  // nie hängen bleibt, wenn der Worker auf dem Smartphone nicht bereit wird.
   const reg = await Promise.race([
     navigator.serviceWorker.ready,
     new Promise<never>((_, reject) =>
       setTimeout(
-        () => reject(new Error("Der Service Worker ist nicht bereit. Bitte Seite neu laden.")),
-        30000,
+        () =>
+          reject(
+            new Error(
+              "Der Service Worker wurde nicht rechtzeitig bereit. Bitte App vollständig schließen, neu öffnen und erneut versuchen.",
+            ),
+          ),
+        3000,
       ),
     ),
   ]);
+
   const existing = await reg.pushManager.getSubscription();
   let sub = existing;
   if (!sub) {
