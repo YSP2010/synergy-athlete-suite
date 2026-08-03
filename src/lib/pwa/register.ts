@@ -1,23 +1,14 @@
 /**
  * Registrierung des Service Workers – der einzige Ort, an dem das passiert.
- * In Entwicklung, in der Lovable-Vorschau und in iframes wird bewusst NICHT
- * registriert; vorhandene Registrierungen werden dort entfernt.
+ * Es gibt keine Vorschau-Sperre mehr: überall dort, wo der Browser einen
+ * sicheren Kontext (HTTPS oder localhost) bietet, wird registriert.
+ * Nur `?sw=off` hebt die Registrierung bewusst wieder auf (Notausstieg).
  */
 const SW_URL = "/sw.js";
 
-function isBlockedContext(): boolean {
-  if (typeof window === "undefined") return true;
-  if (!import.meta.env.PROD) return true;
-  if (window.self !== window.top) return true;
-  const host = window.location.hostname;
-  if (host.startsWith("id-preview--") || host.startsWith("preview--")) return true;
-  if (host === "lovableproject.com" || host.endsWith(".lovableproject.com")) return true;
-  if (host === "lovableproject-dev.com" || host.endsWith(".lovableproject-dev.com")) return true;
-  if (host === "beta.lovable.dev" || host.endsWith(".beta.lovable.dev")) return true;
-  if (new URLSearchParams(window.location.search).has("sw")) {
-    return new URLSearchParams(window.location.search).get("sw") === "off";
-  }
-  return false;
+function killSwitchActive(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("sw") === "off";
 }
 
 async function unregisterOwn(): Promise<void> {
@@ -31,16 +22,27 @@ async function unregisterOwn(): Promise<void> {
 }
 
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
-  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return null;
-  if (isBlockedContext()) {
+  if (typeof window === "undefined" || typeof navigator === "undefined") return null;
+  if (!("serviceWorker" in navigator)) {
+    console.warn("[pwa] Dieser Browser unterstützt keine Service Worker.");
+    return null;
+  }
+  if (killSwitchActive()) {
     await unregisterOwn();
+    console.info("[pwa] Service Worker über ?sw=off deaktiviert.");
+    return null;
+  }
+  if (!window.isSecureContext) {
+    console.warn("[pwa] Kein sicherer Kontext (HTTPS nötig) – Service Worker wird nicht registriert.");
     return null;
   }
   try {
-    return await navigator.serviceWorker.register(SW_URL, { scope: "/" });
-  } catch {
-    // Kein harter Fehler: die App funktioniert auch ohne Offline-Unterstützung.
-    return null;
+    const reg = await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+    console.info("[pwa] Service Worker registriert:", reg.scope);
+    return reg;
+  } catch (e) {
+    console.error("[pwa] Service Worker konnte nicht registriert werden:", e);
+    return (await navigator.serviceWorker.getRegistration()) ?? null;
   }
 }
 
