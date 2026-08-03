@@ -160,10 +160,11 @@ export function NotificationSettings() {
         navigator.serviceWorker.ready,
         new Promise<never>((_, reject) =>
           window.setTimeout(
-            () => reject(new Error("Der Service Worker reagiert nicht.")),
-            3500,
+            () => reject(new Error("Der Service Worker reagiert nicht (Timeout nach 3 Sekunden).")),
+            3000,
           ),
         ),
+
       ]);
       await readyRegistration.showNotification("Synergy Athlete", {
         body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
