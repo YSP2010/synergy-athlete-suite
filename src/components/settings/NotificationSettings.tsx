@@ -11,7 +11,10 @@ import {
   sendTestPush,
 } from "@/lib/push.functions";
 import { pushSupported, subscribeToPush, unsubscribeFromPush } from "@/lib/pwa/push";
-import { registerServiceWorker } from "@/lib/pwa/register";
+import {
+  getReadyServiceWorkerRegistration,
+  registerServiceWorker,
+} from "@/lib/pwa/register";
 import { humanError } from "@/lib/errors";
 
 const TEST_TIMEOUT_MS = 5000;
@@ -48,15 +51,11 @@ export function NotificationSettings() {
       const reg = (await registerServiceWorker()) ?? (await navigator.serviceWorker.getRegistration());
       if (!mounted) return;
       setInstalled(!!reg);
-      // Erst wenn der Worker aktiv ist, liefert getSubscription() verlässliche Werte.
-      // Max. 3 Sekunden warten, damit die Seite nie blockiert.
       const readyReg = reg
-        ? await Promise.race([
-            navigator.serviceWorker.ready,
-            new Promise<ServiceWorkerRegistration>((resolve) =>
-              window.setTimeout(() => resolve(reg), 3000),
-            ),
-          ]).catch(() => reg)
+        ? await getReadyServiceWorkerRegistration().catch((error) => {
+            console.warn("[push] Statusprüfung des Service Workers fehlgeschlagen:", error);
+            return reg.active?.state === "activated" ? reg : null;
+          })
         : null;
       const sub = await readyReg?.pushManager.getSubscription();
 
@@ -156,16 +155,7 @@ export function NotificationSettings() {
     }
 
     try {
-      const readyRegistration = await Promise.race([
-        navigator.serviceWorker.ready,
-        new Promise<never>((_, reject) =>
-          window.setTimeout(
-            () => reject(new Error("Der Service Worker reagiert nicht (Timeout nach 3 Sekunden).")),
-            3000,
-          ),
-        ),
-
-      ]);
+      const readyRegistration = await getReadyServiceWorkerRegistration();
       await readyRegistration.showNotification("Synergy Athlete", {
         body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
         icon: "/pwa-192.png",
