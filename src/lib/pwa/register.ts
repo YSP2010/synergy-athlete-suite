@@ -37,7 +37,18 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     return null;
   }
   try {
+    // Erst prüfen, ob /sw.js überhaupt ausgeliefert wird. In der Vorschau/Dev
+    // existiert die generierte Datei nicht – ohne Prüfung gäbe es nur einen 404-Fehler.
+    const probe = await fetch(SW_URL, { method: "HEAD", cache: "no-store" });
+    if (!probe.ok) {
+      console.warn(
+        `[pwa] ${SW_URL} ist nicht erreichbar (HTTP ${probe.status}) – Service Worker wird übersprungen. In der Vorschau ist das normal; in der veröffentlichten App bitte neu laden.`,
+      );
+      return (await navigator.serviceWorker.getRegistration()) ?? null;
+    }
     const reg = await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+    // Auf Aktivierung warten, damit Push-Abfragen direkt danach funktionieren.
+    await navigator.serviceWorker.ready.catch(() => undefined);
     console.info("[pwa] Service Worker registriert:", reg.scope);
     return reg;
   } catch (e) {

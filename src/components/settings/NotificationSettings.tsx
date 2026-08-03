@@ -37,7 +37,9 @@ export function NotificationSettings() {
       const reg = (await registerServiceWorker()) ?? (await navigator.serviceWorker.getRegistration());
       if (!mounted) return;
       setInstalled(!!reg);
-      const sub = await reg?.pushManager.getSubscription();
+      // Erst wenn der Worker aktiv ist, liefert getSubscription() verlässliche Werte.
+      const readyReg = reg ? await navigator.serviceWorker.ready.catch(() => reg) : null;
+      const sub = await readyReg?.pushManager.getSubscription();
       if (!mounted) return;
       setActive(!!sub);
       if (!sub) return;
