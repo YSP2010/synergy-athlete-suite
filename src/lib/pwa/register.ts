@@ -5,6 +5,7 @@
  * Nur `?sw=off` hebt die Registrierung bewusst wieder auf (Notausstieg).
  */
 const SW_URL = "/sw.js";
+const PUSH_SW_URL = "/push-sw.js";
 const SW_READY_TIMEOUT_MS = 8000;
 
 function killSwitchActive(): boolean {
@@ -20,6 +21,31 @@ async function unregisterOwn(): Promise<void> {
       .filter((r) => r.active?.scriptURL.endsWith(SW_URL) || r.installing?.scriptURL.endsWith(SW_URL))
       .map((r) => r.unregister()),
   );
+}
+
+interface ProbeResult {
+  ok: boolean;
+  html: boolean;
+  status: number;
+  contentType: string;
+}
+
+/**
+ * Lädt eine SW-Datei und stellt fest, ob der Host sie als echtes JavaScript
+ * ausliefert. Viele SSR-/SPA-Hosts beantworten unbekannte Pfade mit der
+ * HTML-App-Shell (Status 200!) – der Browser verwirft dann die Installation.
+ */
+async function probeScript(url: string): Promise<ProbeResult> {
+  const res = await fetch(url, { method: "GET", cache: "no-store" });
+  const contentType = res.headers.get("content-type") ?? "";
+  let html = false;
+  if (res.ok) {
+    const body = await res.text();
+    html =
+      /text\/html/i.test(contentType) ||
+      /^\s*<(?:!doctype|html)/i.test(body.slice(0, 200));
+  }
+  return { ok: res.ok, html, status: res.status, contentType };
 }
 
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
@@ -40,13 +66,30 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   try {
     // Erst prüfen, ob /sw.js überhaupt ausgeliefert wird. In der Vorschau/Dev
     // existiert die generierte Datei nicht – ohne Prüfung gäbe es nur einen 404-Fehler.
-    const probe = await fetch(SW_URL, { method: "HEAD", cache: "no-store" });
-    if (!probe.ok) {
+    const swProbe = await probeScript(SW_URL);
+    if (!swProbe.ok) {
       console.warn(
-        `[pwa] ${SW_URL} ist nicht erreichbar (HTTP ${probe.status}) – Service Worker wird übersprungen. In der Vorschau ist das normal; in der veröffentlichten App bitte neu laden.`,
+        `[pwa] ${SW_URL} ist nicht erreichbar (HTTP ${swProbe.status}) – Service Worker wird übersprungen. In der Vorschau ist das normal; in der veröffentlichten App bitte neu laden.`,
       );
       return (await navigator.serviceWorker.getRegistration()) ?? null;
     }
+
+    // Zusätzlich den Push-Handler prüfen, den der generierte Worker per
+    // importScripts(["/push-sw.js"]) nachlädt. Ist er HTML, schlägt der
+    // Install fehl und der Worker wird "redundant".
+    const pushProbe = await probeScript(PUSH_SW_URL).catch(() => null);
+    if (swProbe.html || pushProbe?.html) {
+      const badUrl = swProbe.html ? SW_URL : PUSH_SW_URL;
+      const badType = (swProbe.html ? swProbe.contentType : pushProbe?.contentType) || "unbekannt";
+      console.error(
+        `[pwa] ${badUrl} wird als HTML statt als JavaScript ausgeliefert (Content-Type: "${badType}"). ` +
+          "Der Browser verwirft deshalb die Service-Worker-Installation. " +
+          "Diese Dateien müssen vom Host als statische JS-Dateien ausgeliefert werden und dürfen " +
+          "nicht über die SSR-/SPA-Catch-all-Route beantwortet werden.",
+      );
+      return (await navigator.serviceWorker.getRegistration()) ?? null;
+    }
+
     const reg = await navigator.serviceWorker.register(SW_URL, {
       scope: "/",
       updateViaCache: "none",
@@ -79,12 +122,28 @@ function waitForActivation(
     }, SW_READY_TIMEOUT_MS);
 
     const onStateChange = () => {
-      if (worker?.state === "activated" || registration.active?.state === "activated") {
+      // Ein aktiver Worker (auch ein neu übernommener) bedeutet Erfolg.
+      if (registration.active?.state === "activated" || worker?.state === "activated") {
         cleanup();
         resolve(registration);
-      } else if (worker?.state === "redundant") {
-        cleanup();
-        reject(new Error("Die Service-Worker-Installation wurde vom Browser verworfen."));
+        return;
+      }
+      if (worker?.state === "redundant") {
+        // Beim Auto-Update wird ein ersetzter Worker "redundant", während der
+        // neue aktiviert. Nur als echten Fehler werten, wenn KEIN aktiver
+        // Worker existiert – sonst ist es lediglich ein Wechsel.
+        if (registration.active) {
+          cleanup();
+          resolve(registration);
+        } else {
+          cleanup();
+          reject(
+            new Error(
+              "Die Service-Worker-Installation wurde vom Browser verworfen. " +
+                "Prüfe, ob /sw.js und /push-sw.js als JavaScript (nicht als HTML) ausgeliefert werden.",
+            ),
+          );
+        }
       }
     };
     const onUpdateFound = () => {
