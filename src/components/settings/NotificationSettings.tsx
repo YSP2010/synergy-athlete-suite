@@ -14,6 +14,17 @@ import { pushSupported, subscribeToPush, unsubscribeFromPush } from "@/lib/pwa/p
 import { registerServiceWorker } from "@/lib/pwa/register";
 import { humanError } from "@/lib/errors";
 
+const TEST_TIMEOUT_MS = 5000;
+
+function withTimeout<T>(operation: Promise<T>, message: string): Promise<T> {
+  return Promise.race([
+    operation,
+    new Promise<never>((_, reject) =>
+      window.setTimeout(() => reject(new Error(message)), TEST_TIMEOUT_MS),
+    ),
+  ]);
+}
+
 /** Ein-/Ausschalten der Push-Benachrichtigungen für dieses Gerät. */
 export function NotificationSettings() {
   const [supported, setSupported] = useState(false);
@@ -91,6 +102,72 @@ export function NotificationSettings() {
     }
   }
 
+  async function showBrowserFallback(): Promise<void> {
+    try {
+      new Notification("Synergy Athlete", {
+        body: "Test-Benachrichtigung – Browser-Mitteilungen sind erlaubt.",
+        icon: "/pwa-192.png",
+      });
+      toast.success("Browser-Testnachricht ausgelöst");
+    } catch (error) {
+      console.error("[push] Browser-Fallback nicht verfügbar:", error);
+      throw new Error(
+        "Der Service Worker reagiert nicht und dieser Browser erlaubt Mitteilungen nur über die installierte App.",
+      );
+    }
+  }
+
+  async function runNotificationTest(): Promise<void> {
+    const permission =
+      Notification.permission === "granted"
+        ? "granted"
+        : await Notification.requestPermission();
+    if (permission !== "granted") {
+      throw new Error(
+        permission === "denied"
+          ? "Benachrichtigungen sind in den Browser- oder App-Einstellungen blockiert."
+          : "Die Benachrichtigungs-Berechtigung wurde nicht erteilt.",
+      );
+    }
+
+    if (active) {
+      const result = await test();
+      if (!result.ok) throw new Error("Kein aktives Push-Gerät gefunden.");
+      toast.success("Testnachricht gesendet");
+      return;
+    }
+
+    const registration =
+      (await registerServiceWorker()) ??
+      (await navigator.serviceWorker?.getRegistration());
+    if (!registration) {
+      console.warn("[push] Kein Service Worker registriert – Browser-Fallback wird getestet.");
+      await showBrowserFallback();
+      return;
+    }
+
+    try {
+      const readyRegistration = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<never>((_, reject) =>
+          window.setTimeout(
+            () => reject(new Error("Der Service Worker reagiert nicht.")),
+            3500,
+          ),
+        ),
+      ]);
+      await readyRegistration.showNotification("Synergy Athlete", {
+        body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
+        icon: "/pwa-192.png",
+        badge: "/pwa-192.png",
+      });
+      toast.success("Lokale Testnachricht ausgelöst");
+    } catch (error) {
+      console.error("[push] Service-Worker-Test fehlgeschlagen, nutze Browser-Fallback:", error);
+      await showBrowserFallback();
+    }
+  }
+
   if (!supported) {
     return (
       <div className="card-elevated space-y-2 p-5">
@@ -133,49 +210,12 @@ export function NotificationSettings() {
         onClick={async () => {
           setBusy(true);
           try {
-            if (active) {
-              const res = await test();
-              toast[res.ok ? "success" : "error"](
-                res.ok ? "Testnachricht gesendet" : "Kein aktives Gerät gefunden",
-              );
-              return;
-            }
-            const perm =
-              Notification.permission === "granted"
-                ? "granted"
-                : await Notification.requestPermission();
-            if (perm !== "granted") {
-              toast.error("Benachrichtigungen wurden im Browser blockiert.");
-              return;
-            }
-            const reg =
-              (await registerServiceWorker()) ??
-              (await navigator.serviceWorker?.getRegistration());
-            if (reg) {
-              // Android/Chrome erlaubt nur Notifications über den Service Worker.
-              await reg.showNotification("Synergy Athlete", {
-                body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
-                icon: "/pwa-192.png",
-                badge: "/pwa-192.png",
-              });
-              toast.success("Lokale Testnachricht ausgelöst");
-              return;
-            }
-            try {
-              new Notification("Synergy Athlete", {
-                body: "Test-Benachrichtigung – so sehen deine Erinnerungen aus.",
-                icon: "/pwa-192.png",
-              });
-              toast.success("Lokale Testnachricht ausgelöst");
-            } catch (err) {
-              console.error("[push] Testbenachrichtigung fehlgeschlagen", err);
-              toast.error(
-                "Testnachricht fehlgeschlagen – der Service Worker ist nicht aktiv. Seite neu laden (HTTPS erforderlich).",
-              );
-            }
-
-
+            await withTimeout(
+              runNotificationTest(),
+              "Zeitüberschreitung: Der Benachrichtigungsdienst hat nach 5 Sekunden nicht reagiert.",
+            );
           } catch (e) {
+            console.error("[push] Testbenachrichtigung fehlgeschlagen:", e);
             toast.error(humanError(e));
           } finally {
             setBusy(false);
