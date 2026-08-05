@@ -2,9 +2,10 @@ import type { ImportFileType } from "./types";
 
 /**
  * Erkennt den Dateityp am Inhalt, nicht am Dateinamen – Garmin ändert
- * Ordner- und Dateinamen im Konto-Export gelegentlich.
+ * Ordner- und Dateinamen im Konto-Export gelegentlich. Für CSV wird der
+ * Dateiname als Zusatzhinweis genutzt, weil CSV keine Signatur hat.
  */
-export function sniffFileType(bytes: Uint8Array): ImportFileType {
+export function sniffFileType(bytes: Uint8Array, filename?: string): ImportFileType {
   if (bytes.length >= 12) {
     // FIT: Bytes 8..11 == ".FIT"
     if (
@@ -30,9 +31,20 @@ export function sniffFileType(bytes: Uint8Array): ImportFileType {
   if (head.startsWith("{") || head.startsWith("[")) return "json";
   if (/<\s*TrainingCenterDatabase/i.test(head)) return "tcx";
   if (/<\s*gpx[\s>]/i.test(head)) return "gpx";
+  // Apple Health: export.xml beginnt mit <?xml … <!DOCTYPE HealthData … <HealthData …>
+  if (/<!DOCTYPE\s+HealthData/i.test(head) || /<\s*HealthData[\s>]/i.test(head)) {
+    return "apple_health";
+  }
   if (head.startsWith("<?xml")) {
     if (/TrainingCenterDatabase/i.test(head)) return "tcx";
     if (/<gpx/i.test(head)) return "gpx";
+    if (/HealthData/i.test(head)) return "apple_health";
+  }
+  // CSV: primär am Dateinamen, sonst konservative Inhaltsheuristik.
+  if (filename && /\.csv$/i.test(filename)) return "csv";
+  if (!head.startsWith("<")) {
+    const firstLine = head.split(/\r?\n/, 1)[0] ?? "";
+    if ((firstLine.match(/[,;]/g)?.length ?? 0) >= 2) return "csv";
   }
   return "unknown";
 }
