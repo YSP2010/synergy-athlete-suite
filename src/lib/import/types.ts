@@ -89,4 +89,3 @@ export class ParseError extends Error {
     this.name = "ParseError";
   }
 }
-}
