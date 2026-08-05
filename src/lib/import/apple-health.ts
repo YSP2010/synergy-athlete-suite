@@ -4,15 +4,14 @@
  * Die Datei kann sehr groß sein, deshalb wird sie NICHT als Ganzes in einen
  * String dekodiert, sondern in 1-MB-Fenstern gestreamt. Pro <Record …>-Tag
  * werden nur die Attribute gelesen und tageweise aggregiert – der
- * Speicherbedarf bleibt konstant, egal wie groß der Export ist.
- * Hochfrequente Roh-Herzfrequenz wird bewusst übersprungen (CPU/Speicher).
+ * Speicherbedarf bleibt konstant. Hochfrequente Roh-Herzfrequenz wird bewusst
+ * übersprungen (CPU/Speicher). Es werden nur belegte Felder geschrieben.
  */
 import {
   emptyBundle,
   type WellnessBundle,
   type WellnessDailyRow,
   type SleepRow,
-  type HrvRow,
 } from "./wellness";
 
 type SumMap = Map<string, Record<string, number>>;
@@ -153,36 +152,33 @@ function build(sums: SumMap, avgs: AvgMap, sleep: SleepMap): WellnessBundle {
     const s = sums.get(date) ?? {};
     const a = avgs.get(date) ?? {};
     const avg = (k: string) => (a[k] ? a[k].s / a[k].n : null);
-    const row: WellnessDailyRow = {
-      date,
-      steps: s.steps != null ? Math.round(s.steps) : null,
-      distance_m: s.distance_m != null ? Math.round(s.distance_m) : null,
-      floors_climbed: s.floors_climbed != null ? Math.round(s.floors_climbed) : null,
-      active_kcal: s.active_kcal != null ? Math.round(s.active_kcal) : null,
-      bmr_kcal: s.bmr_kcal != null ? Math.round(s.bmr_kcal) : null,
-      resting_hr: avg("resting_hr") != null ? Math.round(avg("resting_hr")!) : null,
-      avg_respiration: avg("avg_respiration") != null ? Number(avg("avg_respiration")!.toFixed(1)) : null,
-      avg_spo2: avg("avg_spo2") != null ? Number(avg("avg_spo2")!.toFixed(1)) : null,
-    };
-    out.wellness.push(row);
+    const row: WellnessDailyRow = { date };
+    if (s.steps != null) row.steps = Math.round(s.steps);
+    if (s.distance_m != null) row.distance_m = Math.round(s.distance_m);
+    if (s.floors_climbed != null) row.floors_climbed = Math.round(s.floors_climbed);
+    if (s.active_kcal != null) row.active_kcal = Math.round(s.active_kcal);
+    if (s.bmr_kcal != null) row.bmr_kcal = Math.round(s.bmr_kcal);
+    const rhr = avg("resting_hr");
+    if (rhr != null) row.resting_hr = Math.round(rhr);
+    const resp = avg("avg_respiration");
+    if (resp != null) row.avg_respiration = Number(resp.toFixed(1));
+    const spo2 = avg("avg_spo2");
+    if (spo2 != null) row.avg_spo2 = Number(spo2.toFixed(1));
+    if (Object.keys(row).length > 1) out.wellness.push(row);
 
     const hrv = avg("hrv_ms");
-    if (hrv != null) {
-      const h: HrvRow = { date, last_night_avg_ms: Math.round(hrv) };
-      out.hrv.push(h);
-    }
+    if (hrv != null) out.hrv.push({ date, last_night_avg_ms: Math.round(hrv) });
   }
 
   for (const [date, s] of sleep) {
-    const row: SleepRow = {
-      date,
-      deep_s: Math.round(s.deep) || null,
-      light_s: Math.round(s.core) || null,
-      rem_s: Math.round(s.rem) || null,
-      awake_s: Math.round(s.awake) || null,
-      duration_s: Math.round(s.deep + s.core + s.rem) || null,
-    };
-    out.sleep.push(row);
+    const row: SleepRow = { date };
+    if (s.deep) row.deep_s = Math.round(s.deep);
+    if (s.core) row.light_s = Math.round(s.core);
+    if (s.rem) row.rem_s = Math.round(s.rem);
+    if (s.awake) row.awake_s = Math.round(s.awake);
+    const total = s.deep + s.core + s.rem;
+    if (total) row.duration_s = Math.round(total);
+    if (Object.keys(row).length > 1) out.sleep.push(row);
   }
 
   return out;
