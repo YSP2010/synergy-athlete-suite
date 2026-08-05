@@ -84,9 +84,9 @@ function col(cols: Record<string, number>, ...names: string[]): number | null {
 
 function isoDay(raw: string | undefined): string | null {
   if (!raw) return null;
-  const num = Number(raw);
-  if (Number.isFinite(num) && num > 1_000_000_000) {
-    return new Date(num > 1e12 ? num : num * 1000).toISOString().slice(0, 10);
+  const n = Number(raw);
+  if (Number.isFinite(n) && n > 1_000_000_000) {
+    return new Date(n > 1e12 ? n : n * 1000).toISOString().slice(0, 10);
   }
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw.trim());
   if (m) return `${m[1]}-${m[2]}-${m[3]}`;
