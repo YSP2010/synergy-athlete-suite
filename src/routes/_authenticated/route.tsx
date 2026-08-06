@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/layout/AppShell";
 import { TimezoneSync } from "@/components/TimezoneSync";
+import { LanguageProvider } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -11,9 +12,11 @@ export const Route = createFileRoute("/_authenticated")({
     return { user: data.user };
   },
   component: () => (
-    <AppShell>
-      <TimezoneSync />
-      <Outlet />
-    </AppShell>
+    <LanguageProvider>
+      <AppShell>
+        <TimezoneSync />
+        <Outlet />
+      </AppShell>
+    </LanguageProvider>
   ),
 });
