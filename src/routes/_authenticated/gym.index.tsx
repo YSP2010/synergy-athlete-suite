@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -44,10 +45,19 @@ const GYM_LABEL: Record<GymType, string> = {
   mobility: "Mobility",
 };
 
+/** Erlaubtes Planungsfenster: heute bis heute + 14 Tage. */
+const PLAN_AHEAD_DAYS = 14;
+
 function GymListPage() {
   const qc = useQueryClient();
   const nav = useNavigate();
   const [newType, setNewType] = useState<GymType>("push");
+
+  const todayIso = toISODate(new Date());
+  const maxDate = new Date();
+  maxDate.setDate(maxDate.getDate() + PLAN_AHEAD_DAYS);
+  const maxIso = toISODate(maxDate);
+  const [newDate, setNewDate] = useState(todayIso);
 
   const { data, isLoading } = useQuery({
     queryKey: ["gym-list"],
@@ -66,12 +76,13 @@ function GymListPage() {
   });
 
   const create = useMutation({
-    mutationFn: async (session_type: GymType) => {
+    mutationFn: async ({ session_type, date }: { session_type: GymType; date: string }) => {
       if (!data) return null;
-      const today = toISODate(new Date());
+      // Datum sicherheitshalber auf das erlaubte Fenster begrenzen.
+      const safeDate = date < todayIso ? todayIso : date > maxIso ? maxIso : date;
       const { data: row, error } = await supabase
         .from("workouts_gym")
-        .insert({ user_id: data.uid, date: today, session_type, status: "planned" })
+        .insert({ user_id: data.uid, date: safeDate, session_type, status: "planned" })
         .select("id")
         .single();
       if (error) throw error;
@@ -96,7 +107,7 @@ function GymListPage() {
 
       <div className="card-elevated p-4">
         <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-          <Plus className="h-3.5 w-3.5" /> Neue Session heute
+          <Plus className="h-3.5 w-3.5" /> Neue Session
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={newType} onValueChange={(v) => setNewType(v as GymType)}>
@@ -111,14 +122,26 @@ function GymListPage() {
               ))}
             </SelectContent>
           </Select>
+          <Input
+            type="date"
+            value={newDate}
+            min={todayIso}
+            max={maxIso}
+            onChange={(e) => setNewDate(e.target.value || todayIso)}
+            className="w-44"
+            aria-label="Datum der Session"
+          />
           <Button
-            onClick={() => create.mutate(newType)}
+            onClick={() => create.mutate({ session_type: newType, date: newDate })}
             disabled={create.isPending}
             className="bg-neon text-neon-foreground hover:bg-neon/90 glow"
           >
-            Starten
+            Anlegen
           </Button>
         </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Datum wählen – bis zu {PLAN_AHEAD_DAYS} Tage im Voraus planbar.
+        </p>
       </div>
 
       <div>
@@ -136,6 +159,7 @@ function GymListPage() {
           <div className="space-y-2">
             {data.rows.map((r) => {
               const d = parseISODate(r.date);
+              const isFuture = r.date > todayIso;
               return (
                 <Link
                   key={r.id}
@@ -155,6 +179,11 @@ function GymListPage() {
                       {r.duration_min ? ` · ${r.duration_min} min` : ""}
                     </div>
                   </div>
+                  {isFuture && (
+                    <span className="rounded-md bg-neon-soft px-2 py-0.5 text-[10px] font-semibold uppercase text-neon">
+                      Geplant
+                    </span>
+                  )}
                   <span
                     className={
                       "rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase " +
