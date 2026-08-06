@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -35,10 +36,19 @@ export const Route = createFileRoute("/_authenticated/sport/")({
 
 type Kind = "training" | "match";
 
+/** Erlaubtes Planungsfenster: heute bis heute + 14 Tage. */
+const PLAN_AHEAD_DAYS = 14;
+
 function SportListPage() {
   const qc = useQueryClient();
   const nav = useNavigate();
   const [newKind, setNewKind] = useState<Kind>("training");
+
+  const todayIso = toISODate(new Date());
+  const maxDate = new Date();
+  maxDate.setDate(maxDate.getDate() + PLAN_AHEAD_DAYS);
+  const maxIso = toISODate(maxDate);
+  const [newDate, setNewDate] = useState(todayIso);
 
   const { data, isLoading } = useQuery({
     queryKey: ["sport-list"],
@@ -60,14 +70,15 @@ function SportListPage() {
   });
 
   const create = useMutation({
-    mutationFn: async (kind: Kind) => {
+    mutationFn: async ({ kind, date }: { kind: Kind; date: string }) => {
       if (!data) return null;
-      const today = toISODate(new Date());
+      // Datum sicherheitshalber auf das erlaubte Fenster begrenzen.
+      const safeDate = date < todayIso ? todayIso : date > maxIso ? maxIso : date;
       const { data: row, error } = await supabase
         .from("workouts_sport")
         .insert({
           user_id: data.uid,
-          date: today,
+          date: safeDate,
           kind,
           intensity: kind === "match" ? "high" : "mid",
           match_hardness: kind === "match" ? "normal" : null,
@@ -100,7 +111,7 @@ function SportListPage() {
 
       <div className="card-elevated p-4">
         <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-          <Plus className="h-3.5 w-3.5" /> Neue Session heute
+          <Plus className="h-3.5 w-3.5" /> Neue Session
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={newKind} onValueChange={(v) => setNewKind(v as Kind)}>
@@ -112,14 +123,26 @@ function SportListPage() {
               <SelectItem value="match">Spiel / Wettkampf</SelectItem>
             </SelectContent>
           </Select>
+          <Input
+            type="date"
+            value={newDate}
+            min={todayIso}
+            max={maxIso}
+            onChange={(e) => setNewDate(e.target.value || todayIso)}
+            className="w-44"
+            aria-label="Datum der Session"
+          />
           <Button
-            onClick={() => create.mutate(newKind)}
+            onClick={() => create.mutate({ kind: newKind, date: newDate })}
             disabled={create.isPending}
             className="bg-neon text-neon-foreground hover:bg-neon/90 glow"
           >
-            Starten
+            Anlegen
           </Button>
         </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Datum wählen – bis zu {PLAN_AHEAD_DAYS} Tage im Voraus planbar.
+        </p>
       </div>
 
       <div>
@@ -138,6 +161,7 @@ function SportListPage() {
             {data.rows.map((r) => {
               const d = parseISODate(r.date);
               const isMatch = r.kind === "match";
+              const isFuture = r.date > todayIso;
               return (
                 <Link
                   key={r.id}
@@ -164,6 +188,11 @@ function SportListPage() {
                       {r.duration_min ? ` · ${r.duration_min} min` : ""}
                     </div>
                   </div>
+                  {isFuture && (
+                    <span className="rounded-md bg-neon-soft px-2 py-0.5 text-[10px] font-semibold uppercase text-neon">
+                      Geplant
+                    </span>
+                  )}
                   <span
                     className={
                       "rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase " +
