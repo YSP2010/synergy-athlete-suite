@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  import { LanguageProvider } from "@/lib/i18n";
   Outlet,
   Link,
   createRootRouteWithContext,
