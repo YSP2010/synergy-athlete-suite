@@ -32,14 +32,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
-
+ 
 interface NavItem {
   to: string;
   key: string;
   icon: LucideIcon;
   shortKey?: string;
 }
-
+ 
 const ATHLETE_NAV: NavItem[] = [
   { to: "/dashboard", key: "nav.dashboard", shortKey: "nav.short.home", icon: LayoutDashboard },
   { to: "/plan", key: "nav.plan", shortKey: "nav.short.plan", icon: CalendarDays },
@@ -64,18 +64,18 @@ const ATHLETE_NAV: NavItem[] = [
   { to: "/chat", key: "nav.chat", icon: MessageSquare },
   { to: "/privacy", key: "nav.privacy", icon: ShieldCheck },
 ];
-
+ 
 const COACH_NAV: NavItem[] = [
   { to: "/team", key: "nav.teams", icon: Users },
   { to: "/chat", key: "nav.chat", icon: MessageSquare },
 ];
-
+ 
 export function AppShell({ children }: { children: ReactNode }) {
   const loc = useLocation();
   const router = useRouter();
   const qc = useQueryClient();
   const t = useT();
-
+ 
   const { data: role } = useQuery({
     queryKey: ["me-role-nav"],
     queryFn: async () => {
@@ -89,9 +89,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       return (data?.role ?? "athlete") as "athlete" | "coach";
     },
   });
-
+ 
   const [moreOpen, setMoreOpen] = useState(false);
-
+ 
   const NAV = role === "coach" ? COACH_NAV : ATHLETE_NAV;
   const findNav = (to: string) => ATHLETE_NAV.find((n) => n.to === to)!;
   const MOBILE_NAV =
@@ -99,7 +99,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       ? COACH_NAV
       : [findNav("/dashboard"), findNav("/plan"), findNav("/gym"), findNav("/nutrition")];
   const MORE_NAV = role === "coach" ? [] : NAV.filter((n) => !MOBILE_NAV.includes(n));
-
+ 
   async function signOut() {
     await qc.cancelQueries();
     qc.clear();
@@ -107,10 +107,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     toast.success(t("nav.signedOut"));
     router.navigate({ to: "/auth", replace: true });
   }
-
+ 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      
+      <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-neon focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-neon-foreground">
         {t("nav.skip")}
@@ -162,11 +162,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </div>
       </aside>
-
+ 
       <main id="main-content" className="md:pl-60 pb-24 md:pb-6">
         <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-8 md:px-8">{children}</div>
       </main>
-
+ 
       {moreOpen && MORE_NAV.length > 0 && (
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMoreOpen(false)}>
           <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
@@ -205,7 +205,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       )}
-
+ 
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/90 backdrop-blur md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
@@ -250,3 +250,4 @@ export function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
+ 
