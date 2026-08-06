@@ -73,3 +73,58 @@ export const sendTestPush = createServerFn({ method: "POST" })
     }
     return { ok: sent > 0, sent };
   });
+
+/** Liest die Erinnerungs-Präferenzen: Themen (aus den Abos) + Ruhezeiten (Profil). */
+export const getReminderPrefs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const [{ data: subs }, { data: prof }] = await Promise.all([
+      context.supabase
+        .from("push_subscriptions")
+        .select("topic_checkin, topic_plan, topic_matchday")
+        .eq("user_id", context.userId),
+      context.supabase.from("profiles").select("*").eq("id", context.userId).maybeSingle(),
+    ]);
+    const anyOn = (key: "topic_checkin" | "topic_plan" | "topic_matchday") =>
+      (subs ?? []).some((s) => s[key]);
+    const p = prof as unknown as {
+      reminder_quiet_start?: number | null;
+      reminder_quiet_end?: number | null;
+    } | null;
+    return {
+      topic_checkin: subs?.length ? anyOn("topic_checkin") : true,
+      topic_plan: subs?.length ? anyOn("topic_plan") : true,
+      topic_matchday: subs?.length ? anyOn("topic_matchday") : true,
+      quiet_start: p?.reminder_quiet_start ?? 22,
+      quiet_end: p?.reminder_quiet_end ?? 7,
+    };
+  });
+
+const prefsSchema = z.object({
+  topic_checkin: z.boolean(),
+  topic_plan: z.boolean(),
+  topic_matchday: z.boolean(),
+  quiet_start: z.number().int().min(0).max(23),
+  quiet_end: z.number().int().min(0).max(23),
+});
+
+/** Speichert die Themen (kontoweit auf allen Geräten) und die Ruhezeiten (Profil). */
+export const setReminderPrefs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => prefsSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    await context.supabase
+      .from("push_subscriptions")
+      .update({
+        topic_checkin: data.topic_checkin,
+        topic_plan: data.topic_plan,
+        topic_matchday: data.topic_matchday,
+      })
+      .eq("user_id", context.userId);
+    // Ruhezeiten am Profil – noch nicht in den generierten Typen.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (context.supabase.from("profiles") as any)
+      .update({ reminder_quiet_start: data.quiet_start, reminder_quiet_end: data.quiet_end })
+      .eq("id", context.userId);
+    return { ok: true };
+  });
