@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  import { LanguageProvider } from "@/lib/i18n";
   Outlet,
   Link,
   createRootRouteWithContext,
@@ -15,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { registerServiceWorker } from "@/lib/pwa/register";
+import { LanguageProvider } from "@/lib/i18n";
 
 function NotFoundComponent() {
   return (
