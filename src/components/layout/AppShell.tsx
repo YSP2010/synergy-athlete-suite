@@ -1,54 +1,80 @@
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
-import { Activity, Bike, BookOpen, CalendarDays, Camera, Dumbbell, FileUp, Flag, HeartPulse, LayoutDashboard, LineChart, LogOut, Mail, Medal, MessageSquare, MoreHorizontal, Settings, ShieldCheck, Timer, TrendingUp, Trophy, Users, Utensils, Wrench, type LucideIcon } from "lucide-react";
+import {
+  Activity,
+  Bike,
+  BookOpen,
+  CalendarDays,
+  Camera,
+  Dumbbell,
+  FileUp,
+  Flag,
+  HeartPulse,
+  LayoutDashboard,
+  LineChart,
+  LogOut,
+  Mail,
+  Medal,
+  MessageSquare,
+  MoreHorizontal,
+  Settings,
+  ShieldCheck,
+  Timer,
+  TrendingUp,
+  Trophy,
+  Users,
+  Utensils,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 interface NavItem {
   to: string;
-  label: string;
+  key: string;
   icon: LucideIcon;
-  shortLabel?: string;
+  shortKey?: string;
 }
 
 const ATHLETE_NAV: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, shortLabel: "Home" },
-  { to: "/plan", label: "Wochenplan", icon: CalendarDays, shortLabel: "Plan" },
-  { to: "/checkin", label: "Check-in", icon: HeartPulse, shortLabel: "Check" },
-  { to: "/matchday", label: "Spieltag", icon: Timer, shortLabel: "Spieltag" },
-  { to: "/gym", label: "Gym-Log", icon: Dumbbell, shortLabel: "Gym" },
-  { to: "/sport", label: "Sport-Log", icon: Trophy, shortLabel: "Sport" },
-  { to: "/nutrition", label: "Ernährung", icon: Utensils, shortLabel: "Food" },
-  { to: "/scan", label: "Scanner", icon: Camera, shortLabel: "Scan" },
-  { to: "/journal", label: "Tagebuch", icon: BookOpen, shortLabel: "Diary" },
-  { to: "/insights", label: "Fortschritt", icon: TrendingUp, shortLabel: "Trend" },
-  { to: "/activities", label: "Aktivitäten", icon: Activity, shortLabel: "Aktiv" },
-  { to: "/courses", label: "Strecken", icon: Flag, shortLabel: "Strecken" },
-  { to: "/analytics", label: "Analyse", icon: LineChart, shortLabel: "Analyse" },
-  { to: "/records", label: "Bestleistungen", icon: Trophy, shortLabel: "PRs" },
-  { to: "/leaderboard", label: "Bestenliste", icon: Medal, shortLabel: "Rang" },
-  { to: "/triathlon", label: "Triathlon", icon: Bike, shortLabel: "Tri" },
-  { to: "/races", label: "Rennen", icon: Flag, shortLabel: "Rennen" },
-  { to: "/equipment", label: "Ausrüstung", icon: Wrench, shortLabel: "Gear" },
-  { to: "/import", label: "Import", icon: FileUp, shortLabel: "Import" },
-  { to: "/invites", label: "Einladungen", icon: Mail, shortLabel: "Invites" },
-  { to: "/chat", label: "Chat", icon: MessageSquare, shortLabel: "Chat" },
-  { to: "/privacy", label: "Datenschutz", icon: ShieldCheck, shortLabel: "Daten" },
+  { to: "/dashboard", key: "nav.dashboard", shortKey: "nav.short.home", icon: LayoutDashboard },
+  { to: "/plan", key: "nav.plan", shortKey: "nav.short.plan", icon: CalendarDays },
+  { to: "/checkin", key: "nav.checkin", icon: HeartPulse },
+  { to: "/matchday", key: "nav.matchday", icon: Timer },
+  { to: "/gym", key: "nav.gym", shortKey: "nav.short.gym", icon: Dumbbell },
+  { to: "/sport", key: "nav.sport", icon: Trophy },
+  { to: "/nutrition", key: "nav.nutrition", shortKey: "nav.short.food", icon: Utensils },
+  { to: "/scan", key: "nav.scan", icon: Camera },
+  { to: "/journal", key: "nav.journal", icon: BookOpen },
+  { to: "/insights", key: "nav.insights", icon: TrendingUp },
+  { to: "/activities", key: "nav.activities", icon: Activity },
+  { to: "/courses", key: "nav.courses", icon: Flag },
+  { to: "/analytics", key: "nav.analytics", icon: LineChart },
+  { to: "/records", key: "nav.records", icon: Trophy },
+  { to: "/leaderboard", key: "nav.leaderboard", icon: Medal },
+  { to: "/triathlon", key: "nav.triathlon", icon: Bike },
+  { to: "/races", key: "nav.races", icon: Flag },
+  { to: "/equipment", key: "nav.equipment", icon: Wrench },
+  { to: "/import", key: "nav.import", icon: FileUp },
+  { to: "/invites", key: "nav.invites", icon: Mail },
+  { to: "/chat", key: "nav.chat", icon: MessageSquare },
+  { to: "/privacy", key: "nav.privacy", icon: ShieldCheck },
 ];
 
 const COACH_NAV: NavItem[] = [
-  { to: "/team", label: "Teams", icon: Users, shortLabel: "Teams" },
-  { to: "/chat", label: "Chat", icon: MessageSquare, shortLabel: "Chat" },
+  { to: "/team", key: "nav.teams", icon: Users },
+  { to: "/chat", key: "nav.chat", icon: MessageSquare },
 ];
-
 
 export function AppShell({ children }: { children: ReactNode }) {
   const loc = useLocation();
   const router = useRouter();
   const qc = useQueryClient();
+  const t = useT();
 
   const { data: role } = useQuery({
     queryKey: ["me-role-nav"],
@@ -72,30 +98,24 @@ export function AppShell({ children }: { children: ReactNode }) {
   const MOBILE_NAV =
     role === "coach"
       ? COACH_NAV
-      : [
-          findNav("/dashboard"),
-          findNav("/plan"),
-          findNav("/gym"),
-          findNav("/nutrition"),
-        ];
+      : [findNav("/dashboard"), findNav("/plan"), findNav("/gym"), findNav("/nutrition")];
   const MORE_NAV = role === "coach" ? [] : NAV.filter((n) => !MOBILE_NAV.includes(n));
-
 
   async function signOut() {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
-    toast.success("Abgemeldet");
+    toast.success(t("nav.signedOut"));
     router.navigate({ to: "/auth", replace: true });
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <a
+      
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-neon focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-neon-foreground"
       >
-        Zum Inhalt
+        {t("nav.skip")}
       </a>
       <aside className="fixed inset-y-0 left-0 hidden w-60 border-r border-border bg-sidebar px-3 py-5 md:flex md:flex-col">
         <div className="mb-6 flex items-center gap-2 px-2">
@@ -105,7 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="leading-tight">
             <div className="font-display text-sm font-semibold">Hybrid</div>
             <div className="text-xs text-muted-foreground">
-              {role === "coach" ? "Coach" : "Athlete"}
+              {role === "coach" ? t("nav.roleCoach") : t("nav.roleAthlete")}
             </div>
           </div>
         </div>
@@ -125,7 +145,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               >
                 <Icon className="h-4 w-4" />
-                {n.label}
+                {t(n.key)}
               </Link>
             );
           })}
@@ -136,14 +156,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-elevated hover:text-foreground"
           >
             <Settings className="h-4 w-4" />
-            Einstellungen
+            {t("nav.settings")}
           </Link>
           <button
             onClick={signOut}
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-elevated hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
-            Abmelden
+            {t("nav.signout")}
           </button>
         </div>
       </aside>
@@ -177,7 +197,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       className="flex flex-col items-center gap-1.5 rounded-lg bg-elevated px-2 py-3 text-xs font-medium text-muted-foreground"
                     >
                       <Icon className="h-5 w-5 text-neon" />
-                      <span className="text-center leading-tight">{n.label}</span>
+                      <span className="text-center leading-tight">{t(n.key)}</span>
                     </Link>
                   );
                 })}
@@ -187,14 +207,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                   className="flex flex-col items-center gap-1.5 rounded-lg bg-elevated px-2 py-3 text-xs font-medium text-muted-foreground"
                 >
                   <Settings className="h-5 w-5 text-neon" />
-                  Einstellungen
+                  {t("nav.settings")}
                 </Link>
               </div>
             </div>
           </div>
         </div>
       )}
-
 
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/90 backdrop-blur md:hidden"
@@ -220,7 +239,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               >
                 <Icon className="h-5 w-5" />
-                {n.shortLabel ?? n.label}
+                {t(n.shortKey ?? n.key)}
               </Link>
             );
           })}
@@ -228,7 +247,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => setMoreOpen((v) => !v)}
-              aria-label="Weitere Bereiche anzeigen"
+              aria-label={t("nav.moreAria")}
               aria-expanded={moreOpen}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 py-2 text-xs font-medium",
@@ -236,12 +255,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               )}
             >
               <MoreHorizontal className="h-5 w-5" />
-              Mehr
+              {t("nav.more")}
             </button>
           )}
         </div>
       </nav>
-
     </div>
   );
 }
