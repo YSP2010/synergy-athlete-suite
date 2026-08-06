@@ -22,10 +22,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { recomputeMyLeaderboard } from "@/lib/leaderboard.functions";
 import { humanError } from "@/lib/errors";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { LanguageSwitcher } from "@/components/settings/LanguageSwitcher";
 import { clearAppCaches } from "@/lib/pwa/register";
 import { GuardianConsentCard } from "@/components/settings/GuardianConsentCard";
 import { GUARDIAN_CONSENT_KIND, isMinor } from "@/lib/youth";
-
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -174,8 +174,9 @@ function SettingsPage() {
 
       <LeaderboardSettings />
 
-      <NotificationSettings />
+      <LanguageSwitcher />
 
+      <NotificationSettings />
 
       <Link
         to="/privacy"
@@ -183,7 +184,6 @@ function SettingsPage() {
       >
         <ShieldCheck className="h-4 w-4" /> Datenschutz, Export & Kontolöschung
       </Link>
-
 
       <button
         onClick={signOut}
