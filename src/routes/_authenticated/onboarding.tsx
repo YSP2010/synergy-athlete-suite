@@ -58,6 +58,8 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   component: OnboardingPage,
 });
 
+type Experience = "beginner" | "intermediate" | "advanced";
+
 interface FormState {
   name: string;
   birth_date: string;
@@ -69,6 +71,7 @@ interface FormState {
   gym_days: number[];
   sport_days: number[];
   match_days: number[];
+  experience_level: Experience;
   diet_style: string;
   allergies: string;
   goal: Goal;
@@ -79,6 +82,12 @@ const GOAL_LABELS: Record<Goal, { title: string; desc: string }> = {
   maintain: { title: "Erhalten", desc: "Gewicht halten, Leistung stabilisieren" },
   recomp: { title: "Recomp", desc: "Fett runter, Muskeln halten" },
   performance: { title: "Leistung", desc: "Maximale Sportperformance" },
+};
+
+const EXPERIENCE_LABELS: Record<Experience, { title: string; desc: string }> = {
+  beginner: { title: "Anfänger", desc: "< 1 Jahr strukturiertes Training" },
+  intermediate: { title: "Fortgeschritten", desc: "1–3 Jahre regelmäßiges Training" },
+  advanced: { title: "Erfahren", desc: "3+ Jahre, sicher in allen Grundübungen" },
 };
 
 function OnboardingPage() {
@@ -96,6 +105,7 @@ function OnboardingPage() {
     gym_days: [1, 3, 5],
     sport_days: [1, 3],
     match_days: [6],
+    experience_level: "intermediate",
     diet_style: "omnivor",
     allergies: "",
     goal: "performance",
@@ -133,6 +143,7 @@ function OnboardingPage() {
         weight_kg: f.weight_kg ? Number(f.weight_kg) : null,
         sport: f.sport,
         position: f.position || null,
+        experience_level: f.experience_level,
         diet_style: f.diet_style || null,
         allergies: f.allergies
           ? f.allergies
@@ -240,6 +251,7 @@ function OnboardingPage() {
                   <SelectItem value="basketball">Basketball</SelectItem>
                   <SelectItem value="handball">Handball</SelectItem>
                   <SelectItem value="running">Laufen</SelectItem>
+                  <SelectItem value="triathlon">Triathlon</SelectItem>
                   <SelectItem value="other">Andere</SelectItem>
                 </SelectContent>
               </Select>
@@ -256,7 +268,24 @@ function OnboardingPage() {
 
         {step === 2 && (
           <div className="space-y-5">
-            <h2 className="font-display text-lg font-semibold">Wöchentlicher Rhythmus</h2>
+            <h2 className="font-display text-lg font-semibold">Training & Erfahrung</h2>
+            <Field label="Trainingserfahrung">
+              <Select
+                value={f.experience_level}
+                onValueChange={(v) => setF({ ...f, experience_level: v as Experience })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(EXPERIENCE_LABELS) as Experience[]).map((lvl) => (
+                    <SelectItem key={lvl} value={lvl}>
+                      {EXPERIENCE_LABELS[lvl].title} – {EXPERIENCE_LABELS[lvl].desc}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
             <DayPicker
               label="Gym-Tage"
               value={f.gym_days}
