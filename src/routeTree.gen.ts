@@ -48,6 +48,7 @@ import { Route as AuthenticatedGymIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCoursesIndexRouteImport } from './routes/_authenticated/courses.index'
 import { Route as AuthenticatedChatIndexRouteImport } from './routes/_authenticated/chat.index'
 import { Route as AuthenticatedActivitiesIndexRouteImport } from './routes/_authenticated/activities.index'
+import { Route as ApiCronRemindersRouteImport } from './routes/api.cron.reminders'
 import { Route as AuthenticatedSportIdRouteImport } from './routes/_authenticated/sport.$id'
 import { Route as AuthenticatedRacesIdRouteImport } from './routes/_authenticated/races.$id'
 import { Route as AuthenticatedGymIdRouteImport } from './routes/_authenticated/gym.$id'
@@ -261,6 +262,11 @@ const AuthenticatedActivitiesIndexRoute =
     path: '/activities/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiCronRemindersRoute = ApiCronRemindersRouteImport.update({
+  id: '/api/cron/reminders',
+  path: '/api/cron/reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSportIdRoute = AuthenticatedSportIdRouteImport.update({
   id: '/sport/$id',
   path: '/sport/$id',
@@ -351,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/gym/$id': typeof AuthenticatedGymIdRoute
   '/races/$id': typeof AuthenticatedRacesIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
+  '/api/cron/reminders': typeof ApiCronRemindersRoute
   '/activities/': typeof AuthenticatedActivitiesIndexRoute
   '/chat/': typeof AuthenticatedChatIndexRoute
   '/courses/': typeof AuthenticatedCoursesIndexRoute
@@ -400,6 +407,7 @@ export interface FileRoutesByTo {
   '/gym/$id': typeof AuthenticatedGymIdRoute
   '/races/$id': typeof AuthenticatedRacesIdRoute
   '/sport/$id': typeof AuthenticatedSportIdRoute
+  '/api/cron/reminders': typeof ApiCronRemindersRoute
   '/activities': typeof AuthenticatedActivitiesIndexRoute
   '/chat': typeof AuthenticatedChatIndexRoute
   '/courses': typeof AuthenticatedCoursesIndexRoute
@@ -451,6 +459,7 @@ export interface FileRoutesById {
   '/_authenticated/gym/$id': typeof AuthenticatedGymIdRoute
   '/_authenticated/races/$id': typeof AuthenticatedRacesIdRoute
   '/_authenticated/sport/$id': typeof AuthenticatedSportIdRoute
+  '/api/cron/reminders': typeof ApiCronRemindersRoute
   '/_authenticated/activities/': typeof AuthenticatedActivitiesIndexRoute
   '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
   '/_authenticated/courses/': typeof AuthenticatedCoursesIndexRoute
@@ -502,6 +511,7 @@ export interface FileRouteTypes {
     | '/gym/$id'
     | '/races/$id'
     | '/sport/$id'
+    | '/api/cron/reminders'
     | '/activities/'
     | '/chat/'
     | '/courses/'
@@ -551,6 +561,7 @@ export interface FileRouteTypes {
     | '/gym/$id'
     | '/races/$id'
     | '/sport/$id'
+    | '/api/cron/reminders'
     | '/activities'
     | '/chat'
     | '/courses'
@@ -601,6 +612,7 @@ export interface FileRouteTypes {
     | '/_authenticated/gym/$id'
     | '/_authenticated/races/$id'
     | '/_authenticated/sport/$id'
+    | '/api/cron/reminders'
     | '/_authenticated/activities/'
     | '/_authenticated/chat/'
     | '/_authenticated/courses/'
@@ -626,6 +638,7 @@ export interface RootRouteChildren {
   JoinTokenRoute: typeof JoinTokenRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiCronRemindersRoute: typeof ApiCronRemindersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -903,6 +916,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedActivitiesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/cron/reminders': {
+      id: '/api/cron/reminders'
+      path: '/api/cron/reminders'
+      fullPath: '/api/cron/reminders'
+      preLoaderRoute: typeof ApiCronRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/sport/$id': {
       id: '/_authenticated/sport/$id'
       path: '/sport/$id'
@@ -1061,6 +1081,7 @@ const rootRouteChildren: RootRouteChildren = {
   JoinTokenRoute: JoinTokenRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiCronRemindersRoute: ApiCronRemindersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

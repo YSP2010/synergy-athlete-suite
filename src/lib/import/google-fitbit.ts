@@ -7,12 +7,7 @@
  * Es werden nur belegte Felder geschrieben, unbekannte Strukturen ergeben ein
  * leeres Bundle.
  */
-import {
-  emptyBundle,
-  type WellnessBundle,
-  type WellnessDailyRow,
-  type SleepRow,
-} from "./wellness";
+import { emptyBundle, type WellnessBundle, type WellnessDailyRow, type SleepRow } from "./wellness";
 
 export function parseGoogleFitbit(text: string, filename: string): WellnessBundle {
   let json: unknown;
@@ -56,7 +51,10 @@ function numOf(v: unknown): number | null {
   return null;
 }
 
-function sumDaily(rows: Record<string, unknown>[] | null, field: keyof WellnessDailyRow): WellnessBundle {
+/** Numerische Tagesmetriken (alle Felder außer dem Datum). */
+type NumericDailyKey = Exclude<keyof WellnessDailyRow, "date">;
+
+function sumDaily(rows: Record<string, unknown>[] | null, field: NumericDailyKey): WellnessBundle {
   const out = emptyBundle();
   if (!rows) return out;
   const perDay = new Map<string, number>();
@@ -68,7 +66,7 @@ function sumDaily(rows: Record<string, unknown>[] | null, field: keyof WellnessD
   }
   for (const [date, sum] of perDay) {
     const row: WellnessDailyRow = { date };
-    (row as Record<string, unknown>)[field as string] = Math.round(sum);
+    row[field] = Math.round(sum);
     out.wellness.push(row);
   }
   return out;
@@ -91,8 +89,12 @@ function sleepBundle(rows: Record<string, unknown>[]): WellnessBundle {
   for (const r of rows) {
     const day = isoDay(r.dateOfSleep ?? r.date ?? r.startTime);
     if (!day) continue;
-    const levels = ((r.levels as Record<string, unknown>)?.summary ?? {}) as Record<string, { minutes?: number }>;
-    const min = (k: string) => (typeof levels[k]?.minutes === "number" ? levels[k]!.minutes! * 60 : null);
+    const levels = ((r.levels as Record<string, unknown>)?.summary ?? {}) as Record<
+      string,
+      { minutes?: number }
+    >;
+    const min = (k: string) =>
+      typeof levels[k]?.minutes === "number" ? levels[k]!.minutes! * 60 : null;
     const row: SleepRow = { date: day };
     if (typeof r.startTime === "string") row.sleep_start = r.startTime;
     if (typeof r.endTime === "string") row.sleep_end = r.endTime;
