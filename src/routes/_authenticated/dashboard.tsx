@@ -28,6 +28,7 @@ import {
 import { RecoveryRing } from "@/components/dashboard/RecoveryRing";
 import { MacroRings } from "@/components/dashboard/MacroRings";
 import { QueryError } from "@/components/ui/query-error";
+import { TrainingTipCard } from "@/components/ai/TrainingTipCard";
 import {
   AlertTriangle,
   CalendarDays,
@@ -334,6 +335,9 @@ function DashboardPage() {
           <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
         </Link>
       )}
+
+      {/* KI-Trainingstipp */}
+      <TrainingTipCard compact />
 
       {/* Warnings */}
       {warnings.length > 0 && (
