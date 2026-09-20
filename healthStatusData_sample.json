@@ -1,0 +1,17 @@
+[
+  {
+    "calendarDate": "2026-08-06",
+    "metrics": [
+      { "type": "HRV", "value": 68.0, "status": "ONBOARDING" },
+      { "type": "HR", "value": 52.0, "status": "ONBOARDING" },
+      { "type": "SPO2", "value": 96.0, "status": "ONBOARDING" }
+    ]
+  },
+  {
+    "calendarDate": "2026-08-07",
+    "metrics": [
+      { "type": "HRV", "value": 74.0, "status": "BALANCED" },
+      { "type": "RESPIRATION", "value": 13.9, "status": "ONBOARDING" }
+    ]
+  }
+]

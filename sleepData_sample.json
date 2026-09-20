@@ -1,0 +1,28 @@
+[
+  {
+    "calendarDate": "2026-08-06",
+    "sleepStartTimestampGMT": "2026-08-05T21:25:10.0",
+    "sleepEndTimestampGMT": "2026-08-06T02:31:10.0",
+    "deepSleepSeconds": 6660,
+    "lightSleepSeconds": 7620,
+    "remSleepSeconds": 4020,
+    "awakeSleepSeconds": 60,
+    "spo2SleepSummary": { "averageSPO2": 96.48, "averageHR": 50.0, "lowestSPO2": 90 },
+    "averageRespiration": 13.99,
+    "avgSleepStress": 5.6,
+    "sleepScores": { "overallScore": 68, "qualityScore": 96 },
+    "restlessMomentCount": 28
+  },
+  {
+    "calendarDate": "2026-08-07",
+    "sleepStartTimestampGMT": "2026-08-06T22:10:00.0",
+    "sleepEndTimestampGMT": "2026-08-07T05:40:00.0",
+    "deepSleepSeconds": 4800,
+    "lightSleepSeconds": 12600,
+    "remSleepSeconds": 5400,
+    "awakeSleepSeconds": 120,
+    "sleepScores": { "overallScore": 82 },
+    "restlessMomentCount": 12
+  },
+  { "retro": false }
+]

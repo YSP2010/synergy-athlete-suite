@@ -1,0 +1,56 @@
+[
+  {
+    "userProfilePK": 1,
+    "calendarDate": "2026-08-05",
+    "totalKilocalories": 2386.0,
+    "activeKilocalories": 17.0,
+    "bmrKilocalories": 2369.0,
+    "totalSteps": 488,
+    "totalDistanceMeters": 440,
+    "moderateIntensityMinutes": 0,
+    "vigorousIntensityMinutes": 0,
+    "floorsAscendedInMeters": 6.096,
+    "minHeartRate": 48,
+    "maxHeartRate": 104,
+    "restingHeartRate": 50,
+    "averageSpo2Value": 95.0,
+    "allDayStress": {
+      "aggregatorList": [
+        { "type": "TOTAL", "averageStressLevel": 13, "maxStressLevel": 76 },
+        { "type": "AWAKE", "averageStressLevel": 13, "maxStressLevel": 76 },
+        { "type": "ASLEEP", "averageStressLevel": -2 }
+      ]
+    },
+    "bodyBattery": {
+      "bodyBatteryStatList": [
+        { "bodyBatteryStatType": "HIGHEST", "statsValue": 62 },
+        { "bodyBatteryStatType": "LOWEST", "statsValue": 50 },
+        { "bodyBatteryStatType": "MOSTRECENT", "statsValue": 62 },
+        { "bodyBatteryStatType": "ENDOFDAY", "statsValue": 61 },
+        { "bodyBatteryStatType": "STARTOFDAY", "statsValue": 50 }
+      ]
+    },
+    "respiration": { "avgWakingRespirationValue": 15.0 }
+  },
+  {
+    "userProfilePK": 1,
+    "calendarDate": "2026-08-06",
+    "totalSteps": 10345,
+    "totalDistanceMeters": 8123,
+    "restingHeartRate": 47,
+    "activeKilocalories": 640.0,
+    "bmrKilocalories": 2370.0,
+    "allDayStress": {
+      "aggregatorList": [{ "type": "TOTAL", "averageStressLevel": 30, "maxStressLevel": 91 }]
+    },
+    "bodyBattery": {
+      "bodyBatteryStatList": [
+        { "bodyBatteryStatType": "HIGHEST", "statsValue": 88 },
+        { "bodyBatteryStatType": "LOWEST", "statsValue": 22 },
+        { "bodyBatteryStatType": "ENDOFDAY", "statsValue": 40 },
+        { "bodyBatteryStatType": "STARTOFDAY", "statsValue": 80 }
+      ]
+    }
+  },
+  { "retro": false }
+]

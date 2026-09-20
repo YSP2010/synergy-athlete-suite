@@ -1,0 +1,14 @@
+[
+  {
+    "userProfilePK": 1,
+    "calendarDate": 1785974400000,
+    "dailyTrainingLoadAcute": 101,
+    "dailyTrainingLoadChronic": 178
+  },
+  {
+    "userProfilePK": 1,
+    "calendarDate": 1786060800000,
+    "dailyTrainingLoadAcute": 268,
+    "dailyTrainingLoadChronic": 178
+  }
+]

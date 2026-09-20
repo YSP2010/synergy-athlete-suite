@@ -1,0 +1,16 @@
+[
+  {
+    "userProfilePK": 1,
+    "calendarDate": "2026-08-09",
+    "sport": "RUNNING",
+    "subSport": "GENERIC",
+    "vo2MaxValue": 59.0
+  },
+  {
+    "userProfilePK": 1,
+    "calendarDate": "2026-08-10",
+    "sport": "CYCLING",
+    "subSport": "GENERIC",
+    "vo2MaxValue": 52.0
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "userProfilePK": 1,
+    "calendarDate": "2026-08-06",
+    "level": "MODERATE",
+    "score": 56,
+    "hrvWeeklyAverage": 72.0
+  },
+  {
+    "userProfilePK": 1,
+    "calendarDate": "2026-08-07",
+    "level": "HIGH",
+    "score": 74,
+    "hrvWeeklyAverage": 75.0
+  }
+]
