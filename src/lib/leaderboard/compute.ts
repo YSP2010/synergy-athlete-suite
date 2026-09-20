@@ -89,8 +89,7 @@ function periodEnd(period: LeaderboardPeriod, startIso: string): number {
   if (period === "all_time") return Number.MAX_SAFE_INTEGER;
   const s = new Date(`${startIso}T00:00:00.000Z`);
   if (period === "week") return s.getTime() + 7 * DAY;
-  if (period === "month")
-    return Date.UTC(s.getUTCFullYear(), s.getUTCMonth() + 1, 1);
+  if (period === "month") return Date.UTC(s.getUTCFullYear(), s.getUTCMonth() + 1, 1);
   return Date.UTC(s.getUTCFullYear() + 1, 0, 1);
 }
 
@@ -133,14 +132,20 @@ function best(
   lower: boolean,
 ): { value: number; activityId: string | null } | null {
   if (!list.length) return null;
-  return list.reduce((acc, c) => (lower ? (c.value < acc.value ? c : acc) : c.value > acc.value ? c : acc));
+  return list.reduce((acc, c) =>
+    lower ? (c.value < acc.value ? c : acc) : c.value > acc.value ? c : acc,
+  );
 }
 
 /**
  * Erzeugt die Einträge für eine Periode. Es zählen ausschließlich verifizierte
  * Aktivitäten (FIT mit Geräte-Signatur), Gesundheitswerte nur mit Mindestumfang.
  */
-export function computeEntries(input: LbInput, period: LeaderboardPeriod, now = new Date()): EntryDraft[] {
+export function computeEntries(
+  input: LbInput,
+  period: LeaderboardPeriod,
+  now = new Date(),
+): EntryDraft[] {
   const start = periodStart(period, now);
   const end = periodEnd(period, start);
   const startMs = Date.parse(`${start}T00:00:00.000Z`);
@@ -189,14 +194,18 @@ export function computeEntries(input: LbInput, period: LeaderboardPeriod, now = 
 
   // --- Laufen: Volumen und Höhenmeter ---
   const runKm = runs.reduce((s, a) => s + (a.distance_m ?? 0), 0) / 1000;
-  if (runKm > 0) push("run_weekly_km", runKm, null, runs.length, runKm > PLAUSIBILITY.runWeeklyMaxKm);
+  if (runKm > 0)
+    push("run_weekly_km", runKm, null, runs.length, runKm > PLAUSIBILITY.runWeeklyMaxKm);
   const runElev = runs.reduce((s, a) => s + (a.elevation_gain_m ?? 0), 0);
   if (runElev > 0) push("run_elevation", runElev, null, runs.length);
 
   // --- Laufen: Effizienz (ab 8 km, mit Puls) ---
   const efCands = runs
     .filter((a) => (a.distance_m ?? 0) >= 8000 && a.avg_hr && a.avg_speed_mps)
-    .map((a) => ({ value: ((a.avg_speed_mps as number) * 60) / (a.avg_hr as number), activityId: a.id }));
+    .map((a) => ({
+      value: ((a.avg_speed_mps as number) * 60) / (a.avg_hr as number),
+      activityId: a.id,
+    }));
   const ef = best(efCands, false);
   if (ef) push("run_efficiency", ef.value, ef.activityId, 1);
 
@@ -218,7 +227,9 @@ export function computeEntries(input: LbInput, period: LeaderboardPeriod, now = 
     if (b) push("bike_20min_wkg", b.value, b.activityId, 1, b.value > PLAUSIBILITY.bikeMaxWkg);
   }
   const longRide = best(
-    bikes.filter((a) => (a.distance_m ?? 0) > 0).map((a) => ({ value: (a.distance_m as number) / 1000, activityId: a.id })),
+    bikes
+      .filter((a) => (a.distance_m ?? 0) > 0)
+      .map((a) => ({ value: (a.distance_m as number) / 1000, activityId: a.id })),
     false,
   );
   if (longRide) push("bike_longest_ride", longRide.value, longRide.activityId, 1);
@@ -231,7 +242,13 @@ export function computeEntries(input: LbInput, period: LeaderboardPeriod, now = 
     true,
   );
   if (swim400)
-    push("swim_400m_time", swim400.value, swim400.activityId, 1, swim400.value < PLAUSIBILITY.swim400MinS);
+    push(
+      "swim_400m_time",
+      swim400.value,
+      swim400.activityId,
+      1,
+      swim400.value < PLAUSIBILITY.swim400MinS,
+    );
 
   // --- Triathlon ---
   const sprint = best(
@@ -255,7 +272,10 @@ export function computeEntries(input: LbInput, period: LeaderboardPeriod, now = 
   for (const s of input.segments) {
     if (!triIds.has(s.activity_id)) continue;
     if (s.segment_type !== "t1" && s.segment_type !== "t2") continue;
-    transitionByActivity.set(s.activity_id, (transitionByActivity.get(s.activity_id) ?? 0) + s.duration_s);
+    transitionByActivity.set(
+      s.activity_id,
+      (transitionByActivity.get(s.activity_id) ?? 0) + s.duration_s,
+    );
   }
   const trans = best(
     [...transitionByActivity.entries()].map(([id, v]) => ({ value: v, activityId: id })),
@@ -280,7 +300,9 @@ export function computeEntries(input: LbInput, period: LeaderboardPeriod, now = 
     const t = Date.parse(`${date}T00:00:00.000Z`);
     return t >= startMs && t < end;
   };
-  const scores = input.sleep.filter((s) => s.sleep_score != null && inRange(s.date)).map((s) => s.sleep_score as number);
+  const scores = input.sleep
+    .filter((s) => s.sleep_score != null && inRange(s.date))
+    .map((s) => s.sleep_score as number);
   if (scores.length) {
     const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
     push("sleep_score_avg", avg, null, scores.length, avg > PLAUSIBILITY.sleepScoreMax);

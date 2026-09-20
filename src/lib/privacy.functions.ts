@@ -42,7 +42,10 @@ export const exportMyData = createServerFn({ method: "POST" })
     for (const table of EXPORT_TABLES) {
       const column = table === "profiles" ? "id" : "user_id";
       const query = supabase.from(table).select("*") as unknown as {
-        eq: (col: string, val: string) => { limit: (n: number) => Promise<{ data: unknown[] | null; error: unknown }> };
+        eq: (
+          col: string,
+          val: string,
+        ) => { limit: (n: number) => Promise<{ data: unknown[] | null; error: unknown }> };
       };
       const { data, error } = await query.eq(column, userId).limit(5000);
       if (error) {
@@ -106,7 +109,9 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       .limit(5000);
     const scanPaths = (scans ?? []).map((s) => s.image_path).filter((p): p is string => !!p);
     for (let i = 0; i < scanPaths.length; i += 100) {
-      const { error } = await supabase.storage.from("food-scans").remove(scanPaths.slice(i, i + 100));
+      const { error } = await supabase.storage
+        .from("food-scans")
+        .remove(scanPaths.slice(i, i + 100));
       if (error) console.error("[delete] storage scans", error);
     }
 

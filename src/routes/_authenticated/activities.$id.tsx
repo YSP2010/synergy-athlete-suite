@@ -19,7 +19,14 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, Flag, Loader2, ShieldCheck } from "lucide-react";
 import { RouteMap } from "@/components/activities/RouteMap";
-import { fmtDistance, fmtDuration, fmtPace, fmtSpeed, sportLabel, toChartData } from "@/lib/activities";
+import {
+  fmtDistance,
+  fmtDuration,
+  fmtPace,
+  fmtSpeed,
+  sportLabel,
+  toChartData,
+} from "@/lib/activities";
 import { geometryFromTrack } from "@/lib/import/match";
 import type { TrackPoint } from "@/lib/import/downsample";
 import { humanError } from "@/lib/errors";
@@ -28,13 +35,22 @@ export const Route = createFileRoute("/_authenticated/activities/$id")({
   head: () => ({
     meta: [
       { title: "Aktivität – Hybrid Athlete" },
-      { name: "description", content: "Details zu deiner Aktivität: Karte, Runden, Herzfrequenz und Leistungsverlauf." },
+      {
+        name: "description",
+        content: "Details zu deiner Aktivität: Karte, Runden, Herzfrequenz und Leistungsverlauf.",
+      },
       { property: "og:title", content: "Aktivität – Hybrid Athlete" },
-      { property: "og:description", content: "Karte, Runden, Herzfrequenz und Leistung deiner Aktivität." },
+      {
+        property: "og:description",
+        content: "Karte, Runden, Herzfrequenz und Leistung deiner Aktivität.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Aktivität – Hybrid Athlete" },
-      { name: "twitter:description", content: "Karte, Runden, Herzfrequenz und Leistung deiner Aktivität." },
+      {
+        name: "twitter:description",
+        content: "Karte, Runden, Herzfrequenz und Leistung deiner Aktivität.",
+      },
     ],
   }),
   component: ActivityDetail,
@@ -51,7 +67,11 @@ function ActivityDetail() {
     queryFn: async () => {
       const [act, track, laps, segs] = await Promise.all([
         supabase.from("activities").select("*").eq("id", id).maybeSingle(),
-        supabase.from("activity_tracks").select("points, bounds").eq("activity_id", id).maybeSingle(),
+        supabase
+          .from("activity_tracks")
+          .select("points, bounds")
+          .eq("activity_id", id)
+          .maybeSingle(),
         supabase.from("activity_laps").select("*").eq("activity_id", id).order("lap_index"),
         supabase
           .from("multisport_segments")
@@ -62,7 +82,7 @@ function ActivityDetail() {
       if (act.error) throw act.error;
       return {
         activity: act.data,
-        points: ((track.data?.points as unknown as TrackPoint[]) ?? []),
+        points: (track.data?.points as unknown as TrackPoint[]) ?? [],
         laps: laps.data ?? [],
         segments: segs.data ?? [],
       };
@@ -88,11 +108,17 @@ function ActivityDetail() {
   /** Weist Ausrüstung zu und schreibt den Kilometerstand aus allen Aktivitäten fort. */
   const assignGear = useMutation({
     mutationFn: async (equipmentId: string | null) => {
-      const { error } = await supabase.from("activities").update({ equipment_id: equipmentId }).eq("id", id);
+      const { error } = await supabase
+        .from("activities")
+        .update({ equipment_id: equipmentId })
+        .eq("id", id);
       if (error) throw error;
       const affected = [equipmentId, a?.equipment_id].filter(Boolean) as string[];
       for (const gid of [...new Set(affected)]) {
-        const { data: rows } = await supabase.from("activities").select("distance_m").eq("equipment_id", gid);
+        const { data: rows } = await supabase
+          .from("activities")
+          .select("distance_m")
+          .eq("equipment_id", gid);
         const total = (rows ?? []).reduce((s, r) => s + Number(r.distance_m ?? 0), 0);
         await supabase.from("equipment").update({ total_distance_m: total }).eq("id", gid);
       }
@@ -180,11 +206,18 @@ function ActivityDetail() {
       <header>
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           {a.name || sportLabel(a.sport)}
-          {a.verified && <ShieldCheck className="h-5 w-5 text-primary" aria-label="Geräteverifiziert" />}
+          {a.verified && (
+            <ShieldCheck className="h-5 w-5 text-primary" aria-label="Geräteverifiziert" />
+          )}
         </h1>
         <p className="text-sm text-muted-foreground">
           {sportLabel(a.sport)} ·{" "}
-          {a.started_at ? new Date(a.started_at).toLocaleString("de-DE", { dateStyle: "full", timeStyle: "short" }) : "ohne Datum"}
+          {a.started_at
+            ? new Date(a.started_at).toLocaleString("de-DE", {
+                dateStyle: "full",
+                timeStyle: "short",
+              })
+            : "ohne Datum"}
           {a.device_name ? ` · ${a.device_name}` : ""}
         </p>
       </header>
@@ -196,12 +229,26 @@ function ActivityDetail() {
         <Stat label="Ø Speed" value={fmtSpeed(a.avg_speed_mps)} />
         <Stat label="Ø Puls" value={a.avg_hr ? `${a.avg_hr} bpm` : "–"} />
         <Stat label="Max Puls" value={a.max_hr ? `${a.max_hr} bpm` : "–"} />
-        <Stat label="Höhenmeter" value={a.elevation_gain_m != null ? `${Math.round(a.elevation_gain_m)} m` : "–"} />
+        <Stat
+          label="Höhenmeter"
+          value={a.elevation_gain_m != null ? `${Math.round(a.elevation_gain_m)} m` : "–"}
+        />
         <Stat label="Kalorien" value={a.calories != null ? `${a.calories} kcal` : "–"} />
         <Stat label="Ø Power" value={a.avg_power_w != null ? `${a.avg_power_w} W` : "–"} />
-        <Stat label="Ø Kadenz" value={a.avg_cadence != null ? `${Math.round(a.avg_cadence)} spm` : "–"} />
-        <Stat label="Bodenkontakt" value={a.avg_ground_contact_ms != null ? `${Math.round(a.avg_ground_contact_ms)} ms` : "–"} />
-        <Stat label="Schrittlänge" value={a.avg_stride_length_m != null ? `${a.avg_stride_length_m.toFixed(2)} m` : "–"} />
+        <Stat
+          label="Ø Kadenz"
+          value={a.avg_cadence != null ? `${Math.round(a.avg_cadence)} spm` : "–"}
+        />
+        <Stat
+          label="Bodenkontakt"
+          value={
+            a.avg_ground_contact_ms != null ? `${Math.round(a.avg_ground_contact_ms)} ms` : "–"
+          }
+        />
+        <Stat
+          label="Schrittlänge"
+          value={a.avg_stride_length_m != null ? `${a.avg_stride_length_m.toFixed(2)} m` : "–"}
+        />
       </div>
 
       <RouteMap points={points} className="h-80" />
@@ -214,7 +261,12 @@ function ActivityDetail() {
               <XAxis dataKey="km" tick={{ fontSize: 11 }} unit=" km" />
               <YAxis tick={{ fontSize: 11 }} width={40} unit=" m" />
               <Tooltip contentStyle={tooltipStyle} />
-              <Area type="monotone" dataKey="alt" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
+              <Area
+                type="monotone"
+                dataKey="alt"
+                stroke="hsl(var(--primary))"
+                fill="hsl(var(--primary) / 0.2)"
+              />
             </AreaChart>
           </ChartCard>
           <ChartCard title="Puls & Tempo">
@@ -223,8 +275,20 @@ function ActivityDetail() {
               <XAxis dataKey="km" tick={{ fontSize: 11 }} unit=" km" />
               <YAxis tick={{ fontSize: 11 }} width={40} />
               <Tooltip contentStyle={tooltipStyle} />
-              <Line type="monotone" dataKey="hr" dot={false} stroke="hsl(var(--destructive))" name="Puls" />
-              <Line type="monotone" dataKey="speed" dot={false} stroke="hsl(var(--primary))" name="km/h" />
+              <Line
+                type="monotone"
+                dataKey="hr"
+                dot={false}
+                stroke="hsl(var(--destructive))"
+                name="Puls"
+              />
+              <Line
+                type="monotone"
+                dataKey="speed"
+                dot={false}
+                stroke="hsl(var(--primary))"
+                name="km/h"
+              />
             </LineChart>
           </ChartCard>
         </div>
@@ -266,7 +330,9 @@ function ActivityDetail() {
                     transition ? "bg-muted/40" : ""
                   }`}
                 >
-                  <span className="font-medium">{SEGMENT_LABEL[s.segment_type] ?? s.segment_type}</span>
+                  <span className="font-medium">
+                    {SEGMENT_LABEL[s.segment_type] ?? s.segment_type}
+                  </span>
                   <span className="tabular-nums text-muted-foreground">
                     {fmtDuration(s.duration_s)}
                     {s.distance_m ? ` · ${fmtDistance(s.distance_m)}` : ""}
@@ -315,8 +381,8 @@ function ActivityDetail() {
             <Flag className="h-4 w-4 text-primary" /> Strecke anlegen
           </h2>
           <p className="mb-3 text-sm text-muted-foreground">
-            Mache aus dieser Route eine Strecke – künftige Einheiten auf derselben Strecke landen automatisch in der
-            Bestenliste.
+            Mache aus dieser Route eine Strecke – künftige Einheiten auf derselben Strecke landen
+            automatisch in der Bestenliste.
           </p>
           <div className="flex flex-wrap items-end gap-2">
             <div className="flex-1 min-w-[200px]">

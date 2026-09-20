@@ -158,7 +158,6 @@ export async function persistActivity(
     }
   }
 
-
   const { points, bounds } = downsampleTrack(a.samples);
   if (points.length) {
     const { error: trackErr } = await db.from("activity_tracks").insert({

@@ -6,12 +6,7 @@
  * (…pedometer_day_summary…, …sleep…, …heart_rate…). Reine Inhaltszuordnung,
  * fehlende/unbekannte Spalten werden weggelassen (nie null geschrieben).
  */
-import {
-  emptyBundle,
-  type WellnessBundle,
-  type WellnessDailyRow,
-  type SleepRow,
-} from "./wellness";
+import { emptyBundle, type WellnessBundle, type WellnessDailyRow, type SleepRow } from "./wellness";
 
 export function parseSamsungCsv(text: string, filename: string): WellnessBundle {
   const name = filename.toLowerCase();
@@ -41,12 +36,16 @@ function parseCsv(text: string): string[][] {
     for (let i = 0; i < line.length; i++) {
       const c = line[i];
       if (q) {
-        if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
-        else if (c === '"') q = false;
+        if (c === '"' && line[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else if (c === '"') q = false;
         else cur += c;
       } else if (c === '"') q = true;
-      else if (c === ",") { cells.push(cur); cur = ""; }
-      else cur += c;
+      else if (c === ",") {
+        cells.push(cur);
+        cur = "";
+      } else cur += c;
     }
     cells.push(cur);
     out.push(cells.map((s) => s.trim()));
@@ -142,7 +141,8 @@ function sleep(cols: Record<string, number>, data: string[][]): WellnessBundle {
     const end = r[cEnd];
     const day = isoDay(end) ?? isoDay(start);
     if (!day) continue;
-    const ms = Date.parse((end ?? "").replace(" ", "T")) - Date.parse((start ?? "").replace(" ", "T"));
+    const ms =
+      Date.parse((end ?? "").replace(" ", "T")) - Date.parse((start ?? "").replace(" ", "T"));
     const row: SleepRow = { date: day };
     if (start) row.sleep_start = start;
     if (end) row.sleep_end = end;

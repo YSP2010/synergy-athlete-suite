@@ -64,11 +64,30 @@ export const recomputeMyLeaderboard = createServerFn({ method: "POST" })
         .eq("route_only", false)
         .eq("verified", true)
         .limit(5000),
-      supabase.from("sleep_logs").select("date, sleep_score").eq("user_id", userId).gte("date", since),
-      supabase.from("hrv_logs").select("date, last_night_avg_ms").eq("user_id", userId).gte("date", since),
-      supabase.from("wellness_daily").select("date, resting_hr").eq("user_id", userId).gte("date", since),
-      supabase.from("user_metrics").select("date, chronic_load").eq("user_id", userId).gte("date", since),
-      supabase.from("multisport_segments").select("activity_id, segment_type, duration_s").eq("user_id", userId),
+      supabase
+        .from("sleep_logs")
+        .select("date, sleep_score")
+        .eq("user_id", userId)
+        .gte("date", since),
+      supabase
+        .from("hrv_logs")
+        .select("date, last_night_avg_ms")
+        .eq("user_id", userId)
+        .gte("date", since),
+      supabase
+        .from("wellness_daily")
+        .select("date, resting_hr")
+        .eq("user_id", userId)
+        .gte("date", since),
+      supabase
+        .from("user_metrics")
+        .select("date, chronic_load")
+        .eq("user_id", userId)
+        .gte("date", since),
+      supabase
+        .from("multisport_segments")
+        .select("activity_id, segment_type, duration_s")
+        .eq("user_id", userId),
     ]);
 
     const input: LbInput = {
@@ -77,9 +96,9 @@ export const recomputeMyLeaderboard = createServerFn({ method: "POST" })
       hrv: (hrv.data ?? []) as LbInput["hrv"],
       wellness: (wellness.data ?? []) as LbInput["wellness"],
       metrics: (metrics.data ?? []) as LbInput["metrics"],
-      segments: ((segments.data ?? []) as { activity_id: string; segment_type: string; duration_s: number }[]).map(
-        (s) => ({ ...s, duration_s: Number(s.duration_s) }),
-      ),
+      segments: (
+        (segments.data ?? []) as { activity_id: string; segment_type: string; duration_s: number }[]
+      ).map((s) => ({ ...s, duration_s: Number(s.duration_s) })),
       weightKg: profile.weight_kg ? Number(profile.weight_kg) : null,
     };
 
@@ -96,7 +115,11 @@ export const recomputeMyLeaderboard = createServerFn({ method: "POST" })
 
     if (!drafts.length) return { ok: true, entries: 0 };
 
-    const rows = drafts.map((d) => ({ ...d, user_id: userId, computed_at: new Date().toISOString() }));
+    const rows = drafts.map((d) => ({
+      ...d,
+      user_id: userId,
+      computed_at: new Date().toISOString(),
+    }));
     const { error } = await supabase
       .from("leaderboard_entries")
       .upsert(rows, { onConflict: "user_id,category_key,period,period_start" });

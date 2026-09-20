@@ -12,7 +12,8 @@ export function mapFitSport(sport: unknown, subSport?: unknown): string {
   const s = String(sport ?? "").toLowerCase();
   const sub = String(subSport ?? "").toLowerCase();
   if (s === "running") return sub === "trail" ? "trail_run" : "run";
-  if (s === "cycling") return sub.includes("indoor") || sub === "virtual_activity" ? "bike_indoor" : "bike";
+  if (s === "cycling")
+    return sub.includes("indoor") || sub === "virtual_activity" ? "bike_indoor" : "bike";
   if (s === "swimming") return sub === "open_water" ? "swim_open" : "swim";
   if (s === "walking" || s === "hiking") return "hike";
   if (s === "training" || s === "fitness_equipment") return "strength";
@@ -51,8 +52,7 @@ export function parseFitMessages(messages: Record<string, Mesg[]>): ParsedActivi
   const lapMesgs = messages["lapMesgs"] ?? [];
   if (!session && !records.length) throw new ParseError("FIT enthält keine Session-/Record-Daten");
 
-  const startMs =
-    toDate(session?.["startTime"]) ?? toDate(records[0]?.["timestamp"]) ?? null;
+  const startMs = toDate(session?.["startTime"]) ?? toDate(records[0]?.["timestamp"]) ?? null;
 
   const samples: ParsedSample[] = records.map((r) => {
     const ts = toDate(r["timestamp"]);

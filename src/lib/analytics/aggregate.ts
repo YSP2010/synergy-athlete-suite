@@ -2,7 +2,16 @@
  * Verdichtet Aktivitäten und Gerätedaten zu Tages- und Zeitreihen für /analytics.
  * Reine Funktionen – die Datenbeschaffung passiert in der Route.
  */
-import { loadSeries, trimp, bikeTss, runTss, swimTss, type DailyLoad, type LoadPoint, type Sex } from "./load";
+import {
+  loadSeries,
+  trimp,
+  bikeTss,
+  runTss,
+  swimTss,
+  type DailyLoad,
+  type LoadPoint,
+  type Sex,
+} from "./load";
 
 export interface AnalyticsActivity {
   id: string;
@@ -50,7 +59,8 @@ export function activityLoad(a: AnalyticsActivity, t: Thresholds): number {
   if (family === "run" && a.avg_speed_mps && t.thresholdSpeedMps) {
     return runTss(dur, a.avg_speed_mps, t.thresholdSpeedMps);
   }
-  if (family === "swim" && a.avg_speed_mps && t.cssMps) return swimTss(dur, a.avg_speed_mps, t.cssMps);
+  if (family === "swim" && a.avg_speed_mps && t.cssMps)
+    return swimTss(dur, a.avg_speed_mps, t.cssMps);
 
   if (a.avg_hr && t.maxHr) {
     return trimp(dur / 60, a.avg_hr, t.restHr ?? 55, t.maxHr, t.sex);

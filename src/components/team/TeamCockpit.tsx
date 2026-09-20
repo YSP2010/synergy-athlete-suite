@@ -130,9 +130,9 @@ export function TeamCockpit({ teamId }: { teamId: string }) {
 
       <p className="flex items-start gap-2 rounded-lg border border-border bg-elevated p-3 text-xs text-muted-foreground">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        Die Ampel ist eine grobe Orientierung aus Trainingsbelastung und Selbsteinschätzung. Sie
-        ist keine medizinische Aussage. Bei Schmerzen oder Beschwerden gehört die Entscheidung zu
-        Arzt oder Physiotherapie.
+        Die Ampel ist eine grobe Orientierung aus Trainingsbelastung und Selbsteinschätzung. Sie ist
+        keine medizinische Aussage. Bei Schmerzen oder Beschwerden gehört die Entscheidung zu Arzt
+        oder Physiotherapie.
       </p>
 
       {counts.red > 0 && (

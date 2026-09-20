@@ -23,7 +23,10 @@ export const Route = createFileRoute("/_authenticated/sport/$id")({
   head: () => ({
     meta: [
       { title: "Sport-Einheit – Hybrid Athlete" },
-      { name: "description", content: "Intensität, Dauer und Belastung dieser Sporteinheit protokollieren." },
+      {
+        name: "description",
+        content: "Intensität, Dauer und Belastung dieser Sporteinheit protokollieren.",
+      },
       { property: "og:title", content: "Sport-Einheit – Hybrid Athlete" },
       { property: "og:description", content: "Intensität, Dauer und Belastung protokollieren." },
       { property: "og:type", content: "website" },

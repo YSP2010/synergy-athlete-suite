@@ -102,9 +102,9 @@ function GuidePage() {
           Wenn beides am selben Tag stattfindet
         </h2>
         <p className="mt-3 text-sm text-muted-foreground">
-          Steht Laufen und Beintraining am gleichen Tag an, priorisiere das Ziel: Willst du Kraft und
-          Muskelmasse aufbauen, hebe zuerst und laufe frühestens sechs Stunden später locker. Steht
-          eine wichtige Laufeinheit im Kalender (Intervalle, Testlauf), läufst du zuerst und
+          Steht Laufen und Beintraining am gleichen Tag an, priorisiere das Ziel: Willst du Kraft
+          und Muskelmasse aufbauen, hebe zuerst und laufe frühestens sechs Stunden später locker.
+          Steht eine wichtige Laufeinheit im Kalender (Intervalle, Testlauf), läufst du zuerst und
           reduzierst den anschließenden Leg Day um etwa ein Drittel des Volumens. Zwei harte
           Einheiten direkt hintereinander bringen keinen zusätzlichen Reiz, nur zusätzliche
           Ermüdung.
@@ -135,15 +135,13 @@ function GuidePage() {
           </li>
         </ul>
 
-        <h2 className="mt-10 font-display text-2xl font-bold">
-          Regeneration aktiv unterstützen
-        </h2>
+        <h2 className="mt-10 font-display text-2xl font-bold">Regeneration aktiv unterstützen</h2>
         <p className="mt-3 text-sm text-muted-foreground">
-          Kohlenhydrate rund um beide Einheiten füllen die Glykogenspeicher, die Laufen und Krafttraining
-          gemeinsam leeren – an Doppeltagen eher 6–8 g pro Kilogramm Körpergewicht. Dazu 1,6–2,2 g
-          Protein pro Kilogramm, Schlaf über sieben Stunden und Blick auf HRV und Ruhepuls. Sinkt der
-          Recovery-Score, wird aus dem geplanten Zone-2-Lauf ein Spaziergang – das kostet dich keine
-          Form, ein überzogener Lauf dagegen eine ganze Woche.
+          Kohlenhydrate rund um beide Einheiten füllen die Glykogenspeicher, die Laufen und
+          Krafttraining gemeinsam leeren – an Doppeltagen eher 6–8 g pro Kilogramm Körpergewicht.
+          Dazu 1,6–2,2 g Protein pro Kilogramm, Schlaf über sieben Stunden und Blick auf HRV und
+          Ruhepuls. Sinkt der Recovery-Score, wird aus dem geplanten Zone-2-Lauf ein Spaziergang –
+          das kostet dich keine Form, ein überzogener Lauf dagegen eine ganze Woche.
         </p>
 
         <div className="mt-10 rounded-xl border border-border bg-elevated p-6 text-center">

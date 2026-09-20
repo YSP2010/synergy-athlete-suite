@@ -244,10 +244,23 @@ function mapWellness(rec: Rec, date: string): WellnessDailyRow | null {
     body_battery_max: num(rec, "bodyBatteryHighestValue", "highestBodyBattery", "bodyBatteryMax"),
     active_kcal: num(rec, "activeKilocalories", "activeCalories"),
     bmr_kcal: num(rec, "bmrKilocalories", "bmrCalories", "restingCalories"),
-    intensity_minutes_moderate: num(rec, "moderateIntensityMinutes", "moderateIntensityDurationInMinutes"),
-    intensity_minutes_vigorous: num(rec, "vigorousIntensityMinutes", "vigorousIntensityDurationInMinutes"),
+    intensity_minutes_moderate: num(
+      rec,
+      "moderateIntensityMinutes",
+      "moderateIntensityDurationInMinutes",
+    ),
+    intensity_minutes_vigorous: num(
+      rec,
+      "vigorousIntensityMinutes",
+      "vigorousIntensityDurationInMinutes",
+    ),
     avg_spo2: num(rec, "averageSpo2", "avgSpo2", "averageSpO2Value"),
-    avg_respiration: num(rec, "avgWakingRespirationValue", "averageRespirationValue", "avgRespirationRate"),
+    avg_respiration: num(
+      rec,
+      "avgWakingRespirationValue",
+      "averageRespirationValue",
+      "avgRespirationRate",
+    ),
     skin_temp_deviation_c: num(rec, "skinTempDeviation", "deviationInCelsius"),
   };
   return hasAny(row) ? row : null;

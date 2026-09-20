@@ -4,7 +4,16 @@ import { geometryFromTrack, matchCourse } from "./match";
 import type { ParsedSample } from "./types";
 
 function sample(i: number, lat: number, lng: number): ParsedSample {
-  return { tOffsetS: i, lat, lng, altitudeM: 100 + i, hr: 140, cadence: 80, speedMps: 3, powerW: null };
+  return {
+    tOffsetS: i,
+    lat,
+    lng,
+    altitudeM: 100 + i,
+    hr: 140,
+    cadence: 80,
+    speedMps: 3,
+    powerW: null,
+  };
 }
 
 /** Gerade Linie nach Norden, ~1.1 m pro Schritt. */

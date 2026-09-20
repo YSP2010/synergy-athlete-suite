@@ -16,7 +16,10 @@ export const Route = createFileRoute("/_authenticated/privacy")({
   head: () => ({
     meta: [
       { title: "Datenschutz – Hybrid Athlete" },
-      { name: "description", content: "Datenfreigaben steuern, Daten exportieren oder Konto vollständig löschen." },
+      {
+        name: "description",
+        content: "Datenfreigaben steuern, Daten exportieren oder Konto vollständig löschen.",
+      },
       { property: "og:title", content: "Datenschutz – Hybrid Athlete" },
       { property: "og:description", content: "Datenfreigaben steuern, exportieren oder löschen." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/privacy" },
@@ -36,10 +39,15 @@ interface TrackRow {
 
 /** Baut aus einem gespeicherten Track eine GPX-Datei. */
 function toGpx(activityId: string, points: unknown): string {
-  const list = Array.isArray(points) ? (points as { lat?: number; lng?: number; ele?: number }[]) : [];
+  const list = Array.isArray(points)
+    ? (points as { lat?: number; lng?: number; ele?: number }[])
+    : [];
   const pts = list
     .filter((p) => typeof p?.lat === "number" && typeof p?.lng === "number")
-    .map((p) => `<trkpt lat="${p.lat}" lon="${p.lng}">${p.ele != null ? `<ele>${p.ele}</ele>` : ""}</trkpt>`)
+    .map(
+      (p) =>
+        `<trkpt lat="${p.lat}" lon="${p.lng}">${p.ele != null ? `<ele>${p.ele}</ele>` : ""}</trkpt>`,
+    )
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Hybrid Athlete" xmlns="http://www.topografix.com/GPX/1/1">
@@ -58,7 +66,10 @@ function PrivacyPage() {
 
   const doExport = useMutation({
     mutationFn: async () => {
-      const [main, tracks] = await Promise.all([runExport({ data: undefined }), runTracks({ data: undefined })]);
+      const [main, tracks] = await Promise.all([
+        runExport({ data: undefined }),
+        runTracks({ data: undefined }),
+      ]);
       const files: Record<string, Uint8Array> = {
         "daten.json": strToU8(JSON.stringify(JSON.parse(main.tablesJson), null, 2)),
         "export-info.txt": strToU8(
@@ -103,27 +114,28 @@ function PrivacyPage() {
         </div>
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
-            <strong>Aus deinem Garmin-Export:</strong> Aktivitäten, Runden, GPS-Verlauf (ausgedünnt), Schlaf,
-            HRV, Ruhepuls, Body Battery. Quelle sind ausschließlich die Dateien, die du selbst hochlädst.
+            <strong>Aus deinem Garmin-Export:</strong> Aktivitäten, Runden, GPS-Verlauf
+            (ausgedünnt), Schlaf, HRV, Ruhepuls, Body Battery. Quelle sind ausschließlich die
+            Dateien, die du selbst hochlädst.
           </li>
           <li>
-            <strong>Von dir eingetragen:</strong> Check-ins, Gym- und Sport-Einheiten, Mahlzeiten, Tagebuch,
-            Rennen und Ausrüstung.
+            <strong>Von dir eingetragen:</strong> Check-ins, Gym- und Sport-Einheiten, Mahlzeiten,
+            Tagebuch, Rennen und Ausrüstung.
           </li>
           <li>
-            <strong>Berechnet:</strong> Recovery-Score, Belastung (CTL/ATL/Form), Zonen, Bestleistungen,
-            Ernährungsziele.
+            <strong>Berechnet:</strong> Recovery-Score, Belastung (CTL/ATL/Form), Zonen,
+            Bestleistungen, Ernährungsziele.
           </li>
         </ul>
         <p>
-          Gesundheitsdaten wie Schlaf und HRV werden nur für deine eigene Auswertung genutzt. Trainer sehen
-          Training und Belastung ihrer Athleten, aber niemals Tagebuch, Mahlzeiten oder Food-Scans. In der
-          Bestenliste erscheinst du nur nach ausdrücklicher Zustimmung – Gesundheitskategorien brauchen eine
-          zweite, getrennte Einwilligung.
+          Gesundheitsdaten wie Schlaf und HRV werden nur für deine eigene Auswertung genutzt.
+          Trainer sehen Training und Belastung ihrer Athleten, aber niemals Tagebuch, Mahlzeiten
+          oder Food-Scans. In der Bestenliste erscheinst du nur nach ausdrücklicher Zustimmung –
+          Gesundheitskategorien brauchen eine zweite, getrennte Einwilligung.
         </p>
         <p>
-          Deine Daten bleiben gespeichert, bis du sie löschst. Rohdateien aus dem Import liegen in einem
-          privaten Speicher, auf den nur dein Konto Zugriff hat. Einstellbar unter{" "}
+          Deine Daten bleiben gespeichert, bis du sie löschst. Rohdateien aus dem Import liegen in
+          einem privaten Speicher, auf den nur dein Konto Zugriff hat. Einstellbar unter{" "}
           <Link to="/settings" className="text-neon underline">
             Einstellungen
           </Link>
@@ -137,7 +149,11 @@ function PrivacyPage() {
           Alles als ZIP: eine JSON-Datei mit sämtlichen Tabellen und je Aktivität eine GPX-Datei.
         </p>
         <Button className="w-full" onClick={() => doExport.mutate()} disabled={doExport.isPending}>
-          {doExport.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+          {doExport.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="mr-2 h-4 w-4" />
+          )}
           Export erstellen
         </Button>
       </section>
@@ -150,7 +166,11 @@ function PrivacyPage() {
         </p>
         <div>
           <Label>Zum Bestätigen „LÖSCHEN" eintippen</Label>
-          <Input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="LÖSCHEN" />
+          <Input
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder="LÖSCHEN"
+          />
         </div>
         <Button
           variant="destructive"
@@ -158,7 +178,11 @@ function PrivacyPage() {
           onClick={() => doDelete.mutate()}
           disabled={doDelete.isPending || confirm !== "LÖSCHEN"}
         >
-          {doDelete.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+          {doDelete.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="mr-2 h-4 w-4" />
+          )}
           Konto endgültig löschen
         </Button>
       </section>

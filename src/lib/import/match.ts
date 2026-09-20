@@ -23,11 +23,7 @@ export const MATCH_TOLERANCE = {
   maxDistanceDeviation: 0.15,
 };
 
-function nearestDistanceM(
-  lat: number,
-  lng: number,
-  track: [number, number][],
-): number {
+function nearestDistanceM(lat: number, lng: number, track: [number, number][]): number {
   let best = Infinity;
   for (const [tLat, tLng] of track) {
     // Grobfilter: ~0.01° ≈ 1.1 km – spart teure Haversine-Aufrufe.

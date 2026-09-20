@@ -25,7 +25,10 @@ export const Route = createFileRoute("/_authenticated/scan")({
   head: () => ({
     meta: [
       { title: "Food-Scanner – Hybrid Athlete" },
-      { name: "description", content: "Mahlzeit fotografieren und Kalorien sowie Makros per KI schätzen lassen." },
+      {
+        name: "description",
+        content: "Mahlzeit fotografieren und Kalorien sowie Makros per KI schätzen lassen.",
+      },
       { property: "og:title", content: "Food-Scanner – Hybrid Athlete" },
       { property: "og:description", content: "Mahlzeit fotografieren, Makros per KI schätzen." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/scan" },

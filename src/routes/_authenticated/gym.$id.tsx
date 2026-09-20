@@ -30,7 +30,10 @@ export const Route = createFileRoute("/_authenticated/gym/$id")({
   head: () => ({
     meta: [
       { title: "Gym-Einheit – Hybrid Athlete" },
-      { name: "description", content: "Sätze, Wiederholungen, Gewicht und RPE für diese Krafteinheit protokollieren." },
+      {
+        name: "description",
+        content: "Sätze, Wiederholungen, Gewicht und RPE für diese Krafteinheit protokollieren.",
+      },
       { property: "og:title", content: "Gym-Einheit – Hybrid Athlete" },
       { property: "og:description", content: "Sätze, Gewicht und RPE protokollieren." },
       { property: "og:type", content: "website" },

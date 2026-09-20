@@ -20,14 +20,20 @@ export const Route = createFileRoute("/_authenticated/gym/")({
   head: () => ({
     meta: [
       { title: "Gym-Training – Hybrid Athlete" },
-      { name: "description", content: "Alle Krafteinheiten mit Volumen, RPE und Übungsverlauf im Überblick." },
+      {
+        name: "description",
+        content: "Alle Krafteinheiten mit Volumen, RPE und Übungsverlauf im Überblick.",
+      },
       { property: "og:title", content: "Gym-Training – Hybrid Athlete" },
       { property: "og:description", content: "Krafteinheiten mit Volumen, RPE und Übungsverlauf." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/gym" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Gym-Training – Hybrid Athlete" },
-      { name: "twitter:description", content: "Krafteinheiten mit Volumen, RPE und Übungsverlauf." },
+      {
+        name: "twitter:description",
+        content: "Krafteinheiten mit Volumen, RPE und Übungsverlauf.",
+      },
     ],
   }),
   component: GymListPage,

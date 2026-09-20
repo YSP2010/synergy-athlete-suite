@@ -57,7 +57,6 @@ export async function subscribeToPush(vapidKey: string): Promise<SubscriptionKey
     }
   }
 
-
   return {
     endpoint: sub.endpoint,
     p256dh: keyToBase64(sub, "p256dh"),

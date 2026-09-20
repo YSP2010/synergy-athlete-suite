@@ -11,7 +11,11 @@ export const RACE_DISTANCES: { key: string; label: string; meters: number }[] = 
 ];
 
 /** Riegel-Formel: T2 = T1 × (D2/D1)^1.06 (Sekunden). */
-export function riegel(knownTimeS: number, knownDistanceM: number, targetDistanceM: number): number {
+export function riegel(
+  knownTimeS: number,
+  knownDistanceM: number,
+  targetDistanceM: number,
+): number {
   if (knownTimeS <= 0 || knownDistanceM <= 0 || targetDistanceM <= 0) return 0;
   return Math.round(knownTimeS * Math.pow(targetDistanceM / knownDistanceM, 1.06));
 }

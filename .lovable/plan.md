@@ -1,4 +1,3 @@
-
 # Erweiterung: Einladungslink, Cockpit, PWA, Spieltag-Countdown, Jugendschutz
 
 Umsetzung der fünf Etappen aus dem Dokument, in dieser Reihenfolge. Zentrale Klammer: **eine einzige Quelle für Spieltags-Logik und Tagesmakros**, damit Wochenplan, Dashboard, Ernährung und Countdown niemals auseinanderlaufen.

@@ -25,12 +25,7 @@ function num(v: unknown): number | null {
 const R_EARTH_M = 6_371_000;
 
 /** Haversine-Distanz in Metern. */
-export function haversineM(
-  aLat: number,
-  aLng: number,
-  bLat: number,
-  bLng: number,
-): number {
+export function haversineM(aLat: number, aLng: number, bLat: number, bLng: number): number {
   const toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(bLat - aLat);
   const dLng = toRad(bLng - aLng);
@@ -81,9 +76,7 @@ function finalize(
     elevationGainM: gain > 0 ? Number(gain.toFixed(1)) : null,
     elevationLossM: loss > 0 ? Number(loss.toFixed(1)) : null,
     avgSpeedMps:
-      durationS && durationS > 0 && distance > 0
-        ? Number((distance / durationS).toFixed(3))
-        : null,
+      durationS && durationS > 0 && distance > 0 ? Number((distance / durationS).toFixed(3)) : null,
     avgHr: avg(hrs) != null ? Math.round(avg(hrs)!) : null,
     maxHr: hrs.length ? Math.max(...hrs) : null,
     avgCadence: avg(cads),

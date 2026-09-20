@@ -50,10 +50,7 @@ async function decodeFit(bytes: Uint8Array): Promise<ParsedActivity> {
 }
 
 /** Wertet einen Datei-Inhalt aus und liefert das normalisierte Ergebnis. */
-export async function parseBytes(
-  bytes: Uint8Array,
-  type: ImportFileType,
-): Promise<ParsedActivity> {
+export async function parseBytes(bytes: Uint8Array, type: ImportFileType): Promise<ParsedActivity> {
   if (type === "fit") return decodeFit(bytes);
   const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
   if (type === "gpx") return parseGpx(text);

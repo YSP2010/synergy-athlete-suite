@@ -19,7 +19,13 @@ import {
   runningEconomyScore,
   cadenceConsistency,
 } from "./efficiency";
-import { riegel, vo2maxFromRace, predictFromVo2max, criticalPower, criticalSwimSpeed } from "./predictions";
+import {
+  riegel,
+  vo2maxFromRace,
+  predictFromVo2max,
+  criticalPower,
+  criticalSwimSpeed,
+} from "./predictions";
 import { computeRecords, bestRunEffort } from "./records";
 import { parseWellnessJson, mergeBundles } from "../import/wellness";
 
@@ -138,8 +144,16 @@ describe("efficiency", () => {
     expect(decoupling([])).toBeNull();
   });
   it("bewertet Laufökonomie und Trittfrequenz", () => {
-    const good = runningEconomyScore({ verticalRatio: 6, groundContactMs: 200, strideLengthM: 1.5 })!;
-    const bad = runningEconomyScore({ verticalRatio: 12, groundContactMs: 320, strideLengthM: 0.9 })!;
+    const good = runningEconomyScore({
+      verticalRatio: 6,
+      groundContactMs: 200,
+      strideLengthM: 1.5,
+    })!;
+    const bad = runningEconomyScore({
+      verticalRatio: 12,
+      groundContactMs: 320,
+      strideLengthM: 0.9,
+    })!;
     expect(good).toBeGreaterThan(bad);
     expect(runningEconomyScore({})).toBeNull();
     const cad = cadenceConsistency(
@@ -169,7 +183,9 @@ describe("predictions", () => {
     const cp = criticalPower({ powerW: 350, durationS: 300 }, { powerW: 280, durationS: 1200 })!;
     expect(cp.cpW).toBeGreaterThan(0);
     expect(cp.wPrimeJ).toBeGreaterThan(0);
-    expect(criticalPower({ powerW: 300, durationS: 1200 }, { powerW: 280, durationS: 300 })).toBeNull();
+    expect(
+      criticalPower({ powerW: 300, durationS: 1200 }, { powerW: 280, durationS: 300 }),
+    ).toBeNull();
     expect(criticalSwimSpeed(400, 180)).toBeCloseTo(0.909, 2);
   });
 });

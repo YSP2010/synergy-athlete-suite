@@ -16,7 +16,10 @@ export const Route = createFileRoute("/_authenticated/import")({
   head: () => ({
     meta: [
       { title: "Garmin-Import – Hybrid Athlete" },
-      { name: "description", content: "FIT-, GPX- und TCX-Dateien hochladen und automatisch als Aktivitäten auswerten." },
+      {
+        name: "description",
+        content: "FIT-, GPX- und TCX-Dateien hochladen und automatisch als Aktivitäten auswerten.",
+      },
       { property: "og:title", content: "Garmin-Import – Hybrid Athlete" },
       { property: "og:description", content: "FIT, GPX und TCX hochladen und auswerten lassen." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/import" },
@@ -135,8 +138,8 @@ function ImportPage() {
       <div>
         <h1 className="font-display text-3xl font-bold">Garmin-Import</h1>
         <p className="text-sm text-muted-foreground">
-          Lade einzelne Aktivitäten (FIT, GPX, TCX) oder deinen kompletten Garmin-Konto-Export
-          (ZIP) hoch. Duplikate werden automatisch erkannt.
+          Lade einzelne Aktivitäten (FIT, GPX, TCX) oder deinen kompletten Garmin-Konto-Export (ZIP)
+          hoch. Duplikate werden automatisch erkannt.
         </p>
       </div>
 
@@ -220,8 +223,8 @@ function ImportPage() {
               <div className="min-w-0">
                 <div className="truncate font-medium">{j.original_filename ?? j.kind}</div>
                 <div className="text-xs text-muted-foreground">
-                  {new Date(j.created_at).toLocaleString("de-DE")} ·{" "}
-                  {j.processed_files}/{j.total_files} Dateien
+                  {new Date(j.created_at).toLocaleString("de-DE")} · {j.processed_files}/
+                  {j.total_files} Dateien
                 </div>
               </div>
               <span
@@ -229,8 +232,7 @@ function ImportPage() {
                   "rounded px-2 py-0.5 text-[10px] font-semibold uppercase",
                   j.status === "done" && "bg-neon-soft text-neon",
                   j.status === "failed" && "bg-danger/15 text-danger",
-                  (j.status === "queued" || j.status === "processing") &&
-                    "bg-warn/15 text-warn",
+                  (j.status === "queued" || j.status === "processing") && "bg-warn/15 text-warn",
                 )}
               >
                 {j.status}

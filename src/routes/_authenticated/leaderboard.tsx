@@ -23,14 +23,23 @@ export const Route = createFileRoute("/_authenticated/leaderboard")({
   head: () => ({
     meta: [
       { title: "Bestenliste – Hybrid Athlete" },
-      { name: "description", content: "Verifizierte Ranglisten für Lauf-, Rad- und Triathlon-Leistungen." },
+      {
+        name: "description",
+        content: "Verifizierte Ranglisten für Lauf-, Rad- und Triathlon-Leistungen.",
+      },
       { property: "og:title", content: "Bestenliste – Hybrid Athlete" },
-      { property: "og:description", content: "Verifizierte Ranglisten für Lauf, Rad und Triathlon." },
+      {
+        property: "og:description",
+        content: "Verifizierte Ranglisten für Lauf, Rad und Triathlon.",
+      },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/leaderboard" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Bestenliste – Hybrid Athlete" },
-      { name: "twitter:description", content: "Verifizierte Ranglisten für Lauf, Rad und Triathlon." },
+      {
+        name: "twitter:description",
+        content: "Verifizierte Ranglisten für Lauf, Rad und Triathlon.",
+      },
     ],
   }),
   component: LeaderboardPage,
@@ -101,7 +110,10 @@ function LeaderboardPage() {
         .select("team_id, teams(name)")
         .eq("user_id", u.user.id)
         .eq("status", "active");
-      return (data ?? []).map((r) => ({ id: r.team_id, name: (r.teams as { name: string } | null)?.name ?? "Team" }));
+      return (data ?? []).map((r) => ({
+        id: r.team_id,
+        name: (r.teams as { name: string } | null)?.name ?? "Team",
+      }));
     },
   });
   const [teamId, setTeamId] = useState<string | null>(null);
@@ -119,7 +131,10 @@ function LeaderboardPage() {
     },
   });
 
-  const cat = useMemo(() => categories?.find((c) => c.key === category) ?? null, [categories, category]);
+  const cat = useMemo(
+    () => categories?.find((c) => c.key === category) ?? null,
+    [categories, category],
+  );
   const start = useMemo(() => periodStart(period, new Date()), [period]);
 
   const optedIn = me?.leaderboard_opt_in === true;
@@ -144,7 +159,8 @@ function LeaderboardPage() {
   const refresh = useMutation({
     mutationFn: async () => await recompute({ data: undefined }),
     onSuccess: (res) => {
-      if (res?.skipped === "rate_limit") toast.info("Kürzlich schon berechnet – bitte kurz warten.");
+      if (res?.skipped === "rate_limit")
+        toast.info("Kürzlich schon berechnet – bitte kurz warten.");
       else toast.success("Bestenliste aktualisiert");
       qc.invalidateQueries({ queryKey: ["lb-rows"] });
     },
@@ -161,14 +177,14 @@ function LeaderboardPage() {
             <span className="font-medium">Du nimmst noch nicht teil</span>
           </div>
           <p>
-            Die Bestenliste ist freiwillig. Wenn du beitrittst, sehen andere angemeldete Nutzer deinen
-            Anzeigenamen, den Wert der jeweiligen Kategorie und ob die Leistung von einem Garmin-Gerät
-            stammt. Nichts davon passiert automatisch.
+            Die Bestenliste ist freiwillig. Wenn du beitrittst, sehen andere angemeldete Nutzer
+            deinen Anzeigenamen, den Wert der jeweiligen Kategorie und ob die Leistung von einem
+            Garmin-Gerät stammt. Nichts davon passiert automatisch.
           </p>
           <p>
             Schlaf- und HRV-Kategorien brauchen eine zusätzliche, getrennte Zustimmung – das sind
-            Gesundheitsdaten. Ein Klick genügt, um wieder auszusteigen; alle Einträge werden dann sofort
-            gelöscht.
+            Gesundheitsdaten. Ein Klick genügt, um wieder auszusteigen; alle Einträge werden dann
+            sofort gelöscht.
           </p>
           <Button asChild className="w-full">
             <Link to="/settings">In den Einstellungen beitreten</Link>
@@ -186,7 +202,12 @@ function LeaderboardPage() {
     <div className="space-y-5 pb-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-3xl font-bold">Bestenliste</h1>
-        <Button variant="outline" size="sm" onClick={() => refresh.mutate()} disabled={refresh.isPending}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refresh.mutate()}
+          disabled={refresh.isPending}
+        >
           {refresh.isPending ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
@@ -277,8 +298,12 @@ function LeaderboardPage() {
         </div>
       ) : !rows?.length ? (
         <div className="card-elevated p-8 text-center text-sm text-muted-foreground">
-          Noch keine gewerteten Einträge in dieser Kategorie. Es zählen nur verifizierte Geräte-Aktivitäten
-          aus dem <Link to="/import" className="text-neon underline">Import</Link>.
+          Noch keine gewerteten Einträge in dieser Kategorie. Es zählen nur verifizierte
+          Geräte-Aktivitäten aus dem{" "}
+          <Link to="/import" className="text-neon underline">
+            Import
+          </Link>
+          .
         </div>
       ) : (
         <div className="space-y-4">
@@ -298,7 +323,9 @@ function LeaderboardPage() {
                   )}
                 />
                 <div className="text-sm font-medium">{r.display_name}</div>
-                <div className="font-display text-xl font-bold">{fmt(Number(r.value), cat?.unit ?? "")}</div>
+                <div className="font-display text-xl font-bold">
+                  {fmt(Number(r.value), cat?.unit ?? "")}
+                </div>
                 <div className="text-xs text-muted-foreground">Platz {Number(r.rank)}</div>
               </div>
             ))}
@@ -347,7 +374,9 @@ function Row({ r, unit }: { r: RowData; unit: string }) {
           <Trophy className="mr-1 h-3 w-3" /> verifiziert
         </Badge>
       )}
-      <span className="shrink-0 font-display text-sm font-semibold">{fmt(Number(r.value), unit)}</span>
+      <span className="shrink-0 font-display text-sm font-semibold">
+        {fmt(Number(r.value), unit)}
+      </span>
     </div>
   );
   if (r.is_me && r.activity_id) {

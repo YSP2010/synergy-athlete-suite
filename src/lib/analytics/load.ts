@@ -28,11 +28,7 @@ export function bikeTss(durationS: number, normalizedPowerW: number, ftpW: numbe
 }
 
 /** Lauf-TSS aus steigungsangepasster Geschwindigkeit vs. Schwellengeschwindigkeit. */
-export function runTss(
-  durationS: number,
-  gapSpeedMps: number,
-  thresholdSpeedMps: number,
-): number {
+export function runTss(durationS: number, gapSpeedMps: number, thresholdSpeedMps: number): number {
   if (durationS <= 0 || thresholdSpeedMps <= 0 || gapSpeedMps <= 0) return 0;
   const intensity = gapSpeedMps / thresholdSpeedMps;
   return round1((durationS / 3600) * intensity * intensity * 100);

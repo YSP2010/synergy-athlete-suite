@@ -188,8 +188,8 @@ function GuidePage() {
             Anstoßzeit.
           </li>
           <li>
-            <strong>Ernährung folgt dem Plan:</strong> Kohlenhydrate und Kalorien ändern sich, sobald
-            im Wochenplan Gym oder Spiel steht.
+            <strong>Ernährung folgt dem Plan:</strong> Kohlenhydrate und Kalorien ändern sich,
+            sobald im Wochenplan Gym oder Spiel steht.
           </li>
           <li>
             <strong>Belastungssteuerung:</strong> Recovery-Score aus Schlaf, HRV und Muskelkater;
@@ -197,7 +197,9 @@ function GuidePage() {
           </li>
         </ul>
 
-        <h2 className="mt-10 font-display text-2xl font-bold">Welches Programm für welches Ziel?</h2>
+        <h2 className="mt-10 font-display text-2xl font-bold">
+          Welches Programm für welches Ziel?
+        </h2>
         <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
           <li>
             <strong>Marathon plus Muskelmasse:</strong> Nick-Bare-Stil, wenn du 8+ Einheiten pro

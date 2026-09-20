@@ -12,7 +12,10 @@ export const Route = createFileRoute("/_authenticated/triathlon")({
   head: () => ({
     meta: [
       { title: "Triathlon – Hybrid Athlete" },
-      { name: "description", content: "Schwimmen, Rad und Laufen inklusive Wechselzeiten getrennt auswerten." },
+      {
+        name: "description",
+        content: "Schwimmen, Rad und Laufen inklusive Wechselzeiten getrennt auswerten.",
+      },
       { property: "og:title", content: "Triathlon – Hybrid Athlete" },
       { property: "og:description", content: "Swim, Bike, Run und Wechselzeiten auswerten." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/triathlon" },
@@ -99,8 +102,9 @@ function TriathlonPage() {
             })}
             {balance.weakest && (
               <p className="text-sm text-muted-foreground">
-                Schwächste Disziplin gemessen am Zeitanteil: <strong>{FAM_LABEL[balance.weakest]}</strong>. Eine
-                zusätzliche Einheit pro Woche bringt hier erfahrungsgemäß am meisten.
+                Schwächste Disziplin gemessen am Zeitanteil:{" "}
+                <strong>{FAM_LABEL[balance.weakest]}</strong>. Eine zusätzliche Einheit pro Woche
+                bringt hier erfahrungsgemäß am meisten.
               </p>
             )}
           </div>
@@ -125,7 +129,9 @@ function TriathlonPage() {
         ) : (
           <div className="divide-y divide-border">
             {data.races.map((r) => {
-              const days = Math.ceil((Date.parse(`${r.race_date}T00:00:00Z`) - Date.now()) / 86_400_000);
+              const days = Math.ceil(
+                (Date.parse(`${r.race_date}T00:00:00Z`) - Date.now()) / 86_400_000,
+              );
               return (
                 <Link
                   key={r.id}

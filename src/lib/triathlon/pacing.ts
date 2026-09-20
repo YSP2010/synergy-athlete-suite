@@ -20,7 +20,10 @@ export interface RaceDistances {
   runM: number;
 }
 
-export const RACE_PRESETS: Record<Exclude<RaceType, "custom">, RaceDistances & { label: string }> = {
+export const RACE_PRESETS: Record<
+  Exclude<RaceType, "custom">,
+  RaceDistances & { label: string }
+> = {
   sprint: { label: "Sprintdistanz", swimM: 750, bikeM: 20000, runM: 5000 },
   olympic: { label: "Olympische Distanz", swimM: 1500, bikeM: 40000, runM: 10000 },
   half_iron: { label: "Mitteldistanz (70.3)", swimM: 1900, bikeM: 90000, runM: 21097.5 },
@@ -72,7 +75,7 @@ function fmtPacePer100(timeS: number, distanceM: number): string {
 
 function fmtSpeed(timeS: number, distanceM: number): string {
   if (distanceM <= 0 || timeS <= 0) return "–";
-  return `${((distanceM / 1000) / (timeS / 3600)).toFixed(1)} km/h`;
+  return `${(distanceM / 1000 / (timeS / 3600)).toFixed(1)} km/h`;
 }
 
 /** Sekunden als h:mm:ss bzw. mm:ss. */
@@ -96,10 +99,10 @@ export function buildPacingPlan(input: PacingInput): PacingLeg[] {
   const hasBike = distances.bikeM > 0;
 
   const fixed = {
-    swim: hasSwim ? input.goalSwimS ?? null : 0,
-    t1: hasSwim ? input.goalT1S ?? null : 0,
-    bike: hasBike ? input.goalBikeS ?? null : 0,
-    t2: hasBike ? input.goalT2S ?? null : 0,
+    swim: hasSwim ? (input.goalSwimS ?? null) : 0,
+    t1: hasSwim ? (input.goalT1S ?? null) : 0,
+    bike: hasBike ? (input.goalBikeS ?? null) : 0,
+    t2: hasBike ? (input.goalT2S ?? null) : 0,
     run: input.goalRunS ?? null,
   };
 
@@ -191,7 +194,13 @@ export function taperPlan(daysToRace: number): TaperWeek[] {
 /** Disziplin-Balance der letzten Wochen als Anteil an der Gesamtbelastung. */
 export function disciplineBalance(
   loads: { family: "swim" | "bike" | "run" | "other"; load: number }[],
-): { swim: number; bike: number; run: number; other: number; weakest: "swim" | "bike" | "run" | null } {
+): {
+  swim: number;
+  bike: number;
+  run: number;
+  other: number;
+  weakest: "swim" | "bike" | "run" | null;
+} {
   const sum = { swim: 0, bike: 0, run: 0, other: 0 };
   for (const l of loads) sum[l.family] += l.load;
   const total = sum.swim + sum.bike + sum.run + sum.other;

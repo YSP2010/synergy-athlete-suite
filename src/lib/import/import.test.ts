@@ -164,9 +164,7 @@ describe("parseFitMessages", () => {
     expect(a.sport).toBe("run");
     expect(a.distanceM).toBe(12000);
     expect(a.verified).toBe(true);
-    expect(a.deviceActivityKey).toBe(
-      "garmin|forerunner965|123456|2026-01-05T06:00:00.000Z",
-    );
+    expect(a.deviceActivityKey).toBe("garmin|forerunner965|123456|2026-01-05T06:00:00.000Z");
     expect(a.samples[1].tOffsetS).toBe(10);
     expect(a.samples[0].lat).toBeCloseTo(52.52, 1);
     expect(a.laps).toHaveLength(1);

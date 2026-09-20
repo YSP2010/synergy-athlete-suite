@@ -11,7 +11,10 @@ export const Route = createFileRoute("/_authenticated/courses/$id")({
   head: () => ({
     meta: [
       { title: "Strecke – Hybrid Athlete" },
-      { name: "description", content: "Streckenprofil, Bestzeiten und Bestenliste für diese Route." },
+      {
+        name: "description",
+        content: "Streckenprofil, Bestzeiten und Bestenliste für diese Route.",
+      },
       { property: "og:title", content: "Strecke – Hybrid Athlete" },
       { property: "og:description", content: "Streckenprofil, Bestzeiten und Bestenliste." },
       { property: "og:type", content: "website" },
@@ -49,12 +52,25 @@ function CourseDetail() {
     );
   }
   if (error || !data?.course) {
-    return <p className="py-20 text-center text-muted-foreground">Strecke nicht gefunden oder nicht freigegeben.</p>;
+    return (
+      <p className="py-20 text-center text-muted-foreground">
+        Strecke nicht gefunden oder nicht freigegeben.
+      </p>
+    );
   }
 
   const c = data.course;
   const geometry = (c.geometry as unknown as [number, number][]) ?? [];
-  const points: TrackPoint[] = geometry.map(([lat, lng], i) => [i, lat, lng, null, null, null, null, null]);
+  const points: TrackPoint[] = geometry.map(([lat, lng], i) => [
+    i,
+    lat,
+    lng,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ]);
   const board = [...data.board].sort((a, b) => a.duration_s - b.duration_s);
 
   return (
@@ -81,7 +97,9 @@ function CourseDetail() {
           <Medal className="h-4 w-4 text-primary" /> Bestenliste
         </h2>
         {!board.length ? (
-          <p className="text-sm text-muted-foreground">Noch keine gewerteten Versuche auf dieser Strecke.</p>
+          <p className="text-sm text-muted-foreground">
+            Noch keine gewerteten Versuche auf dieser Strecke.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -105,7 +123,12 @@ function CourseDetail() {
                     <td className="py-1.5 pr-4">
                       <span className="flex items-center gap-1.5">
                         {e.athlete_name}
-                        {e.verified && <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-label="Geräteverifiziert" />}
+                        {e.verified && (
+                          <ShieldCheck
+                            className="h-3.5 w-3.5 text-primary"
+                            aria-label="Geräteverifiziert"
+                          />
+                        )}
                       </span>
                     </td>
                     <td className="py-1.5 pr-4">{fmtDuration(e.duration_s)}</td>

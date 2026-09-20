@@ -99,7 +99,8 @@ export function segmentsFromLaps(laps: SegmentLap[], startedAt: string | null): 
       duration_s: Math.round(duration),
       distance_m: distance > 0 ? Math.round(distance * 10) / 10 : null,
       avg_hr: hr != null ? Math.round(hr) : null,
-      avg_speed_mps: duration > 0 && distance > 0 ? Math.round((distance / duration) * 1000) / 1000 : null,
+      avg_speed_mps:
+        duration > 0 && distance > 0 ? Math.round((distance / duration) * 1000) / 1000 : null,
       avg_power_w: power != null ? Math.round(power) : null,
       avg_cadence: weighted((l) => l.avgCadence),
     };
@@ -111,7 +112,9 @@ export function looksMultisport(laps: SegmentLap[]): boolean {
   const fams = new Set(
     laps
       .map((l) => (l.sport ?? "").toLowerCase())
-      .map((s) => (SWIM.includes(s) ? "swim" : BIKE.includes(s) ? "bike" : RUN.includes(s) ? "run" : null))
+      .map((s) =>
+        SWIM.includes(s) ? "swim" : BIKE.includes(s) ? "bike" : RUN.includes(s) ? "run" : null,
+      )
       .filter(Boolean),
   );
   return fams.size >= 2;

@@ -4,7 +4,11 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type { DeviceRecovery, LoadSignals } from "@/lib/planner";
-import { buildLoadSeries, type AnalyticsActivity, type Thresholds } from "@/lib/analytics/aggregate";
+import {
+  buildLoadSeries,
+  type AnalyticsActivity,
+  type Thresholds,
+} from "@/lib/analytics/aggregate";
 
 export interface RecoveryContext {
   device: DeviceRecovery | null;

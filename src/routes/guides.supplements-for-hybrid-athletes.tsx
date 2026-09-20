@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
-const URL =
-  "https://synergy-athlete-suite.lovable.app/guides/supplements-for-hybrid-athletes";
+const URL = "https://synergy-athlete-suite.lovable.app/guides/supplements-for-hybrid-athletes";
 const TITLE = "Kreatin & Beta-Alanin für Hybrid-Athleten: Guide";
 const DESCRIPTION =
   "Wie Kreatin und Beta-Alanin bei Kraft plus Ausdauer wirken: Dosierung, Timing, Ladephase, Nebenwirkungen und ein Stack-Plan für Hybrid-Athleten.";
@@ -107,10 +106,10 @@ function GuidePage() {
         <p className="mt-3 text-sm text-muted-foreground">
           Kreatin erhöht die Phosphokreatin-Speicher im Muskel um etwa 20 Prozent. Dadurch wird ATP
           in den ersten sechs bis zehn Sekunden einer maximalen Belastung schneller resynthetisiert.
-          Für dich heißt das: ein bis zwei zusätzliche Wiederholungen bei Kniebeugen und Bankdrücken,
-          höhere Spitzenleistung im Sprint und – der für Hybrid-Athleten wichtigste Punkt – eine
-          schnellere Wiederherstellung zwischen wiederholten Sprints. Genau dieses Muster prägt die
-          zweite Halbzeit im Fußball und lange Ballwechselserien im Tennis.
+          Für dich heißt das: ein bis zwei zusätzliche Wiederholungen bei Kniebeugen und
+          Bankdrücken, höhere Spitzenleistung im Sprint und – der für Hybrid-Athleten wichtigste
+          Punkt – eine schnellere Wiederherstellung zwischen wiederholten Sprints. Genau dieses
+          Muster prägt die zweite Halbzeit im Fußball und lange Ballwechselserien im Tennis.
         </p>
         <h3 className="mt-6 font-display text-lg font-semibold">Dosierung und Timing</h3>
         <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
@@ -159,9 +158,9 @@ function GuidePage() {
             (Parästhesie – harmlos, aber unangenehm). Retard-Kapseln reduzieren den Effekt.
           </li>
           <li>
-            <strong>Timing:</strong> egal. Beta-Alanin wirkt über die Sättigung des Carnosinspeichers,
-            nicht akut. Es gehört damit streng genommen nicht in ein Pre-Workout, auch wenn es dort
-            fast immer enthalten ist.
+            <strong>Timing:</strong> egal. Beta-Alanin wirkt über die Sättigung des
+            Carnosinspeichers, nicht akut. Es gehört damit streng genommen nicht in ein Pre-Workout,
+            auch wenn es dort fast immer enthalten ist.
           </li>
         </ul>
 
@@ -169,12 +168,13 @@ function GuidePage() {
           Warum die Kombination für Hybrid-Athleten besonders passt
         </h2>
         <p className="mt-3 text-sm text-muted-foreground">
-          Die beiden Substanzen decken zwei verschiedene Zeitfenster ab und stören sich nicht: Kreatin
-          verbessert alles unter zehn Sekunden und die Erholung dazwischen, Beta-Alanin alles zwischen
-          einer und vier Minuten. Ein Fußballspiel besteht aus genau dieser Mischung – kurze Sprints
-          plus lange Phasen hoher Laktatbelastung. Im Gym profitierst du beim schweren Grundlagenblock
-          von Kreatin und bei den Ausbelastungssätzen am Satzende von Beta-Alanin. Studien zur
-          Kombination zeigen additive Effekte auf Körperzusammensetzung und Leistungsausdauer.
+          Die beiden Substanzen decken zwei verschiedene Zeitfenster ab und stören sich nicht:
+          Kreatin verbessert alles unter zehn Sekunden und die Erholung dazwischen, Beta-Alanin
+          alles zwischen einer und vier Minuten. Ein Fußballspiel besteht aus genau dieser Mischung
+          – kurze Sprints plus lange Phasen hoher Laktatbelastung. Im Gym profitierst du beim
+          schweren Grundlagenblock von Kreatin und bei den Ausbelastungssätzen am Satzende von
+          Beta-Alanin. Studien zur Kombination zeigen additive Effekte auf Körperzusammensetzung und
+          Leistungsausdauer.
         </p>
 
         <h2 className="mt-10 font-display text-2xl font-bold">Basis-Stack: was wirklich zählt</h2>
@@ -191,8 +191,8 @@ function GuidePage() {
             Einheiten – nicht nach 15 Uhr, sonst kostet es dich Tiefschlaf und Regeneration.
           </li>
           <li>
-            <strong>Protein:</strong> 1,6–2,2 g pro Kilogramm Körpergewicht pro Tag; Pulver nur, wenn
-            du diese Menge über Lebensmittel nicht erreichst.
+            <strong>Protein:</strong> 1,6–2,2 g pro Kilogramm Körpergewicht pro Tag; Pulver nur,
+            wenn du diese Menge über Lebensmittel nicht erreichst.
           </li>
           <li>
             <strong>Elektrolyte & Natrium:</strong> bei Einheiten über 60 Minuten oder starkem
@@ -211,10 +211,10 @@ function GuidePage() {
         <h2 className="mt-10 font-display text-2xl font-bold">Sicherheit und Kontrolle</h2>
         <p className="mt-3 text-sm text-muted-foreground">
           Kreatin und Beta-Alanin gehören zu den am besten untersuchten Supplements überhaupt und
-          stehen nicht auf der WADA-Verbotsliste. Wer im organisierten Wettkampfsport startet, sollte
-          trotzdem auf Kölner Liste oder Informed Sport geprüfte Produkte setzen, um Kontaminationen
-          auszuschließen. Bei Nierenerkrankungen, Schwangerschaft oder unter 18 Jahren gilt: vorher
-          ärztlich abklären. Dieser Guide ersetzt keine medizinische Beratung.
+          stehen nicht auf der WADA-Verbotsliste. Wer im organisierten Wettkampfsport startet,
+          sollte trotzdem auf Kölner Liste oder Informed Sport geprüfte Produkte setzen, um
+          Kontaminationen auszuschließen. Bei Nierenerkrankungen, Schwangerschaft oder unter 18
+          Jahren gilt: vorher ärztlich abklären. Dieser Guide ersetzt keine medizinische Beratung.
         </p>
 
         <div className="mt-10 rounded-xl border border-border bg-elevated p-6 text-center">

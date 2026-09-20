@@ -8,12 +8,7 @@ import type { ImportFileType } from "./types";
 export function sniffFileType(bytes: Uint8Array, filename?: string): ImportFileType {
   if (bytes.length >= 12) {
     // FIT: Bytes 8..11 == ".FIT"
-    if (
-      bytes[8] === 0x2e &&
-      bytes[9] === 0x46 &&
-      bytes[10] === 0x49 &&
-      bytes[11] === 0x54
-    ) {
+    if (bytes[8] === 0x2e && bytes[9] === 0x46 && bytes[10] === 0x49 && bytes[11] === 0x54) {
       return "fit";
     }
   }

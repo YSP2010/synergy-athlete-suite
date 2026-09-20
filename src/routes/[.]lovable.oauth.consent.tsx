@@ -101,12 +101,12 @@ function Consent() {
             <ShieldCheck className="h-5 w-5 text-neon shrink-0 mt-0.5" />
             <div className="text-sm">
               <p>
-                <span className="font-semibold">{clientName}</span> möchte auf dein Hybrid-Athlete-Konto
-                zugreifen und Aktionen als du ausführen.
+                <span className="font-semibold">{clientName}</span> möchte auf dein
+                Hybrid-Athlete-Konto zugreifen und Aktionen als du ausführen.
               </p>
               <p className="mt-2 text-muted-foreground">
-                Der Zugriff läuft über deine bestehenden App-Rechte (Row-Level-Security). Deine App-Regeln
-                entscheiden weiterhin, welche Daten sichtbar sind.
+                Der Zugriff läuft über deine bestehenden App-Rechte (Row-Level-Security). Deine
+                App-Regeln entscheiden weiterhin, welche Daten sichtbar sind.
               </p>
             </div>
           </div>

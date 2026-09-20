@@ -2,8 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 const URL = "https://synergy-athlete-suite.lovable.app/guides/nutrition-for-hybrid-athletes";
-const TITLE =
-  "Ernährung für Hybrid-Athleten: Kalorien, Protein & Carbo-Loading für Fußball + Gym";
+const TITLE = "Ernährung für Hybrid-Athleten: Kalorien, Protein & Carbo-Loading für Fußball + Gym";
 const DESCRIPTION =
   "Wie viel sollten Fußballer essen, die zusätzlich Kraft aufbauen? Kalorienbedarf nach Mifflin-St-Jeor, 2 g Protein pro kg, Carbo-Loading mit 7,5 g/kg und Meal-Timing rund um Spieltage.";
 

@@ -26,7 +26,10 @@ export const Route = createFileRoute("/_authenticated/matchday")({
   head: () => ({
     meta: [
       { title: "Matchday – Hybrid Athlete" },
-      { name: "description", content: "Countdown zum Anpfiff mit synchronisiertem Ess- und Trinkplan." },
+      {
+        name: "description",
+        content: "Countdown zum Anpfiff mit synchronisiertem Ess- und Trinkplan.",
+      },
       { property: "og:title", content: "Matchday – Hybrid Athlete" },
       { property: "og:description", content: "Countdown zum Anpfiff mit Ess- und Trinkplan." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/matchday" },

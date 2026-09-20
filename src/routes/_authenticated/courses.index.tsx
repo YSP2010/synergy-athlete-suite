@@ -11,7 +11,10 @@ export const Route = createFileRoute("/_authenticated/courses/")({
   head: () => ({
     meta: [
       { title: "Strecken – Hybrid Athlete" },
-      { name: "description", content: "Deine Lauf- und Radstrecken mit Bestzeiten und Bestenlisten im Team." },
+      {
+        name: "description",
+        content: "Deine Lauf- und Radstrecken mit Bestzeiten und Bestenlisten im Team.",
+      },
       { property: "og:title", content: "Strecken – Hybrid Athlete" },
       { property: "og:description", content: "Strecken mit Bestzeiten und Team-Bestenlisten." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/courses" },
@@ -70,7 +73,8 @@ function CoursesPage() {
             <Flag className="h-6 w-6 text-primary" /> Strecken
           </h1>
           <p className="text-sm text-muted-foreground">
-            Vergleiche deine Zeiten auf denselben Runden – öffentliche Strecken zeigen die Bestenliste aller Athleten.
+            Vergleiche deine Zeiten auf denselben Runden – öffentliche Strecken zeigen die
+            Bestenliste aller Athleten.
           </p>
         </div>
         <Button asChild variant="outline" size="sm">
@@ -95,7 +99,11 @@ function CoursesPage() {
                 key={c.id}
                 className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4"
               >
-                <Link to="/courses/$id" params={{ id: c.id }} className="min-w-[160px] flex-1 hover:text-primary">
+                <Link
+                  to="/courses/$id"
+                  params={{ id: c.id }}
+                  className="min-w-[160px] flex-1 hover:text-primary"
+                >
                   <div className="font-semibold">{c.name}</div>
                   <div className="text-xs text-muted-foreground">
                     {sportLabel(c.sport)} · {fmtDistance(c.distance_m)}
@@ -107,10 +115,16 @@ function CoursesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      aria-label={c.is_public ? "Strecke privat schalten" : "Strecke öffentlich schalten"}
+                      aria-label={
+                        c.is_public ? "Strecke privat schalten" : "Strecke öffentlich schalten"
+                      }
                       onClick={() => toggle.mutate({ id: c.id, isPublic: !c.is_public })}
                     >
-                      {c.is_public ? <Globe className="mr-1 h-4 w-4" /> : <Lock className="mr-1 h-4 w-4" />}
+                      {c.is_public ? (
+                        <Globe className="mr-1 h-4 w-4" />
+                      ) : (
+                        <Lock className="mr-1 h-4 w-4" />
+                      )}
                       {c.is_public ? "Öffentlich" : "Privat"}
                     </Button>
                     <Button

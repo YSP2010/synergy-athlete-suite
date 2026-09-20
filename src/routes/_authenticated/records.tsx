@@ -10,7 +10,10 @@ export const Route = createFileRoute("/_authenticated/records")({
   head: () => ({
     meta: [
       { title: "Bestleistungen – Hybrid Athlete" },
-      { name: "description", content: "Persönliche Rekorde für Kraft, Lauf, Rad und Schwimmen an einem Ort." },
+      {
+        name: "description",
+        content: "Persönliche Rekorde für Kraft, Lauf, Rad und Schwimmen an einem Ort.",
+      },
       { property: "og:title", content: "Bestleistungen – Hybrid Athlete" },
       { property: "og:description", content: "Persönliche Rekorde für Kraft und Ausdauer." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/records" },

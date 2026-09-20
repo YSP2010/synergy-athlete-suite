@@ -5,9 +5,7 @@
   "auth": {
     "type": "oauth",
     "issuer": "https://jqrrxuezrkdypwoudxuz.supabase.co/auth/v1",
-    "accepted_audiences": [
-      "authenticated"
-    ]
+    "accepted_audiences": ["authenticated"]
   },
   "mcp": {
     "server": {
@@ -159,10 +157,7 @@
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
             }
           },
-          "required": [
-            "title",
-            "content"
-          ]
+          "required": ["title", "content"]
         },
         "outputSchema": null
       }

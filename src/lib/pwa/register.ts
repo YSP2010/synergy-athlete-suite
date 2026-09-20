@@ -18,7 +18,9 @@ async function unregisterOwn(): Promise<void> {
   const regs = await navigator.serviceWorker.getRegistrations();
   await Promise.allSettled(
     regs
-      .filter((r) => r.active?.scriptURL.endsWith(SW_URL) || r.installing?.scriptURL.endsWith(SW_URL))
+      .filter(
+        (r) => r.active?.scriptURL.endsWith(SW_URL) || r.installing?.scriptURL.endsWith(SW_URL),
+      )
       .map((r) => r.unregister()),
   );
 }
@@ -41,9 +43,7 @@ async function probeScript(url: string): Promise<ProbeResult> {
   let html = false;
   if (res.ok) {
     const body = await res.text();
-    html =
-      /text\/html/i.test(contentType) ||
-      /^\s*<(?:!doctype|html)/i.test(body.slice(0, 200));
+    html = /text\/html/i.test(contentType) || /^\s*<(?:!doctype|html)/i.test(body.slice(0, 200));
   }
   return { ok: res.ok, html, status: res.status, contentType };
 }
@@ -60,7 +60,9 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     return null;
   }
   if (!window.isSecureContext) {
-    console.warn("[pwa] Kein sicherer Kontext (HTTPS nötig) – Service Worker wird nicht registriert.");
+    console.warn(
+      "[pwa] Kein sicherer Kontext (HTTPS nötig) – Service Worker wird nicht registriert.",
+    );
     return null;
   }
   try {
@@ -176,10 +178,7 @@ export async function getReadyServiceWorkerRegistration(): Promise<ServiceWorker
   if (registration.active?.state === "activated") return registration;
 
   try {
-    return await Promise.race([
-      navigator.serviceWorker.ready,
-      waitForActivation(registration),
-    ]);
+    return await Promise.race([navigator.serviceWorker.ready, waitForActivation(registration)]);
   } catch (error) {
     console.error("[pwa] Service Worker nicht bereit:", {
       error,
@@ -196,5 +195,7 @@ export async function getReadyServiceWorkerRegistration(): Promise<ServiceWorker
 export async function clearAppCaches(): Promise<void> {
   if (typeof caches === "undefined") return;
   const keys = await caches.keys();
-  await Promise.allSettled(keys.filter((k) => k === "html" || k === "assets").map((k) => caches.delete(k)));
+  await Promise.allSettled(
+    keys.filter((k) => k === "html" || k === "assets").map((k) => caches.delete(k)),
+  );
 }

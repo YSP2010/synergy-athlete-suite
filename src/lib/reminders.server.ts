@@ -132,10 +132,7 @@ export async function runReminderSweep(now = new Date()): Promise<SweepResult> {
             tag: "matchday",
           },
         });
-      } else if (
-        (gyms.data?.length || sports.data?.length) &&
-        userSubs.some((s) => s.topic_plan)
-      ) {
+      } else if ((gyms.data?.length || sports.data?.length) && userSubs.some((s) => s.topic_plan)) {
         due.push({
           kind: "plan",
           payload: {

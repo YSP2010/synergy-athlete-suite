@@ -7,12 +7,7 @@
  * Speicherbedarf bleibt konstant. Hochfrequente Roh-Herzfrequenz wird bewusst
  * übersprungen (CPU/Speicher). Es werden nur belegte Felder geschrieben.
  */
-import {
-  emptyBundle,
-  type WellnessBundle,
-  type WellnessDailyRow,
-  type SleepRow,
-} from "./wellness";
+import { emptyBundle, type WellnessBundle, type WellnessDailyRow, type SleepRow } from "./wellness";
 
 type SumMap = Map<string, Record<string, number>>;
 type AvgMap = Map<string, Record<string, { s: number; n: number }>>;
@@ -38,7 +33,11 @@ function scan(bytes: Uint8Array): WellnessBundle {
   let carry = "";
   for (let off = 0; off < bytes.length; off += CHUNK) {
     const streaming = off + CHUNK < bytes.length;
-    const text = carry + decoder.decode(bytes.subarray(off, Math.min(off + CHUNK, bytes.length)), { stream: streaming });
+    const text =
+      carry +
+      decoder.decode(bytes.subarray(off, Math.min(off + CHUNK, bytes.length)), {
+        stream: streaming,
+      });
     const lastGt = text.lastIndexOf(">");
     const scanText = lastGt === -1 ? "" : text.slice(0, lastGt + 1);
     carry = lastGt === -1 ? text : text.slice(lastGt + 1);
@@ -101,7 +100,11 @@ function handleRecord(tag: string, sums: SumMap, avgs: AvgMap, sleep: SleepMap) 
       return;
     case "HKQuantityTypeIdentifierDistanceWalkingRunning":
       if (d && Number.isFinite(value)) {
-        const meters = unit.startsWith("km") ? value * 1000 : unit.startsWith("mi") ? value * 1609.34 : value;
+        const meters = unit.startsWith("km")
+          ? value * 1000
+          : unit.startsWith("mi")
+            ? value * 1609.34
+            : value;
         addSum(sums, d, "distance_m", meters);
       }
       return;
@@ -121,7 +124,8 @@ function handleRecord(tag: string, sums: SumMap, avgs: AvgMap, sleep: SleepMap) 
       if (d && Number.isFinite(value)) addAvg(avgs, d, "avg_respiration", value);
       return;
     case "HKQuantityTypeIdentifierOxygenSaturation":
-      if (d && Number.isFinite(value)) addAvg(avgs, d, "avg_spo2", value <= 1 ? value * 100 : value);
+      if (d && Number.isFinite(value))
+        addAvg(avgs, d, "avg_spo2", value <= 1 ? value * 100 : value);
       return;
     case "HKQuantityTypeIdentifierHeartRateVariabilitySDNN":
       if (d && Number.isFinite(value)) addAvg(avgs, d, "hrv_ms", value);
@@ -135,7 +139,8 @@ function handleRecord(tag: string, sums: SumMap, avgs: AvgMap, sleep: SleepMap) 
       if (v.includes("deep")) s.deep += durS;
       else if (v.includes("rem")) s.rem += durS;
       else if (v.includes("awake")) s.awake += durS;
-      else if (v.includes("asleep") || v.includes("core") || v.includes("unspecified")) s.core += durS;
+      else if (v.includes("asleep") || v.includes("core") || v.includes("unspecified"))
+        s.core += durS;
       sleep.set(dd, s);
       return;
     }

@@ -39,8 +39,7 @@ export function avgGradeAdjustedSpeed(samples: EffSample[]): number | null {
     const dt = cur.tOffsetS - prev.tOffsetS;
     if (dt <= 0) continue;
     const speed = cur.speedMps!;
-    const dh =
-      cur.altitudeM != null && prev.altitudeM != null ? cur.altitudeM - prev.altitudeM : 0;
+    const dh = cur.altitudeM != null && prev.altitudeM != null ? cur.altitudeM - prev.altitudeM : 0;
     const horizontal = speed * dt;
     const gradient = horizontal > 1 ? dh / horizontal : 0;
     sum += gradeAdjustedSpeed(speed, gradient) * dt;

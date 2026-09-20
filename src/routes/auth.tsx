@@ -10,7 +10,6 @@ import { Loader2, Zap } from "lucide-react";
 import { humanError } from "@/lib/errors";
 import { safeRedirect } from "@/lib/invites";
 
-
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
@@ -39,7 +38,6 @@ function readNext(): string | undefined {
   // `next` (bestehend) und `redirect` (Einladungslinks) werden beide akzeptiert.
   return safeRedirect(params.get("next") ?? params.get("redirect"));
 }
-
 
 function AuthPage() {
   const next = typeof window === "undefined" ? undefined : readNext();
@@ -162,7 +160,9 @@ function AuthPage() {
             <Zap className="h-6 w-6" strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className="font-display text-2xl font-bold leading-tight">Hybrid Athlete — Performance Planner</h1>
+            <h1 className="font-display text-2xl font-bold leading-tight">
+              Hybrid Athlete — Performance Planner
+            </h1>
             <p className="text-sm text-muted-foreground">Performance Planner</p>
           </div>
         </div>

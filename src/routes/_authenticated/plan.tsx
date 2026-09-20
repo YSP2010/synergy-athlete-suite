@@ -144,7 +144,11 @@ export const Route = createFileRoute("/_authenticated/plan")({
   head: () => ({
     meta: [
       { title: "Wochenplan – Hybrid Athlete" },
-      { name: "description", content: "Dynamischer Trainingsplan aus Fußball, Gym und Regeneration – jederzeit anpassbar." },
+      {
+        name: "description",
+        content:
+          "Dynamischer Trainingsplan aus Fußball, Gym und Regeneration – jederzeit anpassbar.",
+      },
       { property: "og:title", content: "Wochenplan – Hybrid Athlete" },
       { property: "og:description", content: "Dynamischer Plan aus Sport, Gym und Regeneration." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/plan" },
@@ -391,7 +395,6 @@ function PlanPage() {
           </div>
         </div>
       )}
-
 
       <div className="card-elevated flex items-center justify-between p-4">
         <div>

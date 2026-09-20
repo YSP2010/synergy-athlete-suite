@@ -4,7 +4,12 @@
  * die Tagesziele kommen aus dem Planner, hier werden sie nur auf die
  * Stunden vor und nach dem Anstoß verteilt.
  */
-import { calcDailyMacros, type AthleteProfile, type DailyMacros, type SportSession } from "./planner";
+import {
+  calcDailyMacros,
+  type AthleteProfile,
+  type DailyMacros,
+  type SportSession,
+} from "./planner";
 
 export interface MatchdayInput {
   profile: AthleteProfile;
@@ -95,9 +100,10 @@ export function buildMatchdayPlan(input: MatchdayInput): MatchdayPlan {
     {
       offsetMin: 15,
       title: "Letzter Boost",
-      detail: boostCarbs > 0
-        ? `${boostCarbs} g schnelle Kohlenhydrate + 150–250 ml Wasser.`
-        : "150–250 ml Wasser, nichts Schweres mehr.",
+      detail:
+        boostCarbs > 0
+          ? `${boostCarbs} g schnelle Kohlenhydrate + 150–250 ml Wasser.`
+          : "150–250 ml Wasser, nichts Schweres mehr.",
       icon: "drink",
     },
     {
@@ -137,7 +143,16 @@ export function buildMatchdayPlan(input: MatchdayInput): MatchdayPlan {
             ? "today"
             : "far";
 
-  return { kickoff, minutesToKickoff, phase, macros, preCarbsG, preFluidMl, recoveryProteinG, items };
+  return {
+    kickoff,
+    minutesToKickoff,
+    phase,
+    macros,
+    preCarbsG,
+    preFluidMl,
+    recoveryProteinG,
+    items,
+  };
 }
 
 /** Formatiert eine Restzeit als „3 h 12 min“. */

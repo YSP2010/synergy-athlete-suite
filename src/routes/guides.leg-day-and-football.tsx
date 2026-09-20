@@ -61,12 +61,14 @@ function GuidePage() {
         </h1>
         <p className="mt-5 text-base text-muted-foreground">
           Der häufigste Fehler von Hybrid-Athleten: Kniebeugen am Freitag, Spiel am Sonntag – und
-          dann fragt man sich, warum der Sprint fehlt. Beintraining und Fußball teilen sich denselben
-          neuromuskulären Topf. Wer beides ernst nimmt, muss den Leg Day um Spiele herum planen und
-          nicht andersherum.
+          dann fragt man sich, warum der Sprint fehlt. Beintraining und Fußball teilen sich
+          denselben neuromuskulären Topf. Wer beides ernst nimmt, muss den Leg Day um Spiele herum
+          planen und nicht andersherum.
         </p>
 
-        <h2 className="mt-10 font-display text-2xl font-bold">Das 48–72-Stunden-Recovery-Fenster</h2>
+        <h2 className="mt-10 font-display text-2xl font-bold">
+          Das 48–72-Stunden-Recovery-Fenster
+        </h2>
         <p className="mt-3 text-sm text-muted-foreground">
           Schwere Beinarbeit (Kniebeugen, Kreuzheben, Ausfallschritte mit hoher Last) erzeugt
           Mikrotraumata und einen Abfall der Sprint- und Sprungkraft, der 24 bis 72 Stunden anhält.
@@ -126,7 +128,9 @@ function GuidePage() {
           </li>
         </ul>
 
-        <h2 className="mt-10 font-display text-2xl font-bold">Wenn zwei Spiele pro Woche anstehen</h2>
+        <h2 className="mt-10 font-display text-2xl font-bold">
+          Wenn zwei Spiele pro Woche anstehen
+        </h2>
         <p className="mt-3 text-sm text-muted-foreground">
           Bei englischen Wochen (z. B. Mittwoch- und Sonntagsspiel) fällt der klassische Leg Day
           weg. Ersetze ihn durch eine kurze Unterkörper-Aktivierung (2–3 Sätze Kniebeuge mit 50 %,

@@ -22,7 +22,10 @@ export const Route = createFileRoute("/_authenticated/insights")({
   head: () => ({
     meta: [
       { title: "Insights – Hybrid Athlete" },
-      { name: "description", content: "KI-gestützte Auswertung deiner Trainings-, Schlaf- und Ernährungsdaten." },
+      {
+        name: "description",
+        content: "KI-gestützte Auswertung deiner Trainings-, Schlaf- und Ernährungsdaten.",
+      },
       { property: "og:title", content: "Insights – Hybrid Athlete" },
       { property: "og:description", content: "KI-Auswertung von Training, Schlaf und Ernährung." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/insights" },

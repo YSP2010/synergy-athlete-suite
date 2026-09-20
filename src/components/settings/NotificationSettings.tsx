@@ -20,10 +20,7 @@ import {
   setReminderPrefs,
 } from "@/lib/push.functions";
 import { pushSupported, subscribeToPush, unsubscribeFromPush } from "@/lib/pwa/push";
-import {
-  getReadyServiceWorkerRegistration,
-  registerServiceWorker,
-} from "@/lib/pwa/register";
+import { getReadyServiceWorkerRegistration, registerServiceWorker } from "@/lib/pwa/register";
 import { humanError } from "@/lib/errors";
 
 const TEST_TIMEOUT_MS = 5000;
@@ -69,7 +66,8 @@ export function NotificationSettings() {
     void (async () => {
       // Wartet hier explizit auf die Registrierung. Zuvor konnte diese Prüfung
       // schneller sein als die globale PWA-Registrierung und blieb dann dauerhaft false.
-      const reg = (await registerServiceWorker()) ?? (await navigator.serviceWorker.getRegistration());
+      const reg =
+        (await registerServiceWorker()) ?? (await navigator.serviceWorker.getRegistration());
       if (!mounted) return;
       setInstalled(!!reg);
       const readyReg = reg
@@ -184,9 +182,7 @@ export function NotificationSettings() {
 
   async function runNotificationTest(): Promise<void> {
     const permission =
-      Notification.permission === "granted"
-        ? "granted"
-        : await Notification.requestPermission();
+      Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
     if (permission !== "granted") {
       throw new Error(
         permission === "denied"
@@ -203,8 +199,7 @@ export function NotificationSettings() {
     }
 
     const registration =
-      (await registerServiceWorker()) ??
-      (await navigator.serviceWorker?.getRegistration());
+      (await registerServiceWorker()) ?? (await navigator.serviceWorker?.getRegistration());
     if (!registration) {
       console.warn("[push] Kein Service Worker registriert – Browser-Fallback wird getestet.");
       await showBrowserFallback();
@@ -250,7 +245,12 @@ export function NotificationSettings() {
             Erinnerungen zu Check-in, Planänderungen und Spieltagen – nur auf diesem Gerät.
           </p>
         </div>
-        <Switch checked={active} disabled={busy || !installed} onCheckedChange={toggle} aria-label="Benachrichtigungen aktivieren" />
+        <Switch
+          checked={active}
+          disabled={busy || !installed}
+          onCheckedChange={toggle}
+          aria-label="Benachrichtigungen aktivieren"
+        />
       </div>
       {!installed && (
         <p className="rounded-lg border border-border bg-elevated p-3 text-xs text-muted-foreground">

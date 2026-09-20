@@ -54,14 +54,24 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard – Hybrid Athlete" },
-      { name: "description", content: "Recovery-Score, Wochenplan, Makro-Ziele und die nächsten Einheiten auf einen Blick." },
+      {
+        name: "description",
+        content:
+          "Recovery-Score, Wochenplan, Makro-Ziele und die nächsten Einheiten auf einen Blick.",
+      },
       { property: "og:title", content: "Dashboard – Hybrid Athlete" },
-      { property: "og:description", content: "Recovery-Score, Wochenplan und Makro-Ziele auf einen Blick." },
+      {
+        property: "og:description",
+        content: "Recovery-Score, Wochenplan und Makro-Ziele auf einen Blick.",
+      },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/dashboard" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Dashboard – Hybrid Athlete" },
-      { name: "twitter:description", content: "Recovery-Score, Wochenplan und Makro-Ziele auf einen Blick." },
+      {
+        name: "twitter:description",
+        content: "Recovery-Score, Wochenplan und Makro-Ziele auf einen Blick.",
+      },
     ],
   }),
   component: DashboardPage,
@@ -143,7 +153,13 @@ function DashboardPage() {
 
       // Wochenplan: bei gesperrter Woche Snapshot verwenden, sonst
       // Live-Plan + manuelle Overrides aus /plan.
-      const generated = generateWeekPlan(ath, weekStart, matchHardness, recovery.score, ctx.signals);
+      const generated = generateWeekPlan(
+        ath,
+        weekStart,
+        matchHardness,
+        recovery.score,
+        ctx.signals,
+      );
       const plan: PlannedSlot[] =
         planner?.locked && planner.plan?.snapshot
           ? planner.plan.snapshot

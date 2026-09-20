@@ -17,14 +17,24 @@ export const Route = createFileRoute("/_authenticated/checkin")({
   head: () => ({
     meta: [
       { title: "Daily Check-in – Hybrid Athlete" },
-      { name: "description", content: "Schlaf, Muskelkater, Stress und Energie erfassen – Basis für deinen Recovery-Score." },
+      {
+        name: "description",
+        content:
+          "Schlaf, Muskelkater, Stress und Energie erfassen – Basis für deinen Recovery-Score.",
+      },
       { property: "og:title", content: "Daily Check-in – Hybrid Athlete" },
-      { property: "og:description", content: "Schlaf, Stress und Energie erfassen für deinen Recovery-Score." },
+      {
+        property: "og:description",
+        content: "Schlaf, Stress und Energie erfassen für deinen Recovery-Score.",
+      },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/checkin" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Daily Check-in – Hybrid Athlete" },
-      { name: "twitter:description", content: "Schlaf, Stress und Energie erfassen für deinen Recovery-Score." },
+      {
+        name: "twitter:description",
+        content: "Schlaf, Stress und Energie erfassen für deinen Recovery-Score.",
+      },
     ],
   }),
   component: CheckinPage,

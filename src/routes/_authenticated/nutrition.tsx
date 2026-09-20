@@ -46,14 +46,23 @@ export const Route = createFileRoute("/_authenticated/nutrition")({
   head: () => ({
     meta: [
       { title: "Ernährung – Hybrid Athlete" },
-      { name: "description", content: "Mahlzeiten loggen und Makros passend zu Gym- und Fußballtagen steuern." },
+      {
+        name: "description",
+        content: "Mahlzeiten loggen und Makros passend zu Gym- und Fußballtagen steuern.",
+      },
       { property: "og:title", content: "Ernährung – Hybrid Athlete" },
-      { property: "og:description", content: "Mahlzeiten loggen, Makros an Trainingstage anpassen." },
+      {
+        property: "og:description",
+        content: "Mahlzeiten loggen, Makros an Trainingstage anpassen.",
+      },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/nutrition" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Ernährung – Hybrid Athlete" },
-      { name: "twitter:description", content: "Mahlzeiten loggen, Makros an Trainingstage anpassen." },
+      {
+        name: "twitter:description",
+        content: "Mahlzeiten loggen, Makros an Trainingstage anpassen.",
+      },
     ],
   }),
   component: NutritionPage,
@@ -173,8 +182,7 @@ function NutritionPage() {
 
       const tomorrowMatchHard =
         sport.some(
-          (s) =>
-            s.date === tomorrowSlot?.date && s.kind === "match" && s.match_hardness === "hard",
+          (s) => s.date === tomorrowSlot?.date && s.kind === "match" && s.match_hardness === "hard",
         ) ||
         (tomorrowSlot?.kind === "match" && tomorrowSlot.hardness === "hard");
       const todaySport = sport.find((s) => s.date === dateIso) ?? plannedSportFromSlot(daySlot);

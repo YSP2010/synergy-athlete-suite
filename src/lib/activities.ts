@@ -35,7 +35,10 @@ export function fmtDistance(meters: number | null | undefined): string {
 }
 
 /** Pace in min/km, aus Distanz und Dauer. */
-export function fmtPace(meters: number | null | undefined, seconds: number | null | undefined): string {
+export function fmtPace(
+  meters: number | null | undefined,
+  seconds: number | null | undefined,
+): string {
   if (!meters || !seconds || meters < 50) return "–";
   const secPerKm = seconds / (meters / 1000);
   const m = Math.floor(secPerKm / 60);
@@ -68,7 +71,9 @@ export function toChartData(points: TrackPoint[], distanceM: number | null): Cha
   for (let i = 0; i < count; i++) {
     const p = points[points.length > max ? Math.round(i * step) : i];
     out.push({
-      km: distanceM ? Number(((distanceM / 1000) * (p[0] / total)).toFixed(2)) : Number((p[0] / 60).toFixed(1)),
+      km: distanceM
+        ? Number(((distanceM / 1000) * (p[0] / total)).toFixed(2))
+        : Number((p[0] / 60).toFixed(1)),
       min: Number((p[0] / 60).toFixed(1)),
       hr: p[4],
       alt: p[3],

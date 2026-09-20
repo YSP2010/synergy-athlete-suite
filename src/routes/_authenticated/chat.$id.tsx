@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_authenticated/chat/$id")({
   head: () => ({
     meta: [
       { title: "Chat – Hybrid Athlete" },
-      { name: "description", content: "Direkter Austausch zwischen Trainer und Athlet in Echtzeit." },
+      {
+        name: "description",
+        content: "Direkter Austausch zwischen Trainer und Athlet in Echtzeit.",
+      },
       { property: "og:title", content: "Chat – Hybrid Athlete" },
       { property: "og:description", content: "Trainer-Athlet-Chat in Echtzeit." },
       { property: "og:type", content: "website" },

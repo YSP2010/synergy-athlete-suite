@@ -19,12 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   ChartContainer,
   ChartTooltip,
@@ -100,7 +95,13 @@ const sleepConfig = {
   awake: { label: "Wach", color: "var(--warn)" },
 } satisfies ChartConfig;
 
-export function AnalyticsView({ userId, readOnly = false }: { userId: string; readOnly?: boolean }) {
+export function AnalyticsView({
+  userId,
+  readOnly = false,
+}: {
+  userId: string;
+  readOnly?: boolean;
+}) {
   const [range, setRange] = useState<(typeof RANGES)[number]["key"]>("90");
   const days = RANGES.find((r) => r.key === range)!.days;
 
@@ -127,7 +128,9 @@ export function AnalyticsView({ userId, readOnly = false }: { userId: string; re
           .limit(1000),
         supabase
           .from("sleep_logs")
-          .select("date, duration_s, deep_s, light_s, rem_s, awake_s, sleep_score, avg_sleep_hrv_ms")
+          .select(
+            "date, duration_s, deep_s, light_s, rem_s, awake_s, sleep_score, avg_sleep_hrv_ms",
+          )
           .eq("user_id", userId)
           .order("date", { ascending: true })
           .limit(1000),
@@ -325,17 +328,15 @@ export function AnalyticsView({ userId, readOnly = false }: { userId: string; re
               label="ACWR"
               value={view.last?.acwr != null ? view.last.acwr.toFixed(2) : "–"}
               hint="Verhältnis der letzten 7 zu den letzten 28 Tagen. 0,8–1,3 ist optimal, über 1,5 steigt das Verletzungsrisiko."
-              extra={
-                zone ? (
-                  <span className={zoneVariant[zone]}>{zoneLabel[zone]}</span>
-                ) : null
-              }
+              extra={zone ? <span className={zoneVariant[zone]}>{zoneLabel[zone]}</span> : null}
             />
             <Metric
               icon={<Moon className="h-4 w-4 text-primary" />}
               label="Sleep Score"
               value={
-                view.sleep.length ? String(view.sleep[view.sleep.length - 1]!.sleep_score ?? "–") : "–"
+                view.sleep.length
+                  ? String(view.sleep[view.sleep.length - 1]!.sleep_score ?? "–")
+                  : "–"
               }
               hint="Garmin-Bewertung der letzten Nacht (0–100). Ab 80 gilt der Schlaf als erholsam."
             />
@@ -363,9 +364,24 @@ export function AnalyticsView({ userId, readOnly = false }: { userId: string; re
                     <XAxis dataKey="date" tickFormatter={fmtDate} minTickGap={32} />
                     <YAxis width={36} />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Area dataKey="ctl" stroke="var(--color-ctl)" fill="var(--color-ctl)" fillOpacity={0.2} />
-                    <Area dataKey="atl" stroke="var(--color-atl)" fill="var(--color-atl)" fillOpacity={0.1} />
-                    <Area dataKey="tsb" stroke="var(--color-tsb)" fill="var(--color-tsb)" fillOpacity={0.1} />
+                    <Area
+                      dataKey="ctl"
+                      stroke="var(--color-ctl)"
+                      fill="var(--color-ctl)"
+                      fillOpacity={0.2}
+                    />
+                    <Area
+                      dataKey="atl"
+                      stroke="var(--color-atl)"
+                      fill="var(--color-atl)"
+                      fillOpacity={0.1}
+                    />
+                    <Area
+                      dataKey="tsb"
+                      stroke="var(--color-tsb)"
+                      fill="var(--color-tsb)"
+                      fillOpacity={0.1}
+                    />
                   </AreaChart>
                 </ChartContainer>
               ) : (
@@ -459,7 +475,10 @@ export function AnalyticsView({ userId, readOnly = false }: { userId: string; re
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
-                <Row label="Schwellenpuls" value={view.thresholds.lthr ? `${view.thresholds.lthr} bpm` : "–"} />
+                <Row
+                  label="Schwellenpuls"
+                  value={view.thresholds.lthr ? `${view.thresholds.lthr} bpm` : "–"}
+                />
                 <Row
                   label="Schwellentempo"
                   value={
@@ -471,7 +490,10 @@ export function AnalyticsView({ userId, readOnly = false }: { userId: string; re
                 <Row label="FTP" value={view.thresholds.ftpW ? `${view.thresholds.ftpW} W` : "–"} />
                 <div className="space-y-1 pt-2">
                   {hrZones(view.thresholds.maxHr, view.thresholds.lthr).map((z) => (
-                    <div key={z.index} className="flex justify-between text-xs text-muted-foreground">
+                    <div
+                      key={z.index}
+                      className="flex justify-between text-xs text-muted-foreground"
+                    >
                       <span>
                         Z{z.index} · {z.label}
                       </span>
@@ -481,7 +503,10 @@ export function AnalyticsView({ userId, readOnly = false }: { userId: string; re
                     </div>
                   ))}
                   {powerZones(view.thresholds.ftpW).map((z) => (
-                    <div key={`p${z.index}`} className="flex justify-between text-xs text-muted-foreground">
+                    <div
+                      key={`p${z.index}`}
+                      className="flex justify-between text-xs text-muted-foreground"
+                    >
                       <span>
                         P{z.index} · {z.label}
                       </span>

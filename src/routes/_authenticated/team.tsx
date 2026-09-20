@@ -29,7 +29,6 @@ import type { Tables } from "@/integrations/supabase/types";
 import { TeamCockpit } from "@/components/team/TeamCockpit";
 import { TeamInvites } from "@/components/team/TeamInvites";
 
-
 type TeamRow = Tables<"teams">;
 
 interface TeamMemberRow extends Tables<"team_members"> {
@@ -50,14 +49,23 @@ export const Route = createFileRoute("/_authenticated/team")({
   head: () => ({
     meta: [
       { title: "Team-Cockpit – Hybrid Athlete" },
-      { name: "description", content: "Readiness aller Athleten, Einladungen und Teamverwaltung für Trainer." },
+      {
+        name: "description",
+        content: "Readiness aller Athleten, Einladungen und Teamverwaltung für Trainer.",
+      },
       { property: "og:title", content: "Team-Cockpit – Hybrid Athlete" },
-      { property: "og:description", content: "Readiness, Einladungen und Teamverwaltung für Trainer." },
+      {
+        property: "og:description",
+        content: "Readiness, Einladungen und Teamverwaltung für Trainer.",
+      },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/team" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Team-Cockpit – Hybrid Athlete" },
-      { name: "twitter:description", content: "Readiness, Einladungen und Teamverwaltung für Trainer." },
+      {
+        name: "twitter:description",
+        content: "Readiness, Einladungen und Teamverwaltung für Trainer.",
+      },
     ],
   }),
   component: TeamPage,
@@ -190,7 +198,6 @@ function TeamDetail({ team }: { team: TeamRow }) {
   const [email, setEmail] = useState("");
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [tab, setTab] = useState<"cockpit" | "members" | "invite">("cockpit");
-
 
   const { data: members } = useQuery({
     queryKey: ["team-members", team.id],
@@ -372,105 +379,106 @@ function TeamDetail({ team }: { team: TeamRow }) {
 
       {tab === "members" && (
         <>
-      <div className="card-elevated p-4">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-medium">
-          <Settings2 className="h-4 w-4" /> Team-Chat Einstellungen
-        </h2>
-        <div className="flex items-center justify-between rounded-lg bg-elevated px-3 py-2">
-          <div>
-            <div className="text-sm font-medium">Nur Trainer darf schreiben</div>
-            <div className="text-xs text-muted-foreground">
-              Spieler können lesen, aber nicht antworten.
+          <div className="card-elevated p-4">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-medium">
+              <Settings2 className="h-4 w-4" /> Team-Chat Einstellungen
+            </h2>
+            <div className="flex items-center justify-between rounded-lg bg-elevated px-3 py-2">
+              <div>
+                <div className="text-sm font-medium">Nur Trainer darf schreiben</div>
+                <div className="text-xs text-muted-foreground">
+                  Spieler können lesen, aber nicht antworten.
+                </div>
+              </div>
+              <Switch
+                checked={!!team.coach_only_chat}
+                onCheckedChange={(v) => toggleLock.mutate(v)}
+              />
             </div>
           </div>
-          <Switch checked={!!team.coach_only_chat} onCheckedChange={(v) => toggleLock.mutate(v)} />
-        </div>
-      </div>
 
-
-      <div className="card-elevated p-4">
-        <Label htmlFor="invite-email">Spieler per E-Mail einladen</Label>
-        <div className="mt-2 flex gap-2">
-          <Input
-            id="invite-email"
-            value={email}
-            type="email"
-            placeholder="spieler@example.com"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Button onClick={() => invite.mutate()} disabled={invite.isPending}>
-            {invite.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Mail className="h-4 w-4" />
-            )}
-            <span className="ml-1">Einladen</span>
-          </Button>
-        </div>
-      </div>
-
-      <div className="card-elevated p-4">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-medium">
-          <Users className="h-4 w-4" /> Mitglieder
-        </h2>
-        <ul className="divide-y divide-border">
-          {(members ?? []).map((m) => (
-            <li key={m.id} className="flex items-center justify-between py-2">
-              <div>
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  {m.profiles?.name ?? "Unbekannt"}
-                  {m.status === "active" && <RecoveryDot rec={teamRecovery?.[m.user_id]} />}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  Status: <span className="capitalize">{m.status}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {m.status === "active" && (
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/athletes/$id" params={{ id: m.user_id }}>
-                      Ansicht
-                    </Link>
-                  </Button>
-                )}
-                {confirmRemove === m.id ? (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      disabled={removeMember.isPending}
-                      onClick={() => removeMember.mutate({ id: m.id, user_id: m.user_id })}
-                    >
-                      Wirklich entfernen
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => setConfirmRemove(null)}>
-                      Abbrechen
-                    </Button>
-                  </div>
+          <div className="card-elevated p-4">
+            <Label htmlFor="invite-email">Spieler per E-Mail einladen</Label>
+            <div className="mt-2 flex gap-2">
+              <Input
+                id="invite-email"
+                value={email}
+                type="email"
+                placeholder="spieler@example.com"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button onClick={() => invite.mutate()} disabled={invite.isPending}>
+                {invite.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setConfirmRemove(m.id)}
-                    aria-label="Entfernen"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <Mail className="h-4 w-4" />
                 )}
-              </div>
-            </li>
-          ))}
-          {(members ?? []).length === 0 && (
-            <li className="py-4 text-sm text-muted-foreground">
-              Noch keine Mitglieder eingeladen.
-            </li>
-          )}
-        </ul>
-      </div>
+                <span className="ml-1">Einladen</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="card-elevated p-4">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-medium">
+              <Users className="h-4 w-4" /> Mitglieder
+            </h2>
+            <ul className="divide-y divide-border">
+              {(members ?? []).map((m) => (
+                <li key={m.id} className="flex items-center justify-between py-2">
+                  <div>
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      {m.profiles?.name ?? "Unbekannt"}
+                      {m.status === "active" && <RecoveryDot rec={teamRecovery?.[m.user_id]} />}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Status: <span className="capitalize">{m.status}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {m.status === "active" && (
+                      <Button asChild size="sm" variant="outline">
+                        <Link to="/athletes/$id" params={{ id: m.user_id }}>
+                          Ansicht
+                        </Link>
+                      </Button>
+                    )}
+                    {confirmRemove === m.id ? (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          disabled={removeMember.isPending}
+                          onClick={() => removeMember.mutate({ id: m.id, user_id: m.user_id })}
+                        >
+                          Wirklich entfernen
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => setConfirmRemove(null)}>
+                          Abbrechen
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setConfirmRemove(m.id)}
+                        aria-label="Entfernen"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              ))}
+              {(members ?? []).length === 0 && (
+                <li className="py-4 text-sm text-muted-foreground">
+                  Noch keine Mitglieder eingeladen.
+                </li>
+              )}
+            </ul>
+          </div>
         </>
       )}
     </section>
-
   );
 }
 

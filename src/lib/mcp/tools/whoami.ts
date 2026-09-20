@@ -16,8 +16,7 @@ export default defineTool({
       .select("name,role,sport,goal,birth_date,weight_kg,height_cm,gym_days,sport_days,match_days")
       .eq("id", ctx.getUserId()!)
       .maybeSingle();
-    if (error)
-      return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     return {
       content: [{ type: "text", text: JSON.stringify(data ?? {}, null, 2) }],
       structuredContent: { profile: data },

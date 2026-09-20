@@ -21,14 +21,23 @@ export const Route = createFileRoute("/_authenticated/equipment")({
   head: () => ({
     meta: [
       { title: "Equipment – Hybrid Athlete" },
-      { name: "description", content: "Laufschuhe, Räder und Ausrüstung mit automatischer Kilometerzählung verwalten." },
+      {
+        name: "description",
+        content: "Laufschuhe, Räder und Ausrüstung mit automatischer Kilometerzählung verwalten.",
+      },
       { property: "og:title", content: "Equipment – Hybrid Athlete" },
-      { property: "og:description", content: "Ausrüstung mit automatischer Kilometerzählung verwalten." },
+      {
+        property: "og:description",
+        content: "Ausrüstung mit automatischer Kilometerzählung verwalten.",
+      },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/equipment" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Equipment – Hybrid Athlete" },
-      { name: "twitter:description", content: "Ausrüstung mit automatischer Kilometerzählung verwalten." },
+      {
+        name: "twitter:description",
+        content: "Ausrüstung mit automatischer Kilometerzählung verwalten.",
+      },
     ],
   }),
   component: EquipmentPage,
@@ -48,7 +57,10 @@ function EquipmentPage() {
   const { data: items, isLoading } = useQuery({
     queryKey: ["equipment"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("equipment").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("equipment")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
@@ -103,7 +115,11 @@ function EquipmentPage() {
         <div className="card-elevated space-y-3 p-5">
           <div>
             <Label>Name</Label>
-            <Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="z. B. Pegasus 41" />
+            <Input
+              value={f.name}
+              onChange={(e) => setF({ ...f, name: e.target.value })}
+              placeholder="z. B. Pegasus 41"
+            />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
@@ -112,7 +128,11 @@ function EquipmentPage() {
                 value={f.type}
                 onValueChange={(v) => {
                   const t = TYPES.find((x) => x.key === v);
-                  setF({ ...f, type: v, retireKm: t?.defaultRetireKm ? String(t.defaultRetireKm) : "" });
+                  setF({
+                    ...f,
+                    type: v,
+                    retireKm: t?.defaultRetireKm ? String(t.defaultRetireKm) : "",
+                  });
                 }}
               >
                 <SelectTrigger>
@@ -153,8 +173,8 @@ function EquipmentPage() {
         </div>
       ) : !items?.length ? (
         <div className="card-elevated p-8 text-center text-sm text-muted-foreground">
-          Noch keine Ausrüstung. Leg deine Laufschuhe an, dann zählen wir die Kilometer mit und melden uns
-          rechtzeitig vor dem Verschleiß.
+          Noch keine Ausrüstung. Leg deine Laufschuhe an, dann zählen wir die Kilometer mit und
+          melden uns rechtzeitig vor dem Verschleiß.
         </div>
       ) : (
         <div className="space-y-2">
@@ -170,7 +190,10 @@ function EquipmentPage() {
                   <Icon className="h-5 w-5 text-neon" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium">
-                      {it.name} {it.retired && <span className="text-xs text-muted-foreground">(ausgemustert)</span>}
+                      {it.name}{" "}
+                      {it.retired && (
+                        <span className="text-xs text-muted-foreground">(ausgemustert)</span>
+                      )}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {it.brand ? `${it.brand} · ` : ""}
@@ -186,7 +209,8 @@ function EquipmentPage() {
                 {pct != null && <Progress value={pct} />}
                 {worn && !it.retired && (
                   <p className="flex items-center gap-1.5 text-xs text-warning">
-                    <AlertTriangle className="h-3.5 w-3.5" /> Verschleißgrenze fast erreicht – Zeit für Ersatz.
+                    <AlertTriangle className="h-3.5 w-3.5" /> Verschleißgrenze fast erreicht – Zeit
+                    für Ersatz.
                   </p>
                 )}
               </div>

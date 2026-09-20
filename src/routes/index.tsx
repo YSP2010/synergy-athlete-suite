@@ -49,8 +49,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:title", content: "Trainingsplaner für Hybrid-Athleten – Fußball + Gym" },
       {
         name: "twitter:description",
-        content:
-          "Fußball, Gym, Recovery und Ernährung in einem intelligenten Wochenplan.",
+        content: "Fußball, Gym, Recovery und Ernährung in einem intelligenten Wochenplan.",
       },
     ],
     links: [{ rel: "canonical", href: "https://synergy-athlete-suite.lovable.app/" }],

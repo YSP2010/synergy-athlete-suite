@@ -83,8 +83,9 @@ function GuidePage() {
         12-Wochen Hybrid Athlete Training Program
       </h1>
       <p className="mt-3 text-muted-foreground">
-        Ein periodisiertes Programm für Fußballer, die parallel Kraft und Muskulatur aufbauen wollen —
-        ohne Leistungseinbruch auf dem Platz. Drei Blöcke à vier Wochen: Basis, Intensivierung, Peaking.
+        Ein periodisiertes Programm für Fußballer, die parallel Kraft und Muskulatur aufbauen wollen
+        — ohne Leistungseinbruch auf dem Platz. Drei Blöcke à vier Wochen: Basis, Intensivierung,
+        Peaking.
       </p>
 
       <section className="mt-10 space-y-4">

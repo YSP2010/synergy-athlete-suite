@@ -12,7 +12,11 @@ export default defineTool({
     content: z.string().trim().min(1).describe("Freitext des Eintrags."),
     mood: z.number().int().min(1).max(5).optional().describe("Optionales Mood (1–5)."),
     tags: z.array(z.string().trim()).optional().describe("Optionale Tag-Liste."),
-    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("ISO-Datum YYYY-MM-DD."),
+    date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional()
+      .describe("ISO-Datum YYYY-MM-DD."),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
   handler: async ({ title, content, mood, tags, date }, ctx) => {

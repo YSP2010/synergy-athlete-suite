@@ -22,7 +22,10 @@ export const Route = createFileRoute("/_authenticated/races/")({
   head: () => ({
     meta: [
       { title: "Wettkämpfe – Hybrid Athlete" },
-      { name: "description", content: "Anstehende Rennen planen und vergangene Wettkämpfe auswerten." },
+      {
+        name: "description",
+        content: "Anstehende Rennen planen und vergangene Wettkämpfe auswerten.",
+      },
       { property: "og:title", content: "Wettkämpfe – Hybrid Athlete" },
       { property: "og:description", content: "Rennen planen und Wettkämpfe auswerten." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/races" },
@@ -40,7 +43,12 @@ const TYPE_KEYS = Object.keys(RACE_PRESETS) as (keyof typeof RACE_PRESETS)[];
 function RacesPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ name: "", race_type: "olympic" as RaceType, race_date: "", priority: "B" });
+  const [f, setF] = useState({
+    name: "",
+    race_type: "olympic" as RaceType,
+    race_date: "",
+    priority: "B",
+  });
 
   const { data: races, isLoading } = useQuery({
     queryKey: ["races"],
@@ -91,12 +99,19 @@ function RacesPage() {
         <div className="card-elevated space-y-3 p-5">
           <div>
             <Label>Name</Label>
-            <Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="z. B. Stadttriathlon" />
+            <Input
+              value={f.name}
+              onChange={(e) => setF({ ...f, name: e.target.value })}
+              placeholder="z. B. Stadttriathlon"
+            />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <Label>Distanz</Label>
-              <Select value={f.race_type} onValueChange={(v) => setF({ ...f, race_type: v as RaceType })}>
+              <Select
+                value={f.race_type}
+                onValueChange={(v) => setF({ ...f, race_type: v as RaceType })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -112,7 +127,11 @@ function RacesPage() {
             </div>
             <div>
               <Label>Datum</Label>
-              <Input type="date" value={f.race_date} onChange={(e) => setF({ ...f, race_date: e.target.value })} />
+              <Input
+                type="date"
+                value={f.race_date}
+                onChange={(e) => setF({ ...f, race_date: e.target.value })}
+              />
             </div>
           </div>
           <div>
@@ -146,7 +165,9 @@ function RacesPage() {
       ) : (
         <div className="space-y-2">
           {races.map((r) => {
-            const days = Math.ceil((Date.parse(`${r.race_date}T00:00:00Z`) - Date.now()) / 86_400_000);
+            const days = Math.ceil(
+              (Date.parse(`${r.race_date}T00:00:00Z`) - Date.now()) / 86_400_000,
+            );
             return (
               <Link
                 key={r.id}
@@ -160,7 +181,8 @@ function RacesPage() {
                   <div className="text-xs text-muted-foreground">
                     {new Date(`${r.race_date}T00:00:00Z`).toLocaleDateString("de-DE")} ·{" "}
                     {r.race_type !== "custom"
-                      ? RACE_PRESETS[r.race_type as keyof typeof RACE_PRESETS]?.label ?? r.race_type
+                      ? (RACE_PRESETS[r.race_type as keyof typeof RACE_PRESETS]?.label ??
+                        r.race_type)
                       : "Eigene Distanz"}
                   </div>
                 </div>

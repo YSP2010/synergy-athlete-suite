@@ -31,7 +31,11 @@ export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Einstellungen – Hybrid Athlete" },
-      { name: "description", content: "Profil, Sportart, Ziele, Benachrichtigungen und Bestenlisten-Freigaben verwalten." },
+      {
+        name: "description",
+        content:
+          "Profil, Sportart, Ziele, Benachrichtigungen und Bestenlisten-Freigaben verwalten.",
+      },
       { property: "og:title", content: "Einstellungen – Hybrid Athlete" },
       { property: "og:description", content: "Profil, Ziele und Benachrichtigungen verwalten." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/settings" },
@@ -318,8 +322,8 @@ function LeaderboardSettings() {
         <span className="text-sm">
           <span className="font-medium">An der Bestenliste teilnehmen</span>
           <span className="block text-xs text-muted-foreground">
-            Andere angemeldete Nutzer sehen deinen Anzeigenamen und deine Werte in Lauf-, Rad-, Schwimm- und
-            Konsistenz-Kategorien.
+            Andere angemeldete Nutzer sehen deinen Anzeigenamen und deine Werte in Lauf-, Rad-,
+            Schwimm- und Konsistenz-Kategorien.
           </span>
         </span>
         <Switch
@@ -335,15 +339,19 @@ function LeaderboardSettings() {
         <span className="text-sm">
           <span className="font-medium">Gesundheitsdaten in Wertungen freigeben</span>
           <span className="block text-xs text-muted-foreground">
-            Zusätzliche Zustimmung für Schlaf-Score, HRV-Konstanz und Ruhepuls. Jederzeit widerrufbar – die
-            Einträge werden dann sofort gelöscht.
+            Zusätzliche Zustimmung für Schlaf-Score, HRV-Konstanz und Ruhepuls. Jederzeit
+            widerrufbar – die Einträge werden dann sofort gelöscht.
           </span>
         </span>
         <Switch
           checked={profile?.leaderboard_share_health === true}
           disabled={!optedIn || youthBlocked}
           onCheckedChange={(v) =>
-            update.mutate({ leaderboard_share_health: v, consentKind: "leaderboard_health", consentValue: v })
+            update.mutate({
+              leaderboard_share_health: v,
+              consentKind: "leaderboard_health",
+              consentValue: v,
+            })
           }
         />
       </label>
@@ -375,12 +383,18 @@ function LeaderboardSettings() {
           variant="ghost"
           onClick={async () => {
             const res = await recompute({ data: undefined });
-            toast.success(res?.skipped === "rate_limit" ? "Kürzlich schon berechnet" : "Werte aktualisiert");
+            toast.success(
+              res?.skipped === "rate_limit" ? "Kürzlich schon berechnet" : "Werte aktualisiert",
+            );
           }}
           disabled={!optedIn || youthBlocked}
           aria-label="Bestenlisten-Werte neu berechnen"
         >
-          {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+          {update.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>

@@ -24,7 +24,10 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
     meta: [
       { title: "Einrichtung – Hybrid Athlete" },
-      { name: "description", content: "Sportart, Ziele und Trainingstage festlegen und deinen Wochenplan erstellen." },
+      {
+        name: "description",
+        content: "Sportart, Ziele und Trainingstage festlegen und deinen Wochenplan erstellen.",
+      },
       { property: "og:title", content: "Einrichtung – Hybrid Athlete" },
       { property: "og:description", content: "Sportart, Ziele und Trainingstage einrichten." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/onboarding" },

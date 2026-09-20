@@ -21,7 +21,10 @@ export const Route = createFileRoute("/_authenticated/sport/")({
   head: () => ({
     meta: [
       { title: "Sport-Training – Hybrid Athlete" },
-      { name: "description", content: "Spiele und Sporteinheiten mit Intensität und Belastung im Verlauf." },
+      {
+        name: "description",
+        content: "Spiele und Sporteinheiten mit Intensität und Belastung im Verlauf.",
+      },
       { property: "og:title", content: "Sport-Training – Hybrid Athlete" },
       { property: "og:description", content: "Spiele und Sporteinheiten im Verlauf." },
       { property: "og:url", content: "https://synergy-athlete-suite.lovable.app/sport" },

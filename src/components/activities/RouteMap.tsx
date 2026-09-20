@@ -85,11 +85,18 @@ export function RouteMap({ points, className }: Props) {
 
   if (points.length < 2) {
     return (
-      <div className={`flex items-center justify-center rounded-lg border border-border bg-muted/30 text-sm text-muted-foreground ${className ?? "h-64"}`}>
+      <div
+        className={`flex items-center justify-center rounded-lg border border-border bg-muted/30 text-sm text-muted-foreground ${className ?? "h-64"}`}
+      >
         Keine GPS-Daten für diese Aktivität
       </div>
     );
   }
 
-  return <div ref={ref} className={`overflow-hidden rounded-lg border border-border ${className ?? "h-64"}`} />;
+  return (
+    <div
+      ref={ref}
+      className={`overflow-hidden rounded-lg border border-border ${className ?? "h-64"}`}
+    />
+  );
 }

@@ -85,8 +85,8 @@ export function TeamInvites({ teamId }: { teamId: string }) {
         <Link2 className="h-4 w-4" /> Spieler per Link einladen
       </h2>
       <p className="text-xs text-muted-foreground">
-        Teile den Link oder den QR-Code. Wer ihn öffnet, kann sich registrieren und tritt direkt
-        dem Team bei – ein Konto ist vorher nicht nötig.
+        Teile den Link oder den QR-Code. Wer ihn öffnet, kann sich registrieren und tritt direkt dem
+        Team bei – ein Konto ist vorher nicht nötig.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-3">
