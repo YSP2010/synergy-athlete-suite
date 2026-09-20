@@ -5,6 +5,7 @@
  * Parser-Datei hinzu – import.server.ts muss dafür nicht mehr angefasst werden.
  */
 import { parseWellnessJson, bundleSize, emptyBundle, type WellnessBundle } from "./wellness";
+import { parseGarminExportFile } from "./garmin-export";
 import { parseGoogleFitbit } from "./google-fitbit";
 import { parseSamsungCsv } from "./samsung-health";
 import { parseAppleHealth } from "./apple-health";
@@ -23,7 +24,10 @@ export async function parseWellnessFile(
     if (fileType === "csv") return parseSamsungCsv(text, filename ?? "");
 
     if (fileType === "json") {
-      // Garmin zuerst – bewährt und mit Tests abgesichert.
+      // Garmin-GDPR-Export ("Export Your Data") zuerst – andere Feldnamen.
+      const gdpr = parseGarminExportFile(text, filename ?? "");
+      if (bundleSize(gdpr) > 0) return gdpr;
+      // Sonst Garmin-Web-API – bewährt und mit Tests abgesichert.
       const garmin = parseWellnessJson(text);
       if (bundleSize(garmin) > 0) return garmin;
       // Sonst Google Takeout / Fitbit versuchen.

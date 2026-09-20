@@ -180,6 +180,16 @@ export const messages: Record<Locale, Record<string, string>> = {
     "aitip.focus.strength": "Kraft",
     "aitip.focus.speed": "Schnelligkeit",
     "aitip.focus.recovery": "Erholung",
+
+    "import.skipped.title": "Übersprungene Dateien",
+    "import.skipped.count": "{count} übersprungen",
+    "import.skipped.hint":
+      "Diese Dateien enthielten keine erkannten Daten und wurden nicht importiert.",
+    "import.skipped.reason.no_wellness_data": "Keine erkannten Gesundheitsdaten",
+    "import.skipped.reason.no_activities": "Keine Aktivitäten erkannt",
+    "import.skipped.reason.route_only": "Nur Route (ohne Zeitstempel)",
+    "import.skipped.reason.empty": "Leere Datei",
+    "import.skipped.reason.other": "Sonstiges",
   },
   en: {
     "language.title": "Language",
@@ -355,6 +365,15 @@ export const messages: Record<Locale, Record<string, string>> = {
     "aitip.focus.strength": "Strength",
     "aitip.focus.speed": "Speed",
     "aitip.focus.recovery": "Recovery",
+
+    "import.skipped.title": "Skipped files",
+    "import.skipped.count": "{count} skipped",
+    "import.skipped.hint": "These files contained no recognized data and were not imported.",
+    "import.skipped.reason.no_wellness_data": "No recognized health data",
+    "import.skipped.reason.no_activities": "No activities recognized",
+    "import.skipped.reason.route_only": "Route only (no timestamps)",
+    "import.skipped.reason.empty": "Empty file",
+    "import.skipped.reason.other": "Other",
   },
   uk: {
     "language.title": "Мова",
@@ -530,5 +549,14 @@ export const messages: Record<Locale, Record<string, string>> = {
     "aitip.focus.strength": "Сила",
     "aitip.focus.speed": "Швидкість",
     "aitip.focus.recovery": "Відновлення",
+
+    "import.skipped.title": "Пропущені файли",
+    "import.skipped.count": "{count} пропущено",
+    "import.skipped.hint": "Ці файли не містили розпізнаних даних і не були імпортовані.",
+    "import.skipped.reason.no_wellness_data": "Немає розпізнаних даних здоров'я",
+    "import.skipped.reason.no_activities": "Активності не розпізнано",
+    "import.skipped.reason.route_only": "Лише маршрут (без часових міток)",
+    "import.skipped.reason.empty": "Порожній файл",
+    "import.skipped.reason.other": "Інше",
   },
 };

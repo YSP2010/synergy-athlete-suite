@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createImportJob, processImportJob } from "@/lib/import.functions";
+import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { QueryError } from "@/components/ui/query-error";
@@ -42,6 +43,68 @@ interface Progressish {
   imported: number;
   duplicates: number;
   failed: number;
+}
+
+/** Bekannte Skip-Gründe auf i18n-Schlüssel abbilden; Rest wird gruppiert. */
+const KNOWN_SKIP_REASONS = ["no_wellness_data", "no_activities", "route_only", "empty"] as const;
+
+/**
+ * Zeigt für einen abgeschlossenen Job an, wie viele Dateien übersprungen wurden
+ * (kein erkanntes Datenformat) – damit "leise" No-Data-Importe sichtbar werden.
+ */
+function SkippedSummary({ jobId }: { jobId: string }) {
+  const t = useT();
+  const skipped = useQuery({
+    queryKey: ["import-skipped", jobId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("import_files")
+        .select("skip_reason")
+        .eq("job_id", jobId)
+        .eq("status", "skipped");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const rows = skipped.data ?? [];
+  if (!rows.length) return null;
+
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    const raw = (r.skip_reason ?? "").toString();
+    const key = (KNOWN_SKIP_REASONS as readonly string[]).includes(raw) ? raw : "other";
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  // no_wellness_data zuerst hervorheben, dann die übrigen.
+  const ordered = [...counts.entries()].sort((a, b) => {
+    if (a[0] === "no_wellness_data") return -1;
+    if (b[0] === "no_wellness_data") return 1;
+    return b[1] - a[1];
+  });
+
+  return (
+    <div className="mt-2 border-t border-border pt-2">
+      <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+        <SkipForward className="h-3.5 w-3.5" />
+        {t("import.skipped.title")} · {t("import.skipped.count", { count: rows.length })}
+      </div>
+      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+        {ordered.map(([reason, n]) => (
+          <span
+            key={reason}
+            className={cn(
+              "flex items-center gap-1",
+              reason === "no_wellness_data" && "font-semibold text-warn",
+            )}
+          >
+            {t(`import.skipped.reason.${reason}`)}: {n}
+          </span>
+        ))}
+      </div>
+      <div className="mt-1 text-[11px] text-muted-foreground">{t("import.skipped.hint")}</div>
+    </div>
+  );
 }
 
 function ImportPage() {
@@ -244,6 +307,7 @@ function ImportPage() {
               <span>{j.failed_files} Fehler</span>
             </div>
             {j.error && <div className="mt-2 text-xs text-danger">{j.error}</div>}
+            {j.status === "done" && <SkippedSummary jobId={j.id} />}
           </div>
         ))}
       </div>

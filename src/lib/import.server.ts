@@ -7,6 +7,7 @@ import { parseFitMessages, mapFitSport } from "./import/fit";
 import { fingerprintOf } from "./import/duplicates";
 import { bundleSize, type WellnessBundle } from "./import/wellness";
 import { parseWellnessFile } from "./import/wellness-dispatch";
+import { parseGarminSummarizedActivities } from "./import/garmin-export";
 import type { ImportFileType, ParsedActivity } from "./import/types";
 
 export const IMPORT_BUCKET = "imports";
@@ -67,12 +68,26 @@ interface FileOutcome {
   activity?: ParsedActivity;
   /** Tageswerte aus Wellness-Dateien (Garmin, Apple, Samsung, Google/Fitbit). */
   wellness?: WellnessBundle;
+  /** Mehrere Aktivitäten aus einer Datei (Garmin-GDPR summarizedActivities). */
+  activities?: ParsedActivity[];
 }
 
 /** Verarbeitet einen einzelnen Datei-Inhalt (ohne DB-Zugriff) – gut testbar. */
 export async function evaluateFile(bytes: Uint8Array, filename?: string): Promise<FileOutcome> {
   const fileType = sniffFileType(bytes, filename);
   const contentHash = await sha256Hex(bytes);
+
+  // Garmin-GDPR-Aktivitätsverlauf: eine JSON-Datei mit vielen Aktivitäten.
+  // Muss vor dem Wellness-Zweig laufen, sonst würde sie als Wellness behandelt.
+  if (fileType === "json") {
+    const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+    const nameHint = (filename ?? "").toLowerCase();
+    if (nameHint.includes("summarizedactivities") || text.includes("summarizedActivitiesExport")) {
+      const activities = parseGarminSummarizedActivities(text);
+      if (activities.length >= 1) return { status: "done", fileType, contentHash, activities };
+      return { status: "skipped", fileType, contentHash, skipReason: "no_activities" };
+    }
+  }
 
   if (WELLNESS_TYPES.includes(fileType)) {
     try {
@@ -147,6 +162,64 @@ async function insertChildRow(
   return storeActivity(db, userId, data.id as string, outcome.activity);
 }
 
+/**
+ * Persistiert mehrere Aktivitäten aus einer Datei und zählt Import/Duplikat.
+ * Nutzt persistActivity direkt, damit die eine Datei-Zeile nicht je Aktivität
+ * umgeschrieben wird.
+ */
+async function storeActivityList(
+  db: DB,
+  userId: string,
+  fileId: string | null,
+  activities: ParsedActivity[],
+  counters: Counters,
+): Promise<void> {
+  const { persistActivity } = await import("./activities.server");
+  for (const activity of activities) {
+    const res = await persistActivity(db, userId, fileId, activity);
+    if (res.kind === "duplicate") counters.duplicates += 1;
+    else if (res.kind === "inserted") counters.imported += 1;
+  }
+}
+
+/**
+ * Legt die Datei-Zeile für eine Mehr-Aktivitäten-Datei an (ZIP-Eintrag) und
+ * persistiert alle enthaltenen Aktivitäten.
+ */
+async function insertActivitiesChildRow(
+  db: DB,
+  userId: string,
+  jobId: string,
+  relativePath: string,
+  outcome: FileOutcome,
+  counters: Counters,
+): Promise<void> {
+  const { data, error } = await db
+    .from("import_files")
+    .insert({
+      job_id: jobId,
+      user_id: userId,
+      relative_path: relativePath,
+      file_type: outcome.fileType,
+      content_hash: outcome.contentHash,
+      status: "done",
+      skip_reason: null,
+      error: null,
+      processed_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+  if (error) {
+    // 23505 = unique_violation auf (user_id, content_hash) → schon importiert.
+    if (error.code === "23505") {
+      counters.duplicates += 1;
+      return;
+    }
+    throw error;
+  }
+  await storeActivityList(db, userId, data.id as string, outcome.activities ?? [], counters);
+}
+
 /** Schreibt Wellness-Tageswerte (Upsert je Tag). */
 async function storeWellness(db: DB, userId: string, bundle: WellnessBundle): Promise<void> {
   const { persistWellness } = await import("./wellness.server");
@@ -205,8 +278,12 @@ async function handleZip(
 
   for (const entry of slice) {
     const outcome = await evaluateFile(entry.bytes, entry.relativePath);
-    const result = await insertChildRow(db, userId, jobId, entry.relativePath, outcome);
     counters.processed += 1;
+    if (outcome.status === "done" && outcome.activities?.length) {
+      await insertActivitiesChildRow(db, userId, jobId, entry.relativePath, outcome, counters);
+      continue;
+    }
+    const result = await insertChildRow(db, userId, jobId, entry.relativePath, outcome);
     if (result === "duplicate") counters.duplicates += 1;
     else if (result === "done") counters.imported += 1;
     else if (result === "failed") counters.failed += 1;
@@ -308,6 +385,8 @@ export async function runJobBatch(db: DB, userId: string, jobId: string): Promis
         throw error;
       } else if (outcome.status === "done" && outcome.wellness) {
         await storeWellness(db, userId, outcome.wellness);
+      } else if (outcome.status === "done" && outcome.activities?.length) {
+        await storeActivityList(db, userId, row.id, outcome.activities, counters);
       } else if (outcome.status === "done" && outcome.activity) {
         const stored = await storeActivity(db, userId, row.id, outcome.activity);
         if (stored === "duplicate") counters.duplicates += 1;
