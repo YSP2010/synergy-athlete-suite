@@ -1,10 +1,12 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -18,6 +20,7 @@ import { WEEKDAY_LABELS } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { Loader2, ArrowRight, ArrowLeft } from "lucide-react";
 import type { Goal, Sex } from "@/lib/planner";
+import { generateTrainingPlan } from "@/lib/plan.functions";
 import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
@@ -93,7 +96,10 @@ const EXPERIENCE_LABELS: Record<Experience, { title: string; desc: string }> = {
 function OnboardingPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const genPlan = useServerFn(generateTrainingPlan);
   const [step, setStep] = useState(0);
+  const [createPlans, setCreatePlans] = useState(true);
+  const [finishing, setFinishing] = useState(false);
   const [f, setF] = useState<FormState>({
     name: "",
     birth_date: "",
@@ -157,16 +163,44 @@ function OnboardingPage() {
         match_days: f.match_days,
         onboarded: true,
       };
-      const { error } = await supabase.from("profiles").upsert(payload);
+      // experience_level ist noch nicht in den generierten Supabase-Typen
+      // enthalten (Migration training_plans). Bis zur Neugenerierung: gezielter
+      // Cast, damit die neue Spalte trotzdem geschrieben wird.
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({ ...payload, experience_level: f.experience_level } as typeof payload);
       if (error) throw error;
     },
-    onSuccess: async () => {
+    onSuccess: () => {
       toast.success("Profil gespeichert");
-      await qc.invalidateQueries();
-      navigate({ to: "/dashboard" });
     },
     onError: (e) => toast.error(humanError(e)),
   });
+
+  // Speichert das Profil und – falls gewünscht – erstellt direkt Gym- und
+  // Sport-Plan. Ein Fehler bei der Plan-Erstellung blockiert das Onboarding
+  // nicht: das Profil ist bereits gespeichert, wir navigieren trotzdem weiter.
+  async function finish() {
+    setFinishing(true);
+    try {
+      await save.mutateAsync();
+      if (createPlans) {
+        try {
+          await genPlan({ data: { type: "gym" } });
+          await genPlan({ data: { type: "sport" } });
+          toast.success("Gym- und Sport-Plan erstellt");
+        } catch (e) {
+          toast.error(humanError(e));
+        }
+      }
+      await qc.invalidateQueries();
+      navigate({ to: "/dashboard" });
+    } catch {
+      // Profil-Fehler wurde bereits über save.onError als Toast angezeigt.
+    } finally {
+      setFinishing(false);
+    }
+  }
 
   const steps = ["Basics", "Sport", "Training", "Ernährung", "Ziel"];
 
@@ -354,6 +388,21 @@ function OnboardingPage() {
                 );
               })}
             </div>
+
+            <label className="mt-2 flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-elevated p-3">
+              <Checkbox
+                checked={createPlans}
+                onCheckedChange={(v) => setCreatePlans(v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-sm">
+                <span className="font-medium">Trainingspläne direkt erstellen lassen</span>
+                <span className="block text-xs text-muted-foreground">
+                  Erstellt passend zu deinem Profil einen Gym- und einen Sport-Plan (empfohlen).
+                  Neue Pläne kannst du später alle 4 Wochen in den Einstellungen anfordern.
+                </span>
+              </span>
+            </label>
           </div>
         )}
 
@@ -370,9 +419,9 @@ function OnboardingPage() {
               Weiter <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button onClick={() => save.mutate()} disabled={save.isPending}>
-              {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Los geht's
+            <Button onClick={() => finish()} disabled={save.isPending || finishing}>
+              {(save.isPending || finishing) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {finishing && createPlans ? "Erstelle Pläne…" : "Los geht's"}
             </Button>
           )}
         </div>
