@@ -1,0 +1,299 @@
+From 215de10355416159f7e2ba6eb6e4bf9baa6d3239 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 20 Sep 2026 15:25:53 +0200
+Subject: [PATCH] feat(ai): wire up the AI training-tip feature
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+generateTrainingTip existed but was never called from the UI. Adds a
+reusable TrainingTipCard (sport + focus selectors, "get tip" button,
+graceful error handling via toast) shown in full on the Insights page and
+as a compact teaser on the Dashboard. The server function now takes an
+optional locale and answers in the active app language (de/en/uk).
+Translation keys added for all three locales; LOVABLE_API_KEY documented
+in .env.example. Additive only — no existing component was restructured.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WwagmzvYAcqWRzAJyQX1hV
+---
+ .env.example                            |   4 +
+ src/components/ai/TrainingTipCard.tsx   | 101 ++++++++++++++++++++++++
+ src/lib/ai.functions.ts                 |  11 ++-
+ src/lib/i18n/messages.ts                |  48 +++++++++++
+ src/routes/_authenticated/dashboard.tsx |   4 +
+ src/routes/_authenticated/insights.tsx  |   3 +
+ 6 files changed, 170 insertions(+), 1 deletion(-)
+ create mode 100644 src/components/ai/TrainingTipCard.tsx
+
+diff --git a/.env.example b/.env.example
+index 6a8f144..307d6ca 100644
+--- a/.env.example
++++ b/.env.example
+@@ -15,3 +15,7 @@ VITE_SUPABASE_URL="https://your-project.supabase.co"
+ 
+ # Nur serverseitig (Cron-Endpunkt /api/cron/reminders). NICHT mit VITE_ prefixen.
+ CRON_SECRET="your-cron-secret"
++
++# Nur serverseitig (KI-Trainingstipp / Fortschrittsauswertung über Lovable AI Gateway).
++# Wird von Lovable Cloud i. d. R. automatisch bereitgestellt. NICHT mit VITE_ prefixen.
++LOVABLE_API_KEY="your-lovable-ai-gateway-key"
+diff --git a/src/components/ai/TrainingTipCard.tsx b/src/components/ai/TrainingTipCard.tsx
+new file mode 100644
+index 0000000..2b99045
+--- /dev/null
++++ b/src/components/ai/TrainingTipCard.tsx
+@@ -0,0 +1,101 @@
++import { useState } from "react";
++import { useMutation } from "@tanstack/react-query";
++import { useServerFn } from "@tanstack/react-start";
++import { generateTrainingTip } from "@/lib/ai.functions";
++import { Button } from "@/components/ui/button";
++import { useI18n } from "@/lib/i18n";
++import { humanError } from "@/lib/errors";
++import { toast } from "sonner";
++import { Sparkles, Loader2 } from "lucide-react";
++import { cn } from "@/lib/utils";
++
++const SPORTS = ["football", "tennis", "running", "triathlon"] as const;
++const FOCUSES = ["endurance", "strength", "speed", "recovery"] as const;
++type Sport = (typeof SPORTS)[number];
++type Focus = (typeof FOCUSES)[number];
++
++/**
++ * Kleine Karte für einen KI-Trainingstipp (Server-Funktion generateTrainingTip).
++ * `compact` blendet den Beschreibungstext aus – für den Dashboard-Teaser.
++ * Fehler (z. B. fehlender LOVABLE_API_KEY) landen als Toast, die Karte bleibt stabil.
++ */
++export function TrainingTipCard({ compact = false }: { compact?: boolean }) {
++  const { locale, t } = useI18n();
++  const [sport, setSport] = useState<Sport>("football");
++  const [focus, setFocus] = useState<Focus>("endurance");
++  const [tip, setTip] = useState<string | null>(null);
++  const run = useServerFn(generateTrainingTip);
++
++  const mutation = useMutation({
++    mutationFn: async () => run({ data: { sport, focus, locale } }),
++    onSuccess: (res) => setTip(res.tip),
++    onError: (e: Error) => toast.error(humanError(e)),
++  });
++
++  return (
++    <div className="card-elevated p-4">
++      <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
++        <Sparkles className="h-3.5 w-3.5 text-neon" /> {t("aitip.title")}
++      </div>
++      {!compact && <p className="mt-1 text-sm text-muted-foreground">{t("aitip.subtitle")}</p>}
++
++      <div className="mt-3 space-y-2">
++        <div>
++          <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
++            {t("aitip.sportLabel")}
++          </div>
++          <div className="flex flex-wrap gap-1.5">
++            {SPORTS.map((s) => (
++              <Button
++                key={s}
++                size="sm"
++                variant={sport === s ? "default" : "outline"}
++                onClick={() => setSport(s)}
++              >
++                {t(`aitip.sport.${s}`)}
++              </Button>
++            ))}
++          </div>
++        </div>
++        <div>
++          <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
++            {t("aitip.focusLabel")}
++          </div>
++          <div className="flex flex-wrap gap-1.5">
++            {FOCUSES.map((f) => (
++              <Button
++                key={f}
++                size="sm"
++                variant={focus === f ? "default" : "outline"}
++                onClick={() => setFocus(f)}
++              >
++                {t(`aitip.focus.${f}`)}
++              </Button>
++            ))}
++          </div>
++        </div>
++      </div>
++
++      <Button
++        onClick={() => mutation.mutate()}
++        disabled={mutation.isPending}
++        size="sm"
++        className="glow mt-3 bg-neon text-neon-foreground hover:bg-neon/90"
++      >
++        {mutation.isPending ? (
++          <>
++            <Loader2 className="mr-1 h-4 w-4 animate-spin" /> {t("aitip.loading")}
++          </>
++        ) : (
++          <>
++            <Sparkles className="mr-1 h-4 w-4" /> {t("aitip.button")}
++          </>
++        )}
++      </Button>
++
++      <div className={cn("mt-3 whitespace-pre-line text-sm", !tip && "text-muted-foreground")}>
++        {tip ?? t("aitip.empty")}
++      </div>
++    </div>
++  );
++}
+diff --git a/src/lib/ai.functions.ts b/src/lib/ai.functions.ts
+index 8e7148a..71bb7cd 100644
+--- a/src/lib/ai.functions.ts
++++ b/src/lib/ai.functions.ts
+@@ -6,19 +6,28 @@ import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+ const TrainingTipInput = z.object({
+   sport: z.enum(["football", "tennis", "running", "triathlon"]),
+   focus: z.enum(["endurance", "strength", "speed", "recovery"]),
++  locale: z.enum(["de", "en", "uk"]).optional(),
+   context: z.string().max(500).optional(),
+ });
+ 
++/** Zielsprache der Antwort – der Prompt bleibt Englisch, nur die Ausgabe wechselt. */
++const RESPONSE_LANGUAGE = {
++  de: "German",
++  en: "English",
++  uk: "Ukrainian",
++} as const;
++
+ export const generateTrainingTip = createServerFn({ method: "POST" })
+   .inputValidator((input: unknown) => TrainingTipInput.parse(input))
+   .handler(async ({ data }) => {
+     const key = process.env["LOVABLE_API_KEY"];
+     if (!key) throw new Error("AI is not configured: missing LOVABLE_API_KEY");
+ 
++    const language = RESPONSE_LANGUAGE[data.locale ?? "en"];
+     const gateway = createLovableAiGatewayProvider(key);
+     const { text } = await generateText({
+       model: gateway("openai/gpt-5.6-sol"),
+-      prompt: `Give one concise, actionable training tip for a hybrid athlete who plays/plays ${data.sport} and trains in the gym. Focus: ${data.focus}. ${data.context ?? ""}`,
++      prompt: `Give one concise, actionable training tip for a hybrid athlete who plays ${data.sport} and trains in the gym. Focus: ${data.focus}. ${data.context ?? ""} Respond in ${language}. Maximum two sentences, no preamble.`,
+       providerOptions: { lovable: { reasoningEffort: "none" } },
+     });
+ 
+diff --git a/src/lib/i18n/messages.ts b/src/lib/i18n/messages.ts
+index f921542..a998332 100644
+--- a/src/lib/i18n/messages.ts
++++ b/src/lib/i18n/messages.ts
+@@ -164,6 +164,22 @@ export const messages: Record<Locale, Record<string, string>> = {
+     "analytics.bb.label": "Body Battery max",
+     "analytics.empty.sleep":
+       "Noch keine Gesundheitsdaten. Der Garmin-Konto-Export enthält Schlaf, HRV und Body Battery – lade ihn unter Import hoch.",
++
++    "aitip.title": "KI-Trainingstipp",
++    "aitip.subtitle": "Ein kurzer, umsetzbarer Tipp – abgestimmt auf Sportart und Fokus.",
++    "aitip.sportLabel": "Sportart",
++    "aitip.focusLabel": "Fokus",
++    "aitip.button": "Tipp holen",
++    "aitip.loading": "Erstelle Tipp…",
++    "aitip.empty": "Wähle Sportart und Fokus und hol dir einen Tipp.",
++    "aitip.sport.football": "Fußball",
++    "aitip.sport.tennis": "Tennis",
++    "aitip.sport.running": "Laufen",
++    "aitip.sport.triathlon": "Triathlon",
++    "aitip.focus.endurance": "Ausdauer",
++    "aitip.focus.strength": "Kraft",
++    "aitip.focus.speed": "Schnelligkeit",
++    "aitip.focus.recovery": "Erholung",
+   },
+   en: {
+     "language.title": "Language",
+@@ -323,6 +339,22 @@ export const messages: Record<Locale, Record<string, string>> = {
+     "analytics.bb.label": "Body Battery max",
+     "analytics.empty.sleep":
+       "No health data yet. The Garmin account export includes sleep, HRV and Body Battery — upload it under Import.",
++
++    "aitip.title": "AI training tip",
++    "aitip.subtitle": "A short, actionable tip tailored to your sport and focus.",
++    "aitip.sportLabel": "Sport",
++    "aitip.focusLabel": "Focus",
++    "aitip.button": "Get tip",
++    "aitip.loading": "Generating…",
++    "aitip.empty": "Pick a sport and focus, then get a tip.",
++    "aitip.sport.football": "Football",
++    "aitip.sport.tennis": "Tennis",
++    "aitip.sport.running": "Running",
++    "aitip.sport.triathlon": "Triathlon",
++    "aitip.focus.endurance": "Endurance",
++    "aitip.focus.strength": "Strength",
++    "aitip.focus.speed": "Speed",
++    "aitip.focus.recovery": "Recovery",
+   },
+   uk: {
+     "language.title": "Мова",
+@@ -482,5 +514,21 @@ export const messages: Record<Locale, Record<string, string>> = {
+     "analytics.bb.label": "Body Battery макс.",
+     "analytics.empty.sleep":
+       "Ще немає даних здоров'я. Експорт акаунта Garmin містить сон, ВСР і Body Battery — завантаж його в розділі «Імпорт».",
++
++    "aitip.title": "Порада від ШІ",
++    "aitip.subtitle": "Коротка практична порада відповідно до виду спорту та фокуса.",
++    "aitip.sportLabel": "Вид спорту",
++    "aitip.focusLabel": "Фокус",
++    "aitip.button": "Отримати пораду",
++    "aitip.loading": "Генерую…",
++    "aitip.empty": "Обери вид спорту й фокус і отримай пораду.",
++    "aitip.sport.football": "Футбол",
++    "aitip.sport.tennis": "Теніс",
++    "aitip.sport.running": "Біг",
++    "aitip.sport.triathlon": "Тріатлон",
++    "aitip.focus.endurance": "Витривалість",
++    "aitip.focus.strength": "Сила",
++    "aitip.focus.speed": "Швидкість",
++    "aitip.focus.recovery": "Відновлення",
+   },
+ };
+diff --git a/src/routes/_authenticated/dashboard.tsx b/src/routes/_authenticated/dashboard.tsx
+index 5276d58..3dffed2 100644
+--- a/src/routes/_authenticated/dashboard.tsx
++++ b/src/routes/_authenticated/dashboard.tsx
+@@ -28,6 +28,7 @@ import {
+ import { RecoveryRing } from "@/components/dashboard/RecoveryRing";
+ import { MacroRings } from "@/components/dashboard/MacroRings";
+ import { QueryError } from "@/components/ui/query-error";
++import { TrainingTipCard } from "@/components/ai/TrainingTipCard";
+ import {
+   AlertTriangle,
+   CalendarDays,
+@@ -335,6 +336,9 @@ function DashboardPage() {
+         </Link>
+       )}
+ 
++      {/* KI-Trainingstipp */}
++      <TrainingTipCard compact />
++
+       {/* Warnings */}
+       {warnings.length > 0 && (
+         <div className="card-elevated p-4">
+diff --git a/src/routes/_authenticated/insights.tsx b/src/routes/_authenticated/insights.tsx
+index ae1e139..8642237 100644
+--- a/src/routes/_authenticated/insights.tsx
++++ b/src/routes/_authenticated/insights.tsx
+@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
+ import { generateProgressInsight } from "@/lib/insights.functions";
+ import { Button } from "@/components/ui/button";
+ import { QueryError } from "@/components/ui/query-error";
++import { TrainingTipCard } from "@/components/ai/TrainingTipCard";
+ import { WEEKDAY_LONG, isoDow } from "@/lib/dates";
+ import { humanError } from "@/lib/errors";
+ import { toast } from "sonner";
+@@ -140,6 +141,8 @@ function InsightsPage() {
+         </Button>
+       </div>
+ 
++      <TrainingTipCard />
++
+       <div>
+         <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+           <TrendingUp className="h-3.5 w-3.5" /> Letzte Analysen
+-- 
+2.43.0
+

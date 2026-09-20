@@ -1,0 +1,128 @@
+From 4ff682f67b06846f7d68f46ae79efb69d294c265 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 20 Sep 2026 16:39:12 +0200
+Subject: [PATCH] fix(ai): add auth + rate limit to generateTrainingTip
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The training-tip server function had neither auth middleware nor a rate
+limit, unlike every other AI function — so anyone could call it and burn
+LOVABLE_API_KEY quota. Now guarded by requireSupabaseAuth (login required)
+and limited to 20 tips per user / 24h, counted via a new ai_tip_log table
+(RLS: own rows only; stores only a timestamp, no prompt or response).
+Mirrors the pattern used by analyzeFoodScan and generateProgressInsight.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WwagmzvYAcqWRzAJyQX1hV
+---
+ src/lib/ai.functions.ts                       | 52 ++++++++++++++++++-
+ .../migrations/20260920120000_ai_tip_log.sql  | 18 +++++++
+ 2 files changed, 69 insertions(+), 1 deletion(-)
+ create mode 100644 supabase/migrations/20260920120000_ai_tip_log.sql
+
+diff --git a/src/lib/ai.functions.ts b/src/lib/ai.functions.ts
+index 71bb7cd..9c4d6d4 100644
+--- a/src/lib/ai.functions.ts
++++ b/src/lib/ai.functions.ts
+@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
+ import { generateText } from "ai";
+ import { z } from "zod";
+ import { createLovableAiGatewayProvider } from "./ai-gateway.server";
++import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+ 
+ const TrainingTipInput = z.object({
+   sport: z.enum(["football", "tennis", "running", "triathlon"]),
+@@ -17,9 +18,54 @@ const RESPONSE_LANGUAGE = {
+   uk: "Ukrainian",
+ } as const;
+ 
++/** Max. Trainingstipps pro Nutzer:in und 24h – schützt das AI-Kontingent. */
++const DAILY_TIP_LIMIT = 20;
++
++/**
++ * Minimaler Zugriff auf ai_tip_log. Die Tabelle ist noch nicht in den
++ * generierten Supabase-Typen enthalten (Migration 20260920120000_ai_tip_log),
++ * daher hier bewusst eng typisiert statt `any`.
++ */
++interface TipLogTable {
++  select: (
++    columns: string,
++    options: { count: "exact"; head: true },
++  ) => {
++    eq: (
++      column: string,
++      value: string,
++    ) => {
++      gte: (
++        column: string,
++        value: string,
++      ) => Promise<{ count: number | null; error: { message: string } | null }>;
++    };
++  };
++  insert: (row: { user_id: string }) => Promise<{ error: { message: string } | null }>;
++}
++
+ export const generateTrainingTip = createServerFn({ method: "POST" })
++  .middleware([requireSupabaseAuth])
+   .inputValidator((input: unknown) => TrainingTipInput.parse(input))
+-  .handler(async ({ data }) => {
++  .handler(async ({ data, context }) => {
++    const { supabase, userId } = context;
++
++    // ai_tip_log ist noch nicht in den generierten Supabase-Typen enthalten
++    // (Migration 20260920120000_ai_tip_log). Bis zur Neugenerierung: gezielter Cast.
++    const tipLog = (supabase as unknown as { from: (table: string) => TipLogTable }).from(
++      "ai_tip_log",
++    );
++
++    // Rate-Limit: max. DAILY_TIP_LIMIT Tipps / 24h (analog zu Scanner/Insights).
++    const since = new Date(Date.now() - 86_400_000).toISOString();
++    const { count, error: cntErr } = await tipLog
++      .select("id", { count: "exact", head: true })
++      .eq("user_id", userId)
++      .gte("created_at", since);
++    if (cntErr) throw new Error(cntErr.message);
++    if ((count ?? 0) >= DAILY_TIP_LIMIT)
++      throw new Error(`Tipp-Limit erreicht (max. ${DAILY_TIP_LIMIT} pro 24 Stunden).`);
++
+     const key = process.env["LOVABLE_API_KEY"];
+     if (!key) throw new Error("AI is not configured: missing LOVABLE_API_KEY");
+ 
+@@ -31,5 +77,9 @@ export const generateTrainingTip = createServerFn({ method: "POST" })
+       providerOptions: { lovable: { reasoningEffort: "none" } },
+     });
+ 
++    // Aufruf protokollieren (nur Zeitstempel, kein Inhalt) – für das Rate-Limit.
++    const { error: insErr } = await tipLog.insert({ user_id: userId });
++    if (insErr) console.error("[ai] tip-log insert failed:", insErr.message);
++
+     return { tip: text.trim() };
+   });
+diff --git a/supabase/migrations/20260920120000_ai_tip_log.sql b/supabase/migrations/20260920120000_ai_tip_log.sql
+new file mode 100644
+index 0000000..bd2ca3f
+--- /dev/null
++++ b/supabase/migrations/20260920120000_ai_tip_log.sql
+@@ -0,0 +1,18 @@
++-- ============================================
++-- Rate-Limit-Log für KI-Trainingstipps (generateTrainingTip).
++-- Speichert ausschliesslich einen Zeitstempel je Aufruf und Nutzer:in, um die
++-- Anzahl Tipps pro 24h zu begrenzen und so das LOVABLE_API_KEY-Kontingent zu
++-- schützen. Es werden KEINE Inhalte (Prompt/Antwort) gespeichert.
++-- ============================================
++
++CREATE TABLE public.ai_tip_log (
++  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
++  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
++  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
++);
++GRANT SELECT, INSERT ON public.ai_tip_log TO authenticated;
++GRANT ALL ON public.ai_tip_log TO service_role;
++ALTER TABLE public.ai_tip_log ENABLE ROW LEVEL SECURITY;
++CREATE POLICY "own tip log" ON public.ai_tip_log FOR ALL
++  USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
++CREATE INDEX idx_ai_tip_log_user_created ON public.ai_tip_log(user_id, created_at);
+-- 
+2.43.0
+

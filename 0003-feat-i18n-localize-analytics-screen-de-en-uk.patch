@@ -1,0 +1,933 @@
+From 88ef4e2dbf7d9f3558a1e8558506c87f6e4a5f89 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 20 Sep 2026 11:18:34 +0200
+Subject: [PATCH 3/4] feat(i18n): localize analytics screen (de/en/uk)
+
+The analytics screen was hardcoded German, so EN/UK users saw German
+there. Route header and AnalyticsView now resolve all user-facing strings
+via useI18n()/t(); translation keys for all three locales added to
+messages.ts. Chart configs, tab labels, tooltips, metric hints, empty
+states and the ACWR zone labels are covered. Date formatting follows the
+active locale. SEO <head> meta stays German (runs outside the provider).
+No data-pipeline or chart logic changed.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WwagmzvYAcqWRzAJyQX1hV
+---
+ src/components/analytics/AnalyticsView.tsx | 227 +++++++------
+ src/lib/i18n/messages.ts                   | 351 +++++++++++++++++++++
+ src/routes/_authenticated/analytics.tsx    |   8 +-
+ 3 files changed, 486 insertions(+), 100 deletions(-)
+
+diff --git a/src/components/analytics/AnalyticsView.tsx b/src/components/analytics/AnalyticsView.tsx
+index 7362875..e57d31f 100644
+--- a/src/components/analytics/AnalyticsView.tsx
++++ b/src/components/analytics/AnalyticsView.tsx
+@@ -38,20 +38,29 @@ import { racePredictions } from "@/lib/analytics/predictions";
+ import { bestRunEffort, computeRecords, type RecordActivity } from "@/lib/analytics/records";
+ import { hrZones, powerZones } from "@/lib/analytics/zones";
+ import { efficiencyFactor } from "@/lib/analytics/efficiency";
++import { useI18n, type Locale } from "@/lib/i18n";
+ 
++/** Zeitraum-Auswahl. Label wird über den i18n-Schlüssel aufgelöst. */
+ const RANGES = [
+-  { key: "30", label: "30 Tage", days: 30 },
+-  { key: "90", label: "90 Tage", days: 90 },
+-  { key: "365", label: "1 Jahr", days: 365 },
+-  { key: "all", label: "Alles", days: null },
++  { key: "30", labelKey: "analytics.range.d30", days: 30 },
++  { key: "90", labelKey: "analytics.range.d90", days: 90 },
++  { key: "365", labelKey: "analytics.range.y1", days: 365 },
++  { key: "all", labelKey: "analytics.range.all", days: null },
+ ] as const;
+ 
++/** Locale -> BCP-47 für die Datumsformatierung. */
++const DATE_LOCALES: Record<Locale, string> = {
++  de: "de-DE",
++  en: "en-GB",
++  uk: "uk-UA",
++};
++
+ /** Kurzer Erklärtext neben jeder Kennzahl. */
+-function Explain({ text }: { text: string }) {
++function Explain({ text, aria }: { text: string; aria: string }) {
+   return (
+     <TooltipProvider>
+       <Tooltip>
+-        <TooltipTrigger aria-label="Erklärung" className="text-muted-foreground">
++        <TooltipTrigger aria-label={aria} className="text-muted-foreground">
+           <Info className="h-3.5 w-3.5" />
+         </TooltipTrigger>
+         <TooltipContent className="max-w-xs text-xs">{text}</TooltipContent>
+@@ -75,26 +84,6 @@ function fmtTime(seconds: number | null): string {
+     : `${m}:${String(s).padStart(2, "0")}`;
+ }
+ 
+-const loadConfig = {
+-  ctl: { label: "Fitness (CTL)", color: "var(--chart-2)" },
+-  atl: { label: "Ermüdung (ATL)", color: "var(--warn)" },
+-  tsb: { label: "Form (TSB)", color: "var(--success)" },
+-} satisfies ChartConfig;
+-
+-const volumeConfig = {
+-  run: { label: "Laufen", color: "var(--chart-1)" },
+-  bike: { label: "Rad", color: "var(--chart-2)" },
+-  swim: { label: "Schwimmen", color: "var(--chart-3)" },
+-  other: { label: "Sonstiges", color: "var(--chart-4)" },
+-} satisfies ChartConfig;
+-
+-const sleepConfig = {
+-  deep: { label: "Tiefschlaf", color: "var(--chart-2)" },
+-  light: { label: "Leichtschlaf", color: "var(--chart-3)" },
+-  rem: { label: "REM", color: "var(--chart-1)" },
+-  awake: { label: "Wach", color: "var(--warn)" },
+-} satisfies ChartConfig;
+-
+ export function AnalyticsView({
+   userId,
+   readOnly = false,
+@@ -102,9 +91,32 @@ export function AnalyticsView({
+   userId: string;
+   readOnly?: boolean;
+ }) {
++  const { locale, t } = useI18n();
+   const [range, setRange] = useState<(typeof RANGES)[number]["key"]>("90");
+   const days = RANGES.find((r) => r.key === range)!.days;
+ 
++  const loadConfig = {
++    ctl: { label: t("analytics.series.ctl"), color: "var(--chart-2)" },
++    atl: { label: t("analytics.series.atl"), color: "var(--warn)" },
++    tsb: { label: t("analytics.series.tsb"), color: "var(--success)" },
++  } satisfies ChartConfig;
++
++  const volumeConfig = {
++    run: { label: t("analytics.vol.run"), color: "var(--chart-1)" },
++    bike: { label: t("analytics.vol.bike"), color: "var(--chart-2)" },
++    swim: { label: t("analytics.vol.swim"), color: "var(--chart-3)" },
++    other: { label: t("analytics.vol.other"), color: "var(--chart-4)" },
++  } satisfies ChartConfig;
++
++  const sleepConfig = {
++    deep: { label: t("analytics.sleepPhase.deep"), color: "var(--chart-2)" },
++    light: { label: t("analytics.sleepPhase.light"), color: "var(--chart-3)" },
++    rem: { label: t("analytics.sleepPhase.rem"), color: "var(--chart-1)" },
++    awake: { label: t("analytics.sleepPhase.awake"), color: "var(--warn)" },
++  } satisfies ChartConfig;
++
++  const explainAria = t("analytics.explainAria");
++
+   const { data, isLoading } = useQuery({
+     queryKey: ["analytics", userId],
+     queryFn: async () => {
+@@ -260,10 +272,10 @@ export function AnalyticsView({
+ 
+   const zone = acwrZone(view.last?.acwr ?? null);
+   const zoneLabel: Record<string, string> = {
+-    low: "Unterbelastung",
+-    optimal: "Optimal",
+-    elevated: "Erhöht",
+-    high: "Verletzungsrisiko",
++    low: t("analytics.zone.low"),
++    optimal: t("analytics.zone.optimal"),
++    elevated: t("analytics.zone.elevated"),
++    high: t("analytics.zone.high"),
+   };
+   const zoneVariant: Record<string, string> = {
+     low: "text-muted-foreground",
+@@ -282,17 +294,19 @@ export function AnalyticsView({
+             variant={range === r.key ? "default" : "outline"}
+             onClick={() => setRange(r.key)}
+           >
+-            {r.label}
++            {t(r.labelKey)}
+           </Button>
+         ))}
+         {!readOnly && (
+           <span className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+             {view.lastWellnessDate
+-              ? `Gesundheitsdaten bis ${new Date(view.lastWellnessDate).toLocaleDateString("de-DE")}`
+-              : "Noch keine Gesundheitsdaten"}
++              ? t("analytics.healthUntil", {
++                  date: new Date(view.lastWellnessDate).toLocaleDateString(DATE_LOCALES[locale]),
++                })
++              : t("analytics.noHealthShort")}
+             <Button asChild size="sm" variant="ghost">
+               <Link to="/import">
+-                <FileUp className="mr-1 h-3.5 w-3.5" /> Aktualisieren
++                <FileUp className="mr-1 h-3.5 w-3.5" /> {t("analytics.refresh")}
+               </Link>
+             </Button>
+           </span>
+@@ -301,11 +315,11 @@ export function AnalyticsView({
+ 
+       <Tabs defaultValue="overview">
+         <TabsList className="flex w-full flex-wrap">
+-          <TabsTrigger value="overview">Übersicht</TabsTrigger>
+-          <TabsTrigger value="load">Belastung</TabsTrigger>
+-          <TabsTrigger value="endurance">Ausdauer</TabsTrigger>
+-          <TabsTrigger value="efficiency">Effizienz</TabsTrigger>
+-          <TabsTrigger value="sleep">Schlaf &amp; Erholung</TabsTrigger>
++          <TabsTrigger value="overview">{t("analytics.tab.overview")}</TabsTrigger>
++          <TabsTrigger value="load">{t("analytics.tab.load")}</TabsTrigger>
++          <TabsTrigger value="endurance">{t("analytics.tab.endurance")}</TabsTrigger>
++          <TabsTrigger value="efficiency">{t("analytics.tab.efficiency")}</TabsTrigger>
++          <TabsTrigger value="sleep">{t("analytics.tab.sleep")}</TabsTrigger>
+         </TabsList>
+ 
+         {/* ---------------- Übersicht ---------------- */}
+@@ -313,36 +327,40 @@ export function AnalyticsView({
+           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+             <Metric
+               icon={<Activity className="h-4 w-4 text-primary" />}
+-              label="Fitness (CTL)"
++              label={t("analytics.series.ctl")}
+               value={view.last ? view.last.ctl.toFixed(0) : "–"}
+-              hint="Gleitender 42-Tage-Schnitt deiner Trainingsbelastung. Steigt langsam – höher heißt belastbarer."
++              hint={t("analytics.metric.ctl.hint")}
++              explainAria={explainAria}
+             />
+             <Metric
+               icon={<Gauge className="h-4 w-4 text-primary" />}
+-              label="Form (TSB)"
++              label={t("analytics.series.tsb")}
+               value={view.last ? view.last.tsb.toFixed(0) : "–"}
+-              hint="Fitness minus Ermüdung. −10 bis +5 ist gutes Training, unter −30 droht Übertraining, über +15 bist du frisch."
++              hint={t("analytics.metric.tsb.hint")}
++              explainAria={explainAria}
+             />
+             <Metric
+               icon={<HeartPulse className="h-4 w-4 text-primary" />}
+-              label="ACWR"
++              label={t("analytics.metric.acwr.label")}
+               value={view.last?.acwr != null ? view.last.acwr.toFixed(2) : "–"}
+-              hint="Verhältnis der letzten 7 zu den letzten 28 Tagen. 0,8–1,3 ist optimal, über 1,5 steigt das Verletzungsrisiko."
++              hint={t("analytics.metric.acwr.hint")}
++              explainAria={explainAria}
+               extra={zone ? <span className={zoneVariant[zone]}>{zoneLabel[zone]}</span> : null}
+             />
+             <Metric
+               icon={<Moon className="h-4 w-4 text-primary" />}
+-              label="Sleep Score"
++              label={t("analytics.metric.sleepScore.label")}
+               value={
+                 view.sleep.length
+                   ? String(view.sleep[view.sleep.length - 1]!.sleep_score ?? "–")
+                   : "–"
+               }
+-              hint="Garmin-Bewertung der letzten Nacht (0–100). Ab 80 gilt der Schlaf als erholsam."
++              hint={t("analytics.metric.sleepScore.hint")}
++              explainAria={explainAria}
+             />
+           </div>
+           {!view.series.length && (
+-            <EmptyHint text="Noch keine Aktivitäten im gewählten Zeitraum. Importiere deinen Garmin-Export, um Auswertungen zu sehen." />
++            <EmptyHint text={t("analytics.empty.overview")} noDataLabel={t("analytics.noData")} />
+           )}
+         </TabsContent>
+ 
+@@ -351,10 +369,10 @@ export function AnalyticsView({
+           <Card>
+             <CardHeader>
+               <CardTitle className="flex items-center gap-2 text-base">
+-                Fitness, Ermüdung, Form
+-                <Explain text="CTL = Fitness (42 Tage), ATL = Ermüdung (7 Tage), TSB = Form. Ein Formtief nach harten Wochen ist normal, dauerhaft unter −30 nicht." />
++                {t("analytics.load.title")}
++                <Explain text={t("analytics.load.explain")} aria={explainAria} />
+               </CardTitle>
+-              <CardDescription>Belastungsverlauf im gewählten Zeitraum</CardDescription>
++              <CardDescription>{t("analytics.load.desc")}</CardDescription>
+             </CardHeader>
+             <CardContent>
+               {view.series.length ? (
+@@ -385,7 +403,7 @@ export function AnalyticsView({
+                   </AreaChart>
+                 </ChartContainer>
+               ) : (
+-                <EmptyHint text="Keine Belastungsdaten im Zeitraum." />
++                <EmptyHint text={t("analytics.empty.load")} noDataLabel={t("analytics.noData")} />
+               )}
+             </CardContent>
+           </Card>
+@@ -394,8 +412,8 @@ export function AnalyticsView({
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-base">
+-                  Wochenvolumen
+-                  <Explain text="Trainingsminuten je Sportart pro Woche. Sprünge über 10 % pro Woche gelten als riskant." />
++                  {t("analytics.volume.title")}
++                  <Explain text={t("analytics.volume.explain")} aria={explainAria} />
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+@@ -413,7 +431,10 @@ export function AnalyticsView({
+                     </BarChart>
+                   </ChartContainer>
+                 ) : (
+-                  <EmptyHint text="Keine Einheiten im Zeitraum." />
++                  <EmptyHint
++                    text={t("analytics.empty.weekly")}
++                    noDataLabel={t("analytics.noData")}
++                  />
+                 )}
+               </CardContent>
+             </Card>
+@@ -421,15 +442,24 @@ export function AnalyticsView({
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-base">
+-                  Monotonie &amp; Strain
+-                  <Explain text="Foster: Monotonie über 2,0 bedeutet zu gleichförmiges Training, hoher Strain erhöht das Infekt- und Verletzungsrisiko." />
++                  {t("analytics.monotony.title")}
++                  <Explain text={t("analytics.monotony.explain")} aria={explainAria} />
+                 </CardTitle>
+-                <CardDescription>Letzte 7 Tage</CardDescription>
++                <CardDescription>{t("analytics.last7")}</CardDescription>
+               </CardHeader>
+               <CardContent className="grid grid-cols-3 gap-3 text-center">
+-                <Stat label="Wochenlast" value={view.foster.weeklyLoad.toFixed(0)} />
+-                <Stat label="Monotonie" value={view.foster.monotony?.toFixed(2) ?? "–"} />
+-                <Stat label="Strain" value={view.foster.strain?.toFixed(0) ?? "–"} />
++                <Stat
++                  label={t("analytics.stat.weeklyLoad")}
++                  value={view.foster.weeklyLoad.toFixed(0)}
++                />
++                <Stat
++                  label={t("analytics.stat.monotony")}
++                  value={view.foster.monotony?.toFixed(2) ?? "–"}
++                />
++                <Stat
++                  label={t("analytics.stat.strain")}
++                  value={view.foster.strain?.toFixed(0) ?? "–"}
++                />
+               </CardContent>
+             </Card>
+           </div>
+@@ -441,15 +471,15 @@ export function AnalyticsView({
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-base">
+-                  VO2max-Verlauf
+-                  <Explain text="Maximale Sauerstoffaufnahme laut Uhr. Für ambitionierte Amateure sind 50–60 ml/kg/min ein guter Bereich." />
++                  {t("analytics.vo2.title")}
++                  <Explain text={t("analytics.vo2.explain")} aria={explainAria} />
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <ChartContainer
+                   config={{
+-                    run: { label: "Laufen", color: "var(--chart-1)" },
+-                    bike: { label: "Rad", color: "var(--chart-2)" },
++                    run: { label: t("analytics.vol.run"), color: "var(--chart-1)" },
++                    bike: { label: t("analytics.vol.bike"), color: "var(--chart-2)" },
+                   }}
+                   className="h-56 w-full"
+                 >
+@@ -470,24 +500,27 @@ export function AnalyticsView({
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-base">
+-                  Schwellenwerte &amp; Zonen
+-                  <Explain text="Die Laktatschwelle ist das Tempo, das du rund eine Stunde halten kannst. Zonen darüber trainieren VO2max, darunter die Grundlage." />
++                  {t("analytics.thresholds.title")}
++                  <Explain text={t("analytics.thresholds.explain")} aria={explainAria} />
+                 </CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-3 text-sm">
+                 <Row
+-                  label="Schwellenpuls"
++                  label={t("analytics.threshold.lthr")}
+                   value={view.thresholds.lthr ? `${view.thresholds.lthr} bpm` : "–"}
+                 />
+                 <Row
+-                  label="Schwellentempo"
++                  label={t("analytics.threshold.speed")}
+                   value={
+                     view.thresholds.thresholdSpeedMps
+                       ? `${fmtTime(1000 / view.thresholds.thresholdSpeedMps)} min/km`
+                       : "–"
+                   }
+                 />
+-                <Row label="FTP" value={view.thresholds.ftpW ? `${view.thresholds.ftpW} W` : "–"} />
++                <Row
++                  label={t("analytics.threshold.ftp")}
++                  value={view.thresholds.ftpW ? `${view.thresholds.ftpW} W` : "–"}
++                />
+                 <div className="space-y-1 pt-2">
+                   {hrZones(view.thresholds.maxHr, view.thresholds.lthr).map((z) => (
+                     <div
+@@ -522,17 +555,17 @@ export function AnalyticsView({
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-base">
+-                  Wettkampfprognosen
+-                  <Explain text="Riegel rechnet eine Bestzeit auf andere Distanzen hoch, die VO2max-Prognose nach Daniels/Gilbert nutzt deine Uhr-Werte." />
++                  {t("analytics.pred.title")}
++                  <Explain text={t("analytics.pred.explain")} aria={explainAria} />
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <table className="w-full text-sm">
+                   <thead>
+                     <tr className="text-left text-xs text-muted-foreground">
+-                      <th className="pb-2">Distanz</th>
+-                      <th className="pb-2 text-right">Riegel</th>
+-                      <th className="pb-2 text-right">VO2max</th>
++                      <th className="pb-2">{t("analytics.pred.distance")}</th>
++                      <th className="pb-2 text-right">{t("analytics.pred.riegel")}</th>
++                      <th className="pb-2 text-right">{t("analytics.pred.vo2")}</th>
+                     </tr>
+                   </thead>
+                   <tbody className="tabular-nums">
+@@ -555,14 +588,14 @@ export function AnalyticsView({
+           <Card>
+             <CardHeader>
+               <CardTitle className="flex items-center gap-2 text-base">
+-                Efficiency Factor
+-                <Explain text="Tempo pro Herzschlag. Steigt der Wert über Wochen bei gleichem Puls, wird deine Aerobik besser." />
++                {t("analytics.ef.title")}
++                <Explain text={t("analytics.ef.explain")} aria={explainAria} />
+               </CardTitle>
+             </CardHeader>
+             <CardContent>
+               {view.effTrend.length ? (
+                 <ChartContainer
+-                  config={{ ef: { label: "EF", color: "var(--chart-1)" } }}
++                  config={{ ef: { label: t("analytics.ef.label"), color: "var(--chart-1)" } }}
+                   className="h-56 w-full"
+                 >
+                   <LineChart data={view.effTrend}>
+@@ -574,7 +607,7 @@ export function AnalyticsView({
+                   </LineChart>
+                 </ChartContainer>
+               ) : (
+-                <EmptyHint text="Für den EF-Trend braucht es Einheiten mit Puls- und Tempodaten." />
++                <EmptyHint text={t("analytics.empty.ef")} noDataLabel={t("analytics.noData")} />
+               )}
+             </CardContent>
+           </Card>
+@@ -583,15 +616,15 @@ export function AnalyticsView({
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-base">
+-                  Laufdynamik
+-                  <Explain text="Vertical Ratio unter 7 %, Bodenkontakt unter 240 ms und eine gleichmäßige Schrittlänge sprechen für ökonomisches Laufen." />
++                  {t("analytics.dyn.title")}
++                  <Explain text={t("analytics.dyn.explain")} aria={explainAria} />
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <ChartContainer
+                   config={{
+-                    vr: { label: "Vertical Ratio (%)", color: "var(--chart-1)" },
+-                    gct: { label: "Bodenkontakt (ms)", color: "var(--chart-2)" },
++                    vr: { label: t("analytics.dyn.vr"), color: "var(--chart-1)" },
++                    gct: { label: t("analytics.dyn.gct"), color: "var(--chart-2)" },
+                   }}
+                   className="h-56 w-full"
+                 >
+@@ -615,8 +648,8 @@ export function AnalyticsView({
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-base">
+-                  Schlafphasen
+-                  <Explain text="Rund 15–25 % Tiefschlaf und 20–25 % REM gelten als gut. Wichtig ist vor allem eine konstante Gesamtdauer." />
++                  {t("analytics.sleepPhases.title")}
++                  <Explain text={t("analytics.sleepPhases.explain")} aria={explainAria} />
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+@@ -648,13 +681,13 @@ export function AnalyticsView({
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-base">
+-                  HRV mit Baseline
+-                  <Explain text="Herzratenvariabilität der Nacht. Innerhalb des Baseline-Bands bist du ausbalanciert, dauerhaft darunter bedeutet Stress oder Überlastung." />
++                  {t("analytics.hrv.title")}
++                  <Explain text={t("analytics.hrv.explain")} aria={explainAria} />
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <ChartContainer
+-                  config={{ hrv: { label: "HRV (ms)", color: "var(--chart-1)" } }}
++                  config={{ hrv: { label: t("analytics.hrv.label"), color: "var(--chart-1)" } }}
+                   className="h-56 w-full"
+                 >
+                   <LineChart
+@@ -686,15 +719,15 @@ export function AnalyticsView({
+             <Card>
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2 text-base">
+-                  Ruhepuls &amp; Body Battery
+-                  <Explain text="Ein steigender Ruhepuls oder eine Body Battery, die nachts nicht mehr auflädt, sind frühe Warnzeichen für Überlastung." />
++                  {t("analytics.rhr.title")}
++                  <Explain text={t("analytics.rhr.explain")} aria={explainAria} />
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <ChartContainer
+                   config={{
+-                    resting_hr: { label: "Ruhepuls", color: "var(--chart-2)" },
+-                    body_battery_max: { label: "Body Battery max", color: "var(--success)" },
++                    resting_hr: { label: t("analytics.rhr.label"), color: "var(--chart-2)" },
++                    body_battery_max: { label: t("analytics.bb.label"), color: "var(--success)" },
+                   }}
+                   className="h-56 w-full"
+                 >
+@@ -716,7 +749,7 @@ export function AnalyticsView({
+           ) : null}
+ 
+           {!view.sleep.length && !view.hrv.length && !view.wellness.length && (
+-            <EmptyHint text="Noch keine Gesundheitsdaten. Der Garmin-Konto-Export enthält Schlaf, HRV und Body Battery – lade ihn unter Import hoch." />
++            <EmptyHint text={t("analytics.empty.sleep")} noDataLabel={t("analytics.noData")} />
+           )}
+         </TabsContent>
+       </Tabs>
+@@ -729,12 +762,14 @@ function Metric({
+   label,
+   value,
+   hint,
++  explainAria,
+   extra,
+ }: {
+   icon: React.ReactNode;
+   label: string;
+   value: string;
+   hint: string;
++  explainAria: string;
+   extra?: React.ReactNode;
+ }) {
+   return (
+@@ -743,7 +778,7 @@ function Metric({
+         <div className="flex items-center gap-2 text-xs text-muted-foreground">
+           {icon}
+           {label}
+-          <Explain text={hint} />
++          <Explain text={hint} aria={explainAria} />
+         </div>
+         <div className="font-mono text-2xl font-bold tabular-nums">{value}</div>
+         {extra ? <div className="text-xs">{extra}</div> : null}
+@@ -770,11 +805,11 @@ function Row({ label, value }: { label: string; value: string }) {
+   );
+ }
+ 
+-function EmptyHint({ text }: { text: string }) {
++function EmptyHint({ text, noDataLabel }: { text: string; noDataLabel: string }) {
+   return (
+     <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+       <Badge variant="outline" className="mb-2">
+-        Keine Daten
++        {noDataLabel}
+       </Badge>
+       <p>{text}</p>
+     </div>
+diff --git a/src/lib/i18n/messages.ts b/src/lib/i18n/messages.ts
+index a12b34a..f921542 100644
+--- a/src/lib/i18n/messages.ts
++++ b/src/lib/i18n/messages.ts
+@@ -47,6 +47,123 @@ export const messages: Record<Locale, Record<string, string>> = {
+     "nav.skip": "Zum Inhalt",
+     "nav.roleCoach": "Coach",
+     "nav.roleAthlete": "Athlete",
++
++    "analytics.title": "Analyse",
++    "analytics.subtitle":
++      "Deine Trainingsdaten – jede Kennzahl mit Erklärung, was sie für dich bedeutet.",
++    "analytics.explainAria": "Erklärung",
++    "analytics.noData": "Keine Daten",
++
++    "analytics.range.d30": "30 Tage",
++    "analytics.range.d90": "90 Tage",
++    "analytics.range.y1": "1 Jahr",
++    "analytics.range.all": "Alles",
++
++    "analytics.healthUntil": "Gesundheitsdaten bis {date}",
++    "analytics.noHealthShort": "Noch keine Gesundheitsdaten",
++    "analytics.refresh": "Aktualisieren",
++
++    "analytics.tab.overview": "Übersicht",
++    "analytics.tab.load": "Belastung",
++    "analytics.tab.endurance": "Ausdauer",
++    "analytics.tab.efficiency": "Effizienz",
++    "analytics.tab.sleep": "Schlaf & Erholung",
++
++    "analytics.zone.low": "Unterbelastung",
++    "analytics.zone.optimal": "Optimal",
++    "analytics.zone.elevated": "Erhöht",
++    "analytics.zone.high": "Verletzungsrisiko",
++
++    "analytics.series.ctl": "Fitness (CTL)",
++    "analytics.series.atl": "Ermüdung (ATL)",
++    "analytics.series.tsb": "Form (TSB)",
++
++    "analytics.vol.run": "Laufen",
++    "analytics.vol.bike": "Rad",
++    "analytics.vol.swim": "Schwimmen",
++    "analytics.vol.other": "Sonstiges",
++
++    "analytics.sleepPhase.deep": "Tiefschlaf",
++    "analytics.sleepPhase.light": "Leichtschlaf",
++    "analytics.sleepPhase.rem": "REM",
++    "analytics.sleepPhase.awake": "Wach",
++
++    "analytics.metric.acwr.label": "ACWR",
++    "analytics.metric.sleepScore.label": "Sleep Score",
++    "analytics.metric.ctl.hint":
++      "Gleitender 42-Tage-Schnitt deiner Trainingsbelastung. Steigt langsam – höher heißt belastbarer.",
++    "analytics.metric.tsb.hint":
++      "Fitness minus Ermüdung. −10 bis +5 ist gutes Training, unter −30 droht Übertraining, über +15 bist du frisch.",
++    "analytics.metric.acwr.hint":
++      "Verhältnis der letzten 7 zu den letzten 28 Tagen. 0,8–1,3 ist optimal, über 1,5 steigt das Verletzungsrisiko.",
++    "analytics.metric.sleepScore.hint":
++      "Garmin-Bewertung der letzten Nacht (0–100). Ab 80 gilt der Schlaf als erholsam.",
++    "analytics.empty.overview":
++      "Noch keine Aktivitäten im gewählten Zeitraum. Importiere deinen Garmin-Export, um Auswertungen zu sehen.",
++
++    "analytics.load.title": "Fitness, Ermüdung, Form",
++    "analytics.load.explain":
++      "CTL = Fitness (42 Tage), ATL = Ermüdung (7 Tage), TSB = Form. Ein Formtief nach harten Wochen ist normal, dauerhaft unter −30 nicht.",
++    "analytics.load.desc": "Belastungsverlauf im gewählten Zeitraum",
++    "analytics.empty.load": "Keine Belastungsdaten im Zeitraum.",
++
++    "analytics.volume.title": "Wochenvolumen",
++    "analytics.volume.explain":
++      "Trainingsminuten je Sportart pro Woche. Sprünge über 10 % pro Woche gelten als riskant.",
++    "analytics.empty.weekly": "Keine Einheiten im Zeitraum.",
++
++    "analytics.monotony.title": "Monotonie & Strain",
++    "analytics.monotony.explain":
++      "Foster: Monotonie über 2,0 bedeutet zu gleichförmiges Training, hoher Strain erhöht das Infekt- und Verletzungsrisiko.",
++    "analytics.last7": "Letzte 7 Tage",
++    "analytics.stat.weeklyLoad": "Wochenlast",
++    "analytics.stat.monotony": "Monotonie",
++    "analytics.stat.strain": "Strain",
++
++    "analytics.vo2.title": "VO2max-Verlauf",
++    "analytics.vo2.explain":
++      "Maximale Sauerstoffaufnahme laut Uhr. Für ambitionierte Amateure sind 50–60 ml/kg/min ein guter Bereich.",
++
++    "analytics.thresholds.title": "Schwellenwerte & Zonen",
++    "analytics.thresholds.explain":
++      "Die Laktatschwelle ist das Tempo, das du rund eine Stunde halten kannst. Zonen darüber trainieren VO2max, darunter die Grundlage.",
++    "analytics.threshold.lthr": "Schwellenpuls",
++    "analytics.threshold.speed": "Schwellentempo",
++    "analytics.threshold.ftp": "FTP",
++
++    "analytics.pred.title": "Wettkampfprognosen",
++    "analytics.pred.explain":
++      "Riegel rechnet eine Bestzeit auf andere Distanzen hoch, die VO2max-Prognose nach Daniels/Gilbert nutzt deine Uhr-Werte.",
++    "analytics.pred.distance": "Distanz",
++    "analytics.pred.riegel": "Riegel",
++    "analytics.pred.vo2": "VO2max",
++
++    "analytics.ef.title": "Efficiency Factor",
++    "analytics.ef.explain":
++      "Tempo pro Herzschlag. Steigt der Wert über Wochen bei gleichem Puls, wird deine Aerobik besser.",
++    "analytics.ef.label": "EF",
++    "analytics.empty.ef": "Für den EF-Trend braucht es Einheiten mit Puls- und Tempodaten.",
++
++    "analytics.dyn.title": "Laufdynamik",
++    "analytics.dyn.explain":
++      "Vertical Ratio unter 7 %, Bodenkontakt unter 240 ms und eine gleichmäßige Schrittlänge sprechen für ökonomisches Laufen.",
++    "analytics.dyn.vr": "Vertical Ratio (%)",
++    "analytics.dyn.gct": "Bodenkontakt (ms)",
++
++    "analytics.sleepPhases.title": "Schlafphasen",
++    "analytics.sleepPhases.explain":
++      "Rund 15–25 % Tiefschlaf und 20–25 % REM gelten als gut. Wichtig ist vor allem eine konstante Gesamtdauer.",
++    "analytics.hrv.title": "HRV mit Baseline",
++    "analytics.hrv.explain":
++      "Herzratenvariabilität der Nacht. Innerhalb des Baseline-Bands bist du ausbalanciert, dauerhaft darunter bedeutet Stress oder Überlastung.",
++    "analytics.hrv.label": "HRV (ms)",
++    "analytics.rhr.title": "Ruhepuls & Body Battery",
++    "analytics.rhr.explain":
++      "Ein steigender Ruhepuls oder eine Body Battery, die nachts nicht mehr auflädt, sind frühe Warnzeichen für Überlastung.",
++    "analytics.rhr.label": "Ruhepuls",
++    "analytics.bb.label": "Body Battery max",
++    "analytics.empty.sleep":
++      "Noch keine Gesundheitsdaten. Der Garmin-Konto-Export enthält Schlaf, HRV und Body Battery – lade ihn unter Import hoch.",
+   },
+   en: {
+     "language.title": "Language",
+@@ -89,6 +206,123 @@ export const messages: Record<Locale, Record<string, string>> = {
+     "nav.skip": "Skip to content",
+     "nav.roleCoach": "Coach",
+     "nav.roleAthlete": "Athlete",
++
++    "analytics.title": "Analytics",
++    "analytics.subtitle":
++      "Your training data — every metric explained so you know what it means for you.",
++    "analytics.explainAria": "Explanation",
++    "analytics.noData": "No data",
++
++    "analytics.range.d30": "30 days",
++    "analytics.range.d90": "90 days",
++    "analytics.range.y1": "1 year",
++    "analytics.range.all": "All",
++
++    "analytics.healthUntil": "Health data through {date}",
++    "analytics.noHealthShort": "No health data yet",
++    "analytics.refresh": "Refresh",
++
++    "analytics.tab.overview": "Overview",
++    "analytics.tab.load": "Load",
++    "analytics.tab.endurance": "Endurance",
++    "analytics.tab.efficiency": "Efficiency",
++    "analytics.tab.sleep": "Sleep & recovery",
++
++    "analytics.zone.low": "Undertraining",
++    "analytics.zone.optimal": "Optimal",
++    "analytics.zone.elevated": "Elevated",
++    "analytics.zone.high": "Injury risk",
++
++    "analytics.series.ctl": "Fitness (CTL)",
++    "analytics.series.atl": "Fatigue (ATL)",
++    "analytics.series.tsb": "Form (TSB)",
++
++    "analytics.vol.run": "Running",
++    "analytics.vol.bike": "Cycling",
++    "analytics.vol.swim": "Swimming",
++    "analytics.vol.other": "Other",
++
++    "analytics.sleepPhase.deep": "Deep sleep",
++    "analytics.sleepPhase.light": "Light sleep",
++    "analytics.sleepPhase.rem": "REM",
++    "analytics.sleepPhase.awake": "Awake",
++
++    "analytics.metric.acwr.label": "ACWR",
++    "analytics.metric.sleepScore.label": "Sleep score",
++    "analytics.metric.ctl.hint":
++      "Rolling 42-day average of your training load. Rises slowly — higher means more resilient.",
++    "analytics.metric.tsb.hint":
++      "Fitness minus fatigue. −10 to +5 is solid training, below −30 risks overtraining, above +15 you're fresh.",
++    "analytics.metric.acwr.hint":
++      "Ratio of the last 7 to the last 28 days. 0.8–1.3 is optimal, above 1.5 injury risk rises.",
++    "analytics.metric.sleepScore.hint":
++      "Garmin's rating of last night (0–100). From 80 up, sleep counts as restorative.",
++    "analytics.empty.overview":
++      "No activities in the selected period yet. Import your Garmin export to see analytics.",
++
++    "analytics.load.title": "Fitness, fatigue, form",
++    "analytics.load.explain":
++      "CTL = fitness (42 days), ATL = fatigue (7 days), TSB = form. A dip after hard weeks is normal, staying below −30 is not.",
++    "analytics.load.desc": "Load over the selected period",
++    "analytics.empty.load": "No load data in this period.",
++
++    "analytics.volume.title": "Weekly volume",
++    "analytics.volume.explain":
++      "Training minutes per sport per week. Jumps over 10% per week are considered risky.",
++    "analytics.empty.weekly": "No sessions in this period.",
++
++    "analytics.monotony.title": "Monotony & strain",
++    "analytics.monotony.explain":
++      "Foster: monotony above 2.0 means training is too uniform; high strain raises the risk of illness and injury.",
++    "analytics.last7": "Last 7 days",
++    "analytics.stat.weeklyLoad": "Weekly load",
++    "analytics.stat.monotony": "Monotony",
++    "analytics.stat.strain": "Strain",
++
++    "analytics.vo2.title": "VO2max trend",
++    "analytics.vo2.explain":
++      "Maximum oxygen uptake per your watch. For ambitious amateurs, 50–60 ml/kg/min is a good range.",
++
++    "analytics.thresholds.title": "Thresholds & zones",
++    "analytics.thresholds.explain":
++      "The lactate threshold is the pace you can hold for about an hour. Zones above it train VO2max, below it your aerobic base.",
++    "analytics.threshold.lthr": "Threshold HR",
++    "analytics.threshold.speed": "Threshold pace",
++    "analytics.threshold.ftp": "FTP",
++
++    "analytics.pred.title": "Race predictions",
++    "analytics.pred.explain":
++      "Riegel extrapolates a best time to other distances; the VO2max prediction (Daniels/Gilbert) uses your watch values.",
++    "analytics.pred.distance": "Distance",
++    "analytics.pred.riegel": "Riegel",
++    "analytics.pred.vo2": "VO2max",
++
++    "analytics.ef.title": "Efficiency factor",
++    "analytics.ef.explain":
++      "Pace per heartbeat. If it rises over weeks at the same HR, your aerobic fitness is improving.",
++    "analytics.ef.label": "EF",
++    "analytics.empty.ef": "The EF trend needs sessions with HR and pace data.",
++
++    "analytics.dyn.title": "Running dynamics",
++    "analytics.dyn.explain":
++      "Vertical ratio under 7%, ground contact under 240 ms and a steady stride length indicate economical running.",
++    "analytics.dyn.vr": "Vertical ratio (%)",
++    "analytics.dyn.gct": "Ground contact (ms)",
++
++    "analytics.sleepPhases.title": "Sleep stages",
++    "analytics.sleepPhases.explain":
++      "Around 15–25% deep sleep and 20–25% REM is considered good. Above all, a consistent total duration matters.",
++    "analytics.hrv.title": "HRV with baseline",
++    "analytics.hrv.explain":
++      "Overnight heart rate variability. Within the baseline band you're balanced; consistently below it means stress or overload.",
++    "analytics.hrv.label": "HRV (ms)",
++    "analytics.rhr.title": "Resting HR & Body Battery",
++    "analytics.rhr.explain":
++      "A rising resting HR or a Body Battery that no longer recharges at night are early warning signs of overload.",
++    "analytics.rhr.label": "Resting HR",
++    "analytics.bb.label": "Body Battery max",
++    "analytics.empty.sleep":
++      "No health data yet. The Garmin account export includes sleep, HRV and Body Battery — upload it under Import.",
+   },
+   uk: {
+     "language.title": "Мова",
+@@ -131,5 +365,122 @@ export const messages: Record<Locale, Record<string, string>> = {
+     "nav.skip": "До вмісту",
+     "nav.roleCoach": "Тренер",
+     "nav.roleAthlete": "Атлет",
++
++    "analytics.title": "Аналітика",
++    "analytics.subtitle":
++      "Твої тренувальні дані — кожен показник із поясненням, що він означає для тебе.",
++    "analytics.explainAria": "Пояснення",
++    "analytics.noData": "Немає даних",
++
++    "analytics.range.d30": "30 днів",
++    "analytics.range.d90": "90 днів",
++    "analytics.range.y1": "1 рік",
++    "analytics.range.all": "Все",
++
++    "analytics.healthUntil": "Дані здоров'я до {date}",
++    "analytics.noHealthShort": "Ще немає даних здоров'я",
++    "analytics.refresh": "Оновити",
++
++    "analytics.tab.overview": "Огляд",
++    "analytics.tab.load": "Навантаження",
++    "analytics.tab.endurance": "Витривалість",
++    "analytics.tab.efficiency": "Ефективність",
++    "analytics.tab.sleep": "Сон і відновлення",
++
++    "analytics.zone.low": "Недовантаження",
++    "analytics.zone.optimal": "Оптимально",
++    "analytics.zone.elevated": "Підвищено",
++    "analytics.zone.high": "Ризик травми",
++
++    "analytics.series.ctl": "Форма (CTL)",
++    "analytics.series.atl": "Втома (ATL)",
++    "analytics.series.tsb": "Свіжість (TSB)",
++
++    "analytics.vol.run": "Біг",
++    "analytics.vol.bike": "Велосипед",
++    "analytics.vol.swim": "Плавання",
++    "analytics.vol.other": "Інше",
++
++    "analytics.sleepPhase.deep": "Глибокий сон",
++    "analytics.sleepPhase.light": "Легкий сон",
++    "analytics.sleepPhase.rem": "REM",
++    "analytics.sleepPhase.awake": "Неспання",
++
++    "analytics.metric.acwr.label": "ACWR",
++    "analytics.metric.sleepScore.label": "Оцінка сну",
++    "analytics.metric.ctl.hint":
++      "Ковзне середнє тренувального навантаження за 42 дні. Зростає повільно — вище означає більшу витривалість.",
++    "analytics.metric.tsb.hint":
++      "Форма мінус втома. Від −10 до +5 — хороший стан, нижче −30 — ризик перетренування, вище +15 — ти свіжий.",
++    "analytics.metric.acwr.hint":
++      "Співвідношення останніх 7 до останніх 28 днів. 0,8–1,3 — оптимально, понад 1,5 зростає ризик травми.",
++    "analytics.metric.sleepScore.hint":
++      "Оцінка Garmin за минулу ніч (0–100). Від 80 сон вважається відновлювальним.",
++    "analytics.empty.overview":
++      "У вибраному періоді ще немає активностей. Імпортуй свій експорт Garmin, щоб побачити аналітику.",
++
++    "analytics.load.title": "Форма, втома, свіжість",
++    "analytics.load.explain":
++      "CTL = форма (42 дні), ATL = втома (7 днів), TSB = свіжість. Спад після важких тижнів — нормально, постійно нижче −30 — ні.",
++    "analytics.load.desc": "Динаміка навантаження за вибраний період",
++    "analytics.empty.load": "Немає даних навантаження за цей період.",
++
++    "analytics.volume.title": "Тижневий обсяг",
++    "analytics.volume.explain":
++      "Хвилини тренувань за видом спорту на тиждень. Стрибки понад 10 % на тиждень вважаються ризикованими.",
++    "analytics.empty.weekly": "Немає занять за цей період.",
++
++    "analytics.monotony.title": "Монотонність і strain",
++    "analytics.monotony.explain":
++      "Фостер: монотонність понад 2,0 означає надто одноманітні тренування; високий strain підвищує ризик хвороб і травм.",
++    "analytics.last7": "Останні 7 днів",
++    "analytics.stat.weeklyLoad": "Тижневе навантаження",
++    "analytics.stat.monotony": "Монотонність",
++    "analytics.stat.strain": "Strain",
++
++    "analytics.vo2.title": "Динаміка VO2max",
++    "analytics.vo2.explain":
++      "Максимальне споживання кисню за даними годинника. Для амбітних аматорів 50–60 мл/кг/хв — хороший діапазон.",
++
++    "analytics.thresholds.title": "Порогові значення та зони",
++    "analytics.thresholds.explain":
++      "Лактатний поріг — це темп, який ти можеш утримувати близько години. Зони вище тренують VO2max, нижче — аеробну базу.",
++    "analytics.threshold.lthr": "Пороговий пульс",
++    "analytics.threshold.speed": "Пороговий темп",
++    "analytics.threshold.ftp": "FTP",
++
++    "analytics.pred.title": "Прогнози змагань",
++    "analytics.pred.explain":
++      "Формула Рігеля екстраполює найкращий час на інші дистанції; прогноз за VO2max (Деніелс/Гілберт) використовує дані годинника.",
++    "analytics.pred.distance": "Дистанція",
++    "analytics.pred.riegel": "Рігель",
++    "analytics.pred.vo2": "VO2max",
++
++    "analytics.ef.title": "Фактор ефективності",
++    "analytics.ef.explain":
++      "Темп на удар серця. Якщо показник зростає тижнями за того самого пульсу — твоя аеробіка покращується.",
++    "analytics.ef.label": "EF",
++    "analytics.empty.ef": "Для тренду EF потрібні заняття з даними пульсу й темпу.",
++
++    "analytics.dyn.title": "Бігова динаміка",
++    "analytics.dyn.explain":
++      "Вертикальне співвідношення менше 7 %, час контакту з землею менше 240 мс і рівномірна довжина кроку свідчать про економічний біг.",
++    "analytics.dyn.vr": "Вертикальне співвідношення (%)",
++    "analytics.dyn.gct": "Контакт із землею (мс)",
++
++    "analytics.sleepPhases.title": "Фази сну",
++    "analytics.sleepPhases.explain":
++      "Приблизно 15–25 % глибокого сну та 20–25 % REM вважаються хорошими. Найважливіше — стабільна загальна тривалість.",
++    "analytics.hrv.title": "ВСР із базовою лінією",
++    "analytics.hrv.explain":
++      "Нічна варіабельність серцевого ритму. У межах базового діапазону ти збалансований; постійно нижче — стрес або перевантаження.",
++    "analytics.hrv.label": "ВСР (мс)",
++    "analytics.rhr.title": "Пульс спокою та Body Battery",
++    "analytics.rhr.explain":
++      "Зростання пульсу спокою або Body Battery, що більше не заряджається вночі, — ранні ознаки перевантаження.",
++    "analytics.rhr.label": "Пульс спокою",
++    "analytics.bb.label": "Body Battery макс.",
++    "analytics.empty.sleep":
++      "Ще немає даних здоров'я. Експорт акаунта Garmin містить сон, ВСР і Body Battery — завантаж його в розділі «Імпорт».",
+   },
+ };
+diff --git a/src/routes/_authenticated/analytics.tsx b/src/routes/_authenticated/analytics.tsx
+index 361ac0b..f4d51b8 100644
+--- a/src/routes/_authenticated/analytics.tsx
++++ b/src/routes/_authenticated/analytics.tsx
+@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
+ import { useQuery } from "@tanstack/react-query";
+ import { supabase } from "@/integrations/supabase/client";
+ import { AnalyticsView } from "@/components/analytics/AnalyticsView";
++import { useT } from "@/lib/i18n";
+ import { Loader2 } from "lucide-react";
+ 
+ export const Route = createFileRoute("/_authenticated/analytics")({
+@@ -32,6 +33,7 @@ export const Route = createFileRoute("/_authenticated/analytics")({
+ });
+ 
+ function AnalyticsPage() {
++  const t = useT();
+   const { data: uid } = useQuery({
+     queryKey: ["analytics-uid"],
+     queryFn: async () => (await supabase.auth.getUser()).data.user?.id ?? null,
+@@ -40,10 +42,8 @@ function AnalyticsPage() {
+   return (
+     <div className="space-y-6">
+       <header>
+-        <h1 className="text-2xl font-bold">Analyse</h1>
+-        <p className="text-sm text-muted-foreground">
+-          Deine Trainingsdaten – jede Kennzahl mit Erklärung, was sie für dich bedeutet.
+-        </p>
++        <h1 className="text-2xl font-bold">{t("analytics.title")}</h1>
++        <p className="text-sm text-muted-foreground">{t("analytics.subtitle")}</p>
+       </header>
+       {uid ? (
+         <AnalyticsView userId={uid} />
+-- 
+2.43.0
+
