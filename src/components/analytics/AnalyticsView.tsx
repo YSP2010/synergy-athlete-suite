@@ -38,20 +38,29 @@ import { racePredictions } from "@/lib/analytics/predictions";
 import { bestRunEffort, computeRecords, type RecordActivity } from "@/lib/analytics/records";
 import { hrZones, powerZones } from "@/lib/analytics/zones";
 import { efficiencyFactor } from "@/lib/analytics/efficiency";
+import { useI18n, type Locale } from "@/lib/i18n";
 
+/** Zeitraum-Auswahl. Label wird über den i18n-Schlüssel aufgelöst. */
 const RANGES = [
-  { key: "30", label: "30 Tage", days: 30 },
-  { key: "90", label: "90 Tage", days: 90 },
-  { key: "365", label: "1 Jahr", days: 365 },
-  { key: "all", label: "Alles", days: null },
+  { key: "30", labelKey: "analytics.range.d30", days: 30 },
+  { key: "90", labelKey: "analytics.range.d90", days: 90 },
+  { key: "365", labelKey: "analytics.range.y1", days: 365 },
+  { key: "all", labelKey: "analytics.range.all", days: null },
 ] as const;
 
+/** Locale -> BCP-47 für die Datumsformatierung. */
+const DATE_LOCALES: Record<Locale, string> = {
+  de: "de-DE",
+  en: "en-GB",
+  uk: "uk-UA",
+};
+
 /** Kurzer Erklärtext neben jeder Kennzahl. */
-function Explain({ text }: { text: string }) {
+function Explain({ text, aria }: { text: string; aria: string }) {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger aria-label="Erklärung" className="text-muted-foreground">
+        <TooltipTrigger aria-label={aria} className="text-muted-foreground">
           <Info className="h-3.5 w-3.5" />
         </TooltipTrigger>
         <TooltipContent className="max-w-xs text-xs">{text}</TooltipContent>
@@ -75,26 +84,6 @@ function fmtTime(seconds: number | null): string {
     : `${m}:${String(s).padStart(2, "0")}`;
 }
 
-const loadConfig = {
-  ctl: { label: "Fitness (CTL)", color: "var(--chart-2)" },
-  atl: { label: "Ermüdung (ATL)", color: "var(--warn)" },
-  tsb: { label: "Form (TSB)", color: "var(--success)" },
-} satisfies ChartConfig;
-
-const volumeConfig = {
-  run: { label: "Laufen", color: "var(--chart-1)" },
-  bike: { label: "Rad", color: "var(--chart-2)" },
-  swim: { label: "Schwimmen", color: "var(--chart-3)" },
-  other: { label: "Sonstiges", color: "var(--chart-4)" },
-} satisfies ChartConfig;
-
-const sleepConfig = {
-  deep: { label: "Tiefschlaf", color: "var(--chart-2)" },
-  light: { label: "Leichtschlaf", color: "var(--chart-3)" },
-  rem: { label: "REM", color: "var(--chart-1)" },
-  awake: { label: "Wach", color: "var(--warn)" },
-} satisfies ChartConfig;
-
 export function AnalyticsView({
   userId,
   readOnly = false,
@@ -102,8 +91,31 @@ export function AnalyticsView({
   userId: string;
   readOnly?: boolean;
 }) {
+  const { locale, t } = useI18n();
   const [range, setRange] = useState<(typeof RANGES)[number]["key"]>("90");
   const days = RANGES.find((r) => r.key === range)!.days;
+
+  const loadConfig = {
+    ctl: { label: t("analytics.series.ctl"), color: "var(--chart-2)" },
+    atl: { label: t("analytics.series.atl"), color: "var(--warn)" },
+    tsb: { label: t("analytics.series.tsb"), color: "var(--success)" },
+  } satisfies ChartConfig;
+
+  const volumeConfig = {
+    run: { label: t("analytics.vol.run"), color: "var(--chart-1)" },
+    bike: { label: t("analytics.vol.bike"), color: "var(--chart-2)" },
+    swim: { label: t("analytics.vol.swim"), color: "var(--chart-3)" },
+    other: { label: t("analytics.vol.other"), color: "var(--chart-4)" },
+  } satisfies ChartConfig;
+
+  const sleepConfig = {
+    deep: { label: t("analytics.sleepPhase.deep"), color: "var(--chart-2)" },
+    light: { label: t("analytics.sleepPhase.light"), color: "var(--chart-3)" },
+    rem: { label: t("analytics.sleepPhase.rem"), color: "var(--chart-1)" },
+    awake: { label: t("analytics.sleepPhase.awake"), color: "var(--warn)" },
+  } satisfies ChartConfig;
+
+  const explainAria = t("analytics.explainAria");
 
   const { data, isLoading } = useQuery({
     queryKey: ["analytics", userId],
@@ -260,10 +272,10 @@ export function AnalyticsView({
 
   const zone = acwrZone(view.last?.acwr ?? null);
   const zoneLabel: Record<string, string> = {
-    low: "Unterbelastung",
-    optimal: "Optimal",
-    elevated: "Erhöht",
-    high: "Verletzungsrisiko",
+    low: t("analytics.zone.low"),
+    optimal: t("analytics.zone.optimal"),
+    elevated: t("analytics.zone.elevated"),
+    high: t("analytics.zone.high"),
   };
   const zoneVariant: Record<string, string> = {
     low: "text-muted-foreground",
@@ -282,17 +294,19 @@ export function AnalyticsView({
             variant={range === r.key ? "default" : "outline"}
             onClick={() => setRange(r.key)}
           >
-            {r.label}
+            {t(r.labelKey)}
           </Button>
         ))}
         {!readOnly && (
           <span className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
             {view.lastWellnessDate
-              ? `Gesundheitsdaten bis ${new Date(view.lastWellnessDate).toLocaleDateString("de-DE")}`
-              : "Noch keine Gesundheitsdaten"}
+              ? t("analytics.healthUntil", {
+                  date: new Date(view.lastWellnessDate).toLocaleDateString(DATE_LOCALES[locale]),
+                })
+              : t("analytics.noHealthShort")}
             <Button asChild size="sm" variant="ghost">
               <Link to="/import">
-                <FileUp className="mr-1 h-3.5 w-3.5" /> Aktualisieren
+                <FileUp className="mr-1 h-3.5 w-3.5" /> {t("analytics.refresh")}
               </Link>
             </Button>
           </span>
@@ -301,11 +315,11 @@ export function AnalyticsView({
 
       <Tabs defaultValue="overview">
         <TabsList className="flex w-full flex-wrap">
-          <TabsTrigger value="overview">Übersicht</TabsTrigger>
-          <TabsTrigger value="load">Belastung</TabsTrigger>
-          <TabsTrigger value="endurance">Ausdauer</TabsTrigger>
-          <TabsTrigger value="efficiency">Effizienz</TabsTrigger>
-          <TabsTrigger value="sleep">Schlaf &amp; Erholung</TabsTrigger>
+          <TabsTrigger value="overview">{t("analytics.tab.overview")}</TabsTrigger>
+          <TabsTrigger value="load">{t("analytics.tab.load")}</TabsTrigger>
+          <TabsTrigger value="endurance">{t("analytics.tab.endurance")}</TabsTrigger>
+          <TabsTrigger value="efficiency">{t("analytics.tab.efficiency")}</TabsTrigger>
+          <TabsTrigger value="sleep">{t("analytics.tab.sleep")}</TabsTrigger>
         </TabsList>
 
         {/* ---------------- Übersicht ---------------- */}
@@ -313,36 +327,40 @@ export function AnalyticsView({
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Metric
               icon={<Activity className="h-4 w-4 text-primary" />}
-              label="Fitness (CTL)"
+              label={t("analytics.series.ctl")}
               value={view.last ? view.last.ctl.toFixed(0) : "–"}
-              hint="Gleitender 42-Tage-Schnitt deiner Trainingsbelastung. Steigt langsam – höher heißt belastbarer."
+              hint={t("analytics.metric.ctl.hint")}
+              explainAria={explainAria}
             />
             <Metric
               icon={<Gauge className="h-4 w-4 text-primary" />}
-              label="Form (TSB)"
+              label={t("analytics.series.tsb")}
               value={view.last ? view.last.tsb.toFixed(0) : "–"}
-              hint="Fitness minus Ermüdung. −10 bis +5 ist gutes Training, unter −30 droht Übertraining, über +15 bist du frisch."
+              hint={t("analytics.metric.tsb.hint")}
+              explainAria={explainAria}
             />
             <Metric
               icon={<HeartPulse className="h-4 w-4 text-primary" />}
-              label="ACWR"
+              label={t("analytics.metric.acwr.label")}
               value={view.last?.acwr != null ? view.last.acwr.toFixed(2) : "–"}
-              hint="Verhältnis der letzten 7 zu den letzten 28 Tagen. 0,8–1,3 ist optimal, über 1,5 steigt das Verletzungsrisiko."
+              hint={t("analytics.metric.acwr.hint")}
+              explainAria={explainAria}
               extra={zone ? <span className={zoneVariant[zone]}>{zoneLabel[zone]}</span> : null}
             />
             <Metric
               icon={<Moon className="h-4 w-4 text-primary" />}
-              label="Sleep Score"
+              label={t("analytics.metric.sleepScore.label")}
               value={
                 view.sleep.length
                   ? String(view.sleep[view.sleep.length - 1]!.sleep_score ?? "–")
                   : "–"
               }
-              hint="Garmin-Bewertung der letzten Nacht (0–100). Ab 80 gilt der Schlaf als erholsam."
+              hint={t("analytics.metric.sleepScore.hint")}
+              explainAria={explainAria}
             />
           </div>
           {!view.series.length && (
-            <EmptyHint text="Noch keine Aktivitäten im gewählten Zeitraum. Importiere deinen Garmin-Export, um Auswertungen zu sehen." />
+            <EmptyHint text={t("analytics.empty.overview")} noDataLabel={t("analytics.noData")} />
           )}
         </TabsContent>
 
@@ -351,10 +369,10 @@ export function AnalyticsView({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                Fitness, Ermüdung, Form
-                <Explain text="CTL = Fitness (42 Tage), ATL = Ermüdung (7 Tage), TSB = Form. Ein Formtief nach harten Wochen ist normal, dauerhaft unter −30 nicht." />
+                {t("analytics.load.title")}
+                <Explain text={t("analytics.load.explain")} aria={explainAria} />
               </CardTitle>
-              <CardDescription>Belastungsverlauf im gewählten Zeitraum</CardDescription>
+              <CardDescription>{t("analytics.load.desc")}</CardDescription>
             </CardHeader>
             <CardContent>
               {view.series.length ? (
@@ -385,7 +403,7 @@ export function AnalyticsView({
                   </AreaChart>
                 </ChartContainer>
               ) : (
-                <EmptyHint text="Keine Belastungsdaten im Zeitraum." />
+                <EmptyHint text={t("analytics.empty.load")} noDataLabel={t("analytics.noData")} />
               )}
             </CardContent>
           </Card>
@@ -394,8 +412,8 @@ export function AnalyticsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  Wochenvolumen
-                  <Explain text="Trainingsminuten je Sportart pro Woche. Sprünge über 10 % pro Woche gelten als riskant." />
+                  {t("analytics.volume.title")}
+                  <Explain text={t("analytics.volume.explain")} aria={explainAria} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -413,7 +431,10 @@ export function AnalyticsView({
                     </BarChart>
                   </ChartContainer>
                 ) : (
-                  <EmptyHint text="Keine Einheiten im Zeitraum." />
+                  <EmptyHint
+                    text={t("analytics.empty.weekly")}
+                    noDataLabel={t("analytics.noData")}
+                  />
                 )}
               </CardContent>
             </Card>
@@ -421,15 +442,24 @@ export function AnalyticsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  Monotonie &amp; Strain
-                  <Explain text="Foster: Monotonie über 2,0 bedeutet zu gleichförmiges Training, hoher Strain erhöht das Infekt- und Verletzungsrisiko." />
+                  {t("analytics.monotony.title")}
+                  <Explain text={t("analytics.monotony.explain")} aria={explainAria} />
                 </CardTitle>
-                <CardDescription>Letzte 7 Tage</CardDescription>
+                <CardDescription>{t("analytics.last7")}</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-3 gap-3 text-center">
-                <Stat label="Wochenlast" value={view.foster.weeklyLoad.toFixed(0)} />
-                <Stat label="Monotonie" value={view.foster.monotony?.toFixed(2) ?? "–"} />
-                <Stat label="Strain" value={view.foster.strain?.toFixed(0) ?? "–"} />
+                <Stat
+                  label={t("analytics.stat.weeklyLoad")}
+                  value={view.foster.weeklyLoad.toFixed(0)}
+                />
+                <Stat
+                  label={t("analytics.stat.monotony")}
+                  value={view.foster.monotony?.toFixed(2) ?? "–"}
+                />
+                <Stat
+                  label={t("analytics.stat.strain")}
+                  value={view.foster.strain?.toFixed(0) ?? "–"}
+                />
               </CardContent>
             </Card>
           </div>
@@ -441,15 +471,15 @@ export function AnalyticsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  VO2max-Verlauf
-                  <Explain text="Maximale Sauerstoffaufnahme laut Uhr. Für ambitionierte Amateure sind 50–60 ml/kg/min ein guter Bereich." />
+                  {t("analytics.vo2.title")}
+                  <Explain text={t("analytics.vo2.explain")} aria={explainAria} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ChartContainer
                   config={{
-                    run: { label: "Laufen", color: "var(--chart-1)" },
-                    bike: { label: "Rad", color: "var(--chart-2)" },
+                    run: { label: t("analytics.vol.run"), color: "var(--chart-1)" },
+                    bike: { label: t("analytics.vol.bike"), color: "var(--chart-2)" },
                   }}
                   className="h-56 w-full"
                 >
@@ -470,24 +500,27 @@ export function AnalyticsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  Schwellenwerte &amp; Zonen
-                  <Explain text="Die Laktatschwelle ist das Tempo, das du rund eine Stunde halten kannst. Zonen darüber trainieren VO2max, darunter die Grundlage." />
+                  {t("analytics.thresholds.title")}
+                  <Explain text={t("analytics.thresholds.explain")} aria={explainAria} />
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <Row
-                  label="Schwellenpuls"
+                  label={t("analytics.threshold.lthr")}
                   value={view.thresholds.lthr ? `${view.thresholds.lthr} bpm` : "–"}
                 />
                 <Row
-                  label="Schwellentempo"
+                  label={t("analytics.threshold.speed")}
                   value={
                     view.thresholds.thresholdSpeedMps
                       ? `${fmtTime(1000 / view.thresholds.thresholdSpeedMps)} min/km`
                       : "–"
                   }
                 />
-                <Row label="FTP" value={view.thresholds.ftpW ? `${view.thresholds.ftpW} W` : "–"} />
+                <Row
+                  label={t("analytics.threshold.ftp")}
+                  value={view.thresholds.ftpW ? `${view.thresholds.ftpW} W` : "–"}
+                />
                 <div className="space-y-1 pt-2">
                   {hrZones(view.thresholds.maxHr, view.thresholds.lthr).map((z) => (
                     <div
@@ -522,17 +555,17 @@ export function AnalyticsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  Wettkampfprognosen
-                  <Explain text="Riegel rechnet eine Bestzeit auf andere Distanzen hoch, die VO2max-Prognose nach Daniels/Gilbert nutzt deine Uhr-Werte." />
+                  {t("analytics.pred.title")}
+                  <Explain text={t("analytics.pred.explain")} aria={explainAria} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-xs text-muted-foreground">
-                      <th className="pb-2">Distanz</th>
-                      <th className="pb-2 text-right">Riegel</th>
-                      <th className="pb-2 text-right">VO2max</th>
+                      <th className="pb-2">{t("analytics.pred.distance")}</th>
+                      <th className="pb-2 text-right">{t("analytics.pred.riegel")}</th>
+                      <th className="pb-2 text-right">{t("analytics.pred.vo2")}</th>
                     </tr>
                   </thead>
                   <tbody className="tabular-nums">
@@ -555,14 +588,14 @@ export function AnalyticsView({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                Efficiency Factor
-                <Explain text="Tempo pro Herzschlag. Steigt der Wert über Wochen bei gleichem Puls, wird deine Aerobik besser." />
+                {t("analytics.ef.title")}
+                <Explain text={t("analytics.ef.explain")} aria={explainAria} />
               </CardTitle>
             </CardHeader>
             <CardContent>
               {view.effTrend.length ? (
                 <ChartContainer
-                  config={{ ef: { label: "EF", color: "var(--chart-1)" } }}
+                  config={{ ef: { label: t("analytics.ef.label"), color: "var(--chart-1)" } }}
                   className="h-56 w-full"
                 >
                   <LineChart data={view.effTrend}>
@@ -574,7 +607,7 @@ export function AnalyticsView({
                   </LineChart>
                 </ChartContainer>
               ) : (
-                <EmptyHint text="Für den EF-Trend braucht es Einheiten mit Puls- und Tempodaten." />
+                <EmptyHint text={t("analytics.empty.ef")} noDataLabel={t("analytics.noData")} />
               )}
             </CardContent>
           </Card>
@@ -583,15 +616,15 @@ export function AnalyticsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  Laufdynamik
-                  <Explain text="Vertical Ratio unter 7 %, Bodenkontakt unter 240 ms und eine gleichmäßige Schrittlänge sprechen für ökonomisches Laufen." />
+                  {t("analytics.dyn.title")}
+                  <Explain text={t("analytics.dyn.explain")} aria={explainAria} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ChartContainer
                   config={{
-                    vr: { label: "Vertical Ratio (%)", color: "var(--chart-1)" },
-                    gct: { label: "Bodenkontakt (ms)", color: "var(--chart-2)" },
+                    vr: { label: t("analytics.dyn.vr"), color: "var(--chart-1)" },
+                    gct: { label: t("analytics.dyn.gct"), color: "var(--chart-2)" },
                   }}
                   className="h-56 w-full"
                 >
@@ -615,8 +648,8 @@ export function AnalyticsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  Schlafphasen
-                  <Explain text="Rund 15–25 % Tiefschlaf und 20–25 % REM gelten als gut. Wichtig ist vor allem eine konstante Gesamtdauer." />
+                  {t("analytics.sleepPhases.title")}
+                  <Explain text={t("analytics.sleepPhases.explain")} aria={explainAria} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -648,13 +681,13 @@ export function AnalyticsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  HRV mit Baseline
-                  <Explain text="Herzratenvariabilität der Nacht. Innerhalb des Baseline-Bands bist du ausbalanciert, dauerhaft darunter bedeutet Stress oder Überlastung." />
+                  {t("analytics.hrv.title")}
+                  <Explain text={t("analytics.hrv.explain")} aria={explainAria} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ChartContainer
-                  config={{ hrv: { label: "HRV (ms)", color: "var(--chart-1)" } }}
+                  config={{ hrv: { label: t("analytics.hrv.label"), color: "var(--chart-1)" } }}
                   className="h-56 w-full"
                 >
                   <LineChart
@@ -686,15 +719,15 @@ export function AnalyticsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  Ruhepuls &amp; Body Battery
-                  <Explain text="Ein steigender Ruhepuls oder eine Body Battery, die nachts nicht mehr auflädt, sind frühe Warnzeichen für Überlastung." />
+                  {t("analytics.rhr.title")}
+                  <Explain text={t("analytics.rhr.explain")} aria={explainAria} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ChartContainer
                   config={{
-                    resting_hr: { label: "Ruhepuls", color: "var(--chart-2)" },
-                    body_battery_max: { label: "Body Battery max", color: "var(--success)" },
+                    resting_hr: { label: t("analytics.rhr.label"), color: "var(--chart-2)" },
+                    body_battery_max: { label: t("analytics.bb.label"), color: "var(--success)" },
                   }}
                   className="h-56 w-full"
                 >
@@ -716,7 +749,7 @@ export function AnalyticsView({
           ) : null}
 
           {!view.sleep.length && !view.hrv.length && !view.wellness.length && (
-            <EmptyHint text="Noch keine Gesundheitsdaten. Der Garmin-Konto-Export enthält Schlaf, HRV und Body Battery – lade ihn unter Import hoch." />
+            <EmptyHint text={t("analytics.empty.sleep")} noDataLabel={t("analytics.noData")} />
           )}
         </TabsContent>
       </Tabs>
@@ -729,12 +762,14 @@ function Metric({
   label,
   value,
   hint,
+  explainAria,
   extra,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   hint: string;
+  explainAria: string;
   extra?: React.ReactNode;
 }) {
   return (
@@ -743,7 +778,7 @@ function Metric({
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {icon}
           {label}
-          <Explain text={hint} />
+          <Explain text={hint} aria={explainAria} />
         </div>
         <div className="font-mono text-2xl font-bold tabular-nums">{value}</div>
         {extra ? <div className="text-xs">{extra}</div> : null}
@@ -770,11 +805,11 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function EmptyHint({ text }: { text: string }) {
+function EmptyHint({ text, noDataLabel }: { text: string; noDataLabel: string }) {
   return (
     <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
       <Badge variant="outline" className="mb-2">
-        Keine Daten
+        {noDataLabel}
       </Badge>
       <p>{text}</p>
     </div>

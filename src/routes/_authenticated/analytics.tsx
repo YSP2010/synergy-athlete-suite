@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AnalyticsView } from "@/components/analytics/AnalyticsView";
+import { useT } from "@/lib/i18n";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 });
 
 function AnalyticsPage() {
+  const t = useT();
   const { data: uid } = useQuery({
     queryKey: ["analytics-uid"],
     queryFn: async () => (await supabase.auth.getUser()).data.user?.id ?? null,
@@ -40,10 +42,8 @@ function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold">Analyse</h1>
-        <p className="text-sm text-muted-foreground">
-          Deine Trainingsdaten – jede Kennzahl mit Erklärung, was sie für dich bedeutet.
-        </p>
+        <h1 className="text-2xl font-bold">{t("analytics.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("analytics.subtitle")}</p>
       </header>
       {uid ? (
         <AnalyticsView userId={uid} />
