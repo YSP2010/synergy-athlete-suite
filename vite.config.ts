@@ -14,6 +14,26 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    // Die Backend-Zugangsdaten (öffentlicher Schlüssel + URL) werden beim Build
+    // fest eingesetzt. Ohne das blieb die veröffentlichte App leer bzw. zeigte
+    // "Etwas ist schiefgelaufen", weil im Client-Bundle keine Werte ankamen.
+    define: {
+      "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(
+        process.env.VITE_SUPABASE_URL ||
+          process.env.SUPABASE_URL ||
+          "https://jqrrxuezrkdypwoudxuz.supabase.co",
+      ),
+      "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(
+        process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+          process.env.SUPABASE_PUBLISHABLE_KEY ||
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxcnJ4dWV6cmtkeXB3b3VkeHV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNjg4MjgsImV4cCI6MjA5ODY0NDgyOH0.cjLpPX_CnjJgWCv8eJcJ6YkIeBI3b0kmLUfd8ImZ5Eg",
+      ),
+      "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify(
+        process.env.VITE_SUPABASE_PROJECT_ID ||
+          process.env.SUPABASE_PROJECT_ID ||
+          "jqrrxuezrkdypwoudxuz",
+      ),
+    },
     plugins: [
       mcpPlugin(),
       VitePWA({
