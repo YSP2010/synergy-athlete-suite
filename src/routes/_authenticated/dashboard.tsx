@@ -26,6 +26,7 @@ import {
   type SportSession,
 } from "@/lib/planner";
 import { RecoveryRing } from "@/components/dashboard/RecoveryRing";
+import { RankBadge } from "@/components/gamification/RankBadge";
 import { MacroRings } from "@/components/dashboard/MacroRings";
 import { QueryError } from "@/components/ui/query-error";
 import { TrainingTipCard } from "@/components/ai/TrainingTipCard";
@@ -275,6 +276,8 @@ function DashboardPage() {
           </Link>
         )}
       </div>
+
+      <RankBadge />
 
       {/* Recovery + Today */}
       <div className="grid gap-4 md:grid-cols-3">
