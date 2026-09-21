@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { humanError } from "@/lib/errors";
+import { TrainingPlanView } from "@/components/plan/TrainingPlanView";
 
 /** Auswahl-Optionen für manuelle Slot-Overrides. */
 const OVERRIDE_OPTIONS: {
@@ -382,6 +383,8 @@ function PlanPage() {
           Carbo-Loading auszulösen.
         </p>
       </div>
+
+      <TrainingPlanView />
 
       {needsDeload(data.signals) && (
         <div className="card-elevated flex items-start gap-2 border-l-4 border-l-[color:var(--warn)] p-4 text-sm">
