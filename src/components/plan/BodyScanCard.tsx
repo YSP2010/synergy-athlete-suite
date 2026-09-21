@@ -20,16 +20,31 @@ interface Suggestion {
  * Optionaler Body-Scan: Foto hochladen → KI schlägt zu betonende Muskelgruppen
  * vor. Foto wird serverseitig sofort nach der Analyse gelöscht. Für unter
  * 16-Jährige komplett gesperrt. Ausgabe ist nur ein Trainings-Fokus-Vorschlag.
+ *
+ * `birthDate` überschreibt die Altersprüfung (Onboarding: lokale Eingabe, bevor
+ * das Profil gespeichert ist). Ohne die Prop wird das Geburtsdatum aus dem
+ * Profil gelesen (Einstellungen). `onBeforeScan` wird vor dem Upload aufgerufen
+ * (Onboarding: Geburtsdatum persistieren, damit auch die Server-Sperre greift).
  */
-export function BodyScanCard({ onApply }: { onApply: (groups: string[]) => void }) {
+export function BodyScanCard({
+  onApply,
+  birthDate,
+  onBeforeScan,
+}: {
+  onApply: (groups: string[]) => void;
+  birthDate?: string | null;
+  onBeforeScan?: () => Promise<void>;
+}) {
   const { t, locale } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [consent, setConsent] = useState(false);
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const analyze = useServerFn(analyzeBodyScan);
+  const useLocalBirth = birthDate !== undefined;
 
-  const { data: birthDate, isLoading } = useQuery({
+  const { data: dbBirth, isLoading } = useQuery({
     queryKey: ["profile-birthdate"],
+    enabled: !useLocalBirth,
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
@@ -44,9 +59,9 @@ export function BodyScanCard({ onApply }: { onApply: (groups: string[]) => void 
 
   const run = useMutation({
     mutationFn: async (file: File) => {
+      if (onBeforeScan) await onBeforeScan();
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Nicht angemeldet");
-      // Einwilligung protokollieren (append-only).
       await supabase
         .from("consents")
         .insert({ user_id: u.user.id, kind: "body_scan", granted: true, version: "v1" });
@@ -78,9 +93,10 @@ export function BodyScanCard({ onApply }: { onApply: (groups: string[]) => void 
     run.mutate(file);
   }
 
-  if (isLoading) return null;
+  if (!useLocalBirth && isLoading) return null;
 
-  const blocked = isMinor(birthDate);
+  const effectiveBirth = useLocalBirth ? (birthDate ?? null) : (dbBirth ?? null);
+  const blocked = isMinor(effectiveBirth);
 
   return (
     <div className="rounded-lg border border-border bg-elevated p-4">

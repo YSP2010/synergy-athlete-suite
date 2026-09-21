@@ -23,6 +23,7 @@ import type { Goal, Sex } from "@/lib/planner";
 import { generateTrainingPlan } from "@/lib/plan.functions";
 import { useI18n } from "@/lib/i18n";
 import { FocusPicker } from "@/components/plan/FocusPicker";
+import { BodyScanCard } from "@/components/plan/BodyScanCard";
 import { EMPTY_FOCUS, type TrainingFocus } from "@/lib/plan-types";
 import { humanError } from "@/lib/errors";
 
@@ -208,6 +209,29 @@ function OnboardingPage() {
       setFinishing(false);
     }
   }
+
+  // Speichert nur das Geburtsdatum vorab, damit die serverseitige
+  // Minderjährigen-Sperre des Body-Scans auch im Onboarding greift.
+  async function persistBirthDate() {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return;
+    await supabase
+      .from("profiles")
+      .update({ birth_date: f.birth_date || null })
+      .eq("id", u.user.id);
+  }
+
+  const applyScanSuggestion = (groups: string[]) =>
+    setF((s) => ({
+      ...s,
+      training_focus: {
+        preset: "custom",
+        groups: {
+          ...s.training_focus.groups,
+          ...Object.fromEntries(groups.map((g) => [g, "focus" as const])),
+        },
+      },
+    }));
 
   const steps = ["Basics", "Sport", "Training", "Ernährung", "Ziel"];
 
@@ -396,7 +420,12 @@ function OnboardingPage() {
               })}
             </div>
 
-            <div className="mt-2 border-t border-border pt-4">
+            <div className="mt-2 space-y-4 border-t border-border pt-4">
+              <BodyScanCard
+                birthDate={f.birth_date || null}
+                onBeforeScan={persistBirthDate}
+                onApply={applyScanSuggestion}
+              />
               <FocusPicker
                 value={f.training_focus}
                 onChange={(tf) => setF({ ...f, training_focus: tf })}
