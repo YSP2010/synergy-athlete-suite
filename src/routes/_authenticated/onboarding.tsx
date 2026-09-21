@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Loader2, ArrowRight, ArrowLeft } from "lucide-react";
 import type { Goal, Sex } from "@/lib/planner";
 import { generateTrainingPlan } from "@/lib/plan.functions";
+import { useI18n } from "@/lib/i18n";
 import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
@@ -97,6 +98,7 @@ function OnboardingPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const genPlan = useServerFn(generateTrainingPlan);
+  const { locale } = useI18n();
   const [step, setStep] = useState(0);
   const [createPlans, setCreatePlans] = useState(true);
   const [finishing, setFinishing] = useState(false);
@@ -185,8 +187,8 @@ function OnboardingPage() {
       await save.mutateAsync();
       if (createPlans) {
         try {
-          await genPlan({ data: { type: "gym" } });
-          await genPlan({ data: { type: "sport" } });
+          await genPlan({ data: { type: "gym", locale } });
+          await genPlan({ data: { type: "sport", locale } });
           toast.success("Gym- und Sport-Plan erstellt");
         } catch (e) {
           toast.error(humanError(e));

@@ -3,6 +3,7 @@
 
 export type PlanType = "gym" | "sport";
 export type Experience = "beginner" | "intermediate" | "advanced";
+export type PlanLocale = "de" | "en" | "uk";
 
 export interface PlanExercise {
   name: string;

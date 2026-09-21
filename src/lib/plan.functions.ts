@@ -8,6 +8,7 @@ import { PLAN_COOLDOWN_DAYS, planTypeStatus } from "./plan-types";
 
 const GeneratePlanInput = z.object({
   type: z.enum(["gym", "sport"]),
+  locale: z.enum(["de", "en", "uk"]).optional(),
 });
 
 // training_plans ist noch nicht in den generierten Supabase-Typen enthalten
@@ -151,7 +152,7 @@ export const generateTrainingPlan = createServerFn({ method: "POST" })
     };
 
     // 3) Plan generieren (Hybrid: Regel-Gerüst + KI-Feinschliff)
-    const plan = await generatePlan(input, type);
+    const plan = await generatePlan(input, type, data.locale ?? "de");
 
     // 4) Bisherigen aktiven Plan desselben Typs deaktivieren
     const { error: deactErr } = await db

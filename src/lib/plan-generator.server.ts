@@ -8,8 +8,21 @@
 import { generateText } from "ai";
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 import { calcDailyMacros, toAthleteProfile } from "./planner";
-import type { Experience, PlanContent, PlanSession, PlanType, WeekFocus } from "./plan-types";
+import type {
+  Experience,
+  PlanContent,
+  PlanLocale,
+  PlanSession,
+  PlanType,
+  WeekFocus,
+} from "./plan-types";
 import { gymPlanWeeks, sportPlanWeeks } from "./plan-types";
+
+const RESPONSE_LANGUAGE: Record<PlanLocale, string> = {
+  de: "German",
+  en: "English",
+  uk: "Ukrainian",
+};
 
 /** Rohdaten aus der profiles-Zeile, die der Generator benötigt. */
 export interface PlanProfileInput {
@@ -303,6 +316,7 @@ async function refineWithAI(
   scaffold: PlanContent,
   input: PlanProfileInput,
   key: string,
+  locale: PlanLocale,
 ): Promise<PlanContent> {
   const gateway = createLovableAiGatewayProvider(key);
   const context = [
@@ -314,7 +328,7 @@ async function refineWithAI(
     `weeks=${scaffold.weeks}`,
   ].join(", ");
 
-  const prompt = `You are an experienced strength & conditioning coach. Improve the following DRAFT training plan for an athlete (${context}). Make the exercise selection specific and appropriate to the athlete's sport, goal and experience level. Keep exactly the same JSON structure and keys. Do NOT change "type", "weeks", "version" or "macros". Keep the number of sessions similar. Write ALL text (titles, focus, notes, summary, exercise names) in German. Return ONLY valid minified JSON, no markdown, no commentary.\n\nDRAFT:\n${JSON.stringify(scaffold)}`;
+  const prompt = `You are an experienced strength & conditioning coach. Improve the following DRAFT training plan for an athlete (${context}). Make the exercise selection specific and appropriate to the athlete's sport, goal and experience level. Keep exactly the same JSON structure and keys. Do NOT change "type", "weeks", "version" or "macros". Keep the number of sessions similar. Write ALL text (titles, focus, notes, summary, exercise names) in ${RESPONSE_LANGUAGE[locale]}. Return ONLY valid minified JSON, no markdown, no commentary.\n\nDRAFT:\n${JSON.stringify(scaffold)}`;
 
   const { text } = await generateText({
     model: gateway("openai/gpt-5.6-sol"),
@@ -355,12 +369,16 @@ async function refineWithAI(
  * Gerüst und verfeinert es – wenn ein LOVABLE_API_KEY gesetzt ist – per KI.
  * Schlägt die KI fehl, wird das Gerüst zurückgegeben (generated_by: "rules").
  */
-export async function generatePlan(input: PlanProfileInput, type: PlanType): Promise<PlanContent> {
+export async function generatePlan(
+  input: PlanProfileInput,
+  type: PlanType,
+  locale: PlanLocale = "de",
+): Promise<PlanContent> {
   const scaffold = buildScaffold(input, type);
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) return scaffold;
   try {
-    return await refineWithAI(scaffold, input, key);
+    return await refineWithAI(scaffold, input, key, locale);
   } catch (e) {
     console.error("[plan] AI refinement failed, using rule-based scaffold:", e);
     return scaffold;
