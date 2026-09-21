@@ -160,3 +160,15 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
 }
+
+/* Gamification: Avatar-Rang-Ring (Animationen + Hintergrund) */
+.gav-bg { fill: var(--elevated); }
+.gspin { transform-box: fill-box; transform-origin: center; animation: gspin 26s linear infinite; }
+.ghalo { transform-box: fill-box; transform-origin: center; animation: ghalo 2.8s ease-in-out infinite; }
+.gwings { transform-box: fill-box; transform-origin: center; animation: gbreathe 3.4s ease-in-out infinite; }
+.gtw { animation: gtwinkle 1.8s ease-in-out infinite; }
+@keyframes gspin { to { transform: rotate(360deg); } }
+@keyframes ghalo { 0%, 100% { opacity: .35; transform: scale(1); } 50% { opacity: .8; transform: scale(1.05); } }
+@keyframes gbreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+@keyframes gtwinkle { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .gspin, .ghalo, .gwings, .gtw { animation: none; } }
