@@ -22,6 +22,8 @@ import { Loader2, ArrowRight, ArrowLeft } from "lucide-react";
 import type { Goal, Sex } from "@/lib/planner";
 import { generateTrainingPlan } from "@/lib/plan.functions";
 import { useI18n } from "@/lib/i18n";
+import { FocusPicker } from "@/components/plan/FocusPicker";
+import { EMPTY_FOCUS, type TrainingFocus } from "@/lib/plan-types";
 import { humanError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
@@ -76,6 +78,7 @@ interface FormState {
   sport_days: number[];
   match_days: number[];
   experience_level: Experience;
+  training_focus: TrainingFocus;
   diet_style: string;
   allergies: string;
   goal: Goal;
@@ -114,6 +117,7 @@ function OnboardingPage() {
     sport_days: [1, 3],
     match_days: [6],
     experience_level: "intermediate",
+    training_focus: EMPTY_FOCUS,
     diet_style: "omnivor",
     allergies: "",
     goal: "performance",
@@ -167,9 +171,11 @@ function OnboardingPage() {
       // experience_level ist noch nicht in den generierten Supabase-Typen
       // enthalten (Migration training_plans). Bis zur Neugenerierung: gezielter
       // Cast, damit die neue Spalte trotzdem geschrieben wird.
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({ ...payload, experience_level: f.experience_level } as typeof payload);
+      const { error } = await supabase.from("profiles").upsert({
+        ...payload,
+        experience_level: f.experience_level,
+        training_focus: f.training_focus,
+      } as typeof payload);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -388,6 +394,13 @@ function OnboardingPage() {
                   </button>
                 );
               })}
+            </div>
+
+            <div className="mt-2 border-t border-border pt-4">
+              <FocusPicker
+                value={f.training_focus}
+                onChange={(tf) => setF({ ...f, training_focus: tf })}
+              />
             </div>
 
             <label className="mt-2 flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-elevated p-3">

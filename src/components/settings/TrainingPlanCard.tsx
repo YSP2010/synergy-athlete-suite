@@ -1,12 +1,21 @@
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, Dumbbell, Trophy } from "lucide-react";
 import { humanError } from "@/lib/errors";
 import { useI18n } from "@/lib/i18n";
+import { FocusPicker } from "@/components/plan/FocusPicker";
 import { getTrainingPlanStatus, generateTrainingPlan } from "@/lib/plan.functions";
-import type { PlanStatus, PlanType, PlanTypeStatus } from "@/lib/plan-types";
+import {
+  EMPTY_FOCUS,
+  type PlanStatus,
+  type PlanType,
+  type PlanTypeStatus,
+  type TrainingFocus,
+} from "@/lib/plan-types";
 
 type TFn = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -16,9 +25,9 @@ function formatDate(iso: string | null): string {
 }
 
 /**
- * Einstellungen-Karte „Trainingsplan": zeigt je Typ (Gym/Sport) den Status und
- * erlaubt das Anfordern eines neuen Plans in der eingestellten App-Sprache. Die
- * 4-Wochen-Sperre wird zusätzlich serverseitig erzwungen.
+ * Einstellungen-Karte „Trainingsplan": Fokus-Auswahl + je Typ (Gym/Sport)
+ * Status und Anforderung eines neuen Plans in der App-Sprache. Der Fokus wird
+ * vor der Generierung ins Profil gespeichert. 4-Wochen-Sperre serverseitig.
  */
 export function TrainingPlanCard() {
   const qc = useQueryClient();
@@ -31,12 +40,47 @@ export function TrainingPlanCard() {
     queryFn: () => getStatus({ data: undefined }) as Promise<PlanStatus>,
   });
 
+  const { data: profileFocus } = useQuery({
+    queryKey: ["profile-focus"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", u.user.id)
+        .maybeSingle();
+      return (
+        (data as unknown as { training_focus: TrainingFocus | null } | null)?.training_focus ?? null
+      );
+    },
+  });
+
+  const [focus, setFocus] = useState<TrainingFocus>(EMPTY_FOCUS);
+  useEffect(() => {
+    if (profileFocus) setFocus(profileFocus);
+  }, [profileFocus]);
+
+  async function persistFocus() {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ training_focus: focus } as never)
+      .eq("id", u.user.id);
+    if (error) throw error;
+  }
+
   const gen = useMutation({
-    mutationFn: (type: PlanType) => generate({ data: { type, locale } }),
+    mutationFn: async (type: PlanType) => {
+      await persistFocus();
+      return generate({ data: { type, locale } });
+    },
     onSuccess: () => {
       toast.success(t("plan.toast.created"));
       qc.invalidateQueries({ queryKey: ["training-plan-status"] });
       qc.invalidateQueries({ queryKey: ["training-plans"] });
+      qc.invalidateQueries({ queryKey: ["profile-focus"] });
     },
     onError: (e: Error) => toast.error(humanError(e)),
   });
@@ -46,27 +90,31 @@ export function TrainingPlanCard() {
       <h2 className="font-display text-lg font-semibold">{t("plan.card.title")}</h2>
       <p className="text-xs text-muted-foreground">{t("plan.card.subtitle")}</p>
 
-      <PlanRow
-        icon={<Dumbbell className="h-4 w-4 text-neon" />}
-        title={t("plan.gym.title")}
-        desc={t("plan.gym.desc")}
-        status={status?.gym}
-        loading={isLoading}
-        pending={gen.isPending && gen.variables === "gym"}
-        onGenerate={() => gen.mutate("gym")}
-        t={t}
-      />
+      <FocusPicker value={focus} onChange={setFocus} />
 
-      <PlanRow
-        icon={<Trophy className="h-4 w-4 text-neon" />}
-        title={t("plan.sport.title")}
-        desc={t("plan.sport.desc")}
-        status={status?.sport}
-        loading={isLoading}
-        pending={gen.isPending && gen.variables === "sport"}
-        onGenerate={() => gen.mutate("sport")}
-        t={t}
-      />
+      <div className="space-y-4 border-t border-border pt-4">
+        <PlanRow
+          icon={<Dumbbell className="h-4 w-4 text-neon" />}
+          title={t("plan.gym.title")}
+          desc={t("plan.gym.desc")}
+          status={status?.gym}
+          loading={isLoading}
+          pending={gen.isPending && gen.variables === "gym"}
+          onGenerate={() => gen.mutate("gym")}
+          t={t}
+        />
+
+        <PlanRow
+          icon={<Trophy className="h-4 w-4 text-neon" />}
+          title={t("plan.sport.title")}
+          desc={t("plan.sport.desc")}
+          status={status?.sport}
+          loading={isLoading}
+          pending={gen.isPending && gen.variables === "sport"}
+          onGenerate={() => gen.mutate("sport")}
+          t={t}
+        />
+      </div>
     </div>
   );
 }

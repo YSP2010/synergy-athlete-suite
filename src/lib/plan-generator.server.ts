@@ -14,9 +14,10 @@ import type {
   PlanLocale,
   PlanSession,
   PlanType,
+  TrainingFocus,
   WeekFocus,
 } from "./plan-types";
-import { gymPlanWeeks, sportPlanWeeks } from "./plan-types";
+import { focusLists, gymPlanWeeks, sportPlanWeeks } from "./plan-types";
 
 const RESPONSE_LANGUAGE: Record<PlanLocale, string> = {
   de: "German",
@@ -37,6 +38,7 @@ export interface PlanProfileInput {
   sport_days: number[] | null;
   match_days: number[] | null;
   experience_level: Experience | null;
+  focus: TrainingFocus | null;
 }
 
 /** Lokales Sport-Label inkl. Triathlon (planner.SPORT_LABELS kennt Triathlon nicht). */
@@ -85,6 +87,83 @@ const GYM_EXERCISES: Record<string, string[]> = {
   "Ganzkörper A": ["Kniebeugen", "Bankdrücken", "Rudern", "Schulterdrücken", "Plank"],
   "Ganzkörper B": ["Kreuzheben", "Schrägbankdrücken", "Klimmzüge", "Ausfallschritte", "Core"],
 };
+
+const EXERCISE_GROUP: Record<string, string> = {
+  Bankdrücken: "chest_lower",
+  "Schrägbankdrücken (KH)": "chest_upper",
+  Schrägbankdrücken: "chest_upper",
+  Schulterdrücken: "delts_front",
+  Seitheben: "delts_side",
+  Trizepsdrücken: "triceps",
+  Klimmzüge: "back_lats",
+  Langhantelrudern: "back_upper",
+  Latzug: "back_lats",
+  "Face Pulls": "delts_rear",
+  "Bizeps-Curls": "biceps",
+  Kniebeugen: "quads",
+  "Rumänisches Kreuzheben": "hamstrings",
+  Beinpresse: "quads",
+  Ausfallschritte: "glutes",
+  Wadenheben: "calves",
+  Rudern: "back_upper",
+  Armzusatz: "biceps",
+  Kreuzheben: "hamstrings",
+  Beinbeuger: "hamstrings",
+  Plank: "abs",
+  Core: "abs",
+};
+
+function exerciseGroup(name: string): string {
+  return EXERCISE_GROUP[name] ?? "";
+}
+
+const GROUP_EN: Record<string, string> = {
+  chest_upper: "upper chest",
+  chest_lower: "mid/lower chest",
+  back_lats: "lats (back width)",
+  back_upper: "upper back/traps",
+  back_lower: "lower back",
+  delts_front: "front delts",
+  delts_side: "side delts",
+  delts_rear: "rear delts",
+  biceps: "biceps",
+  triceps: "triceps",
+  forearms: "forearms",
+  abs: "abs",
+  obliques: "obliques",
+  glutes: "glutes",
+  quads: "quads",
+  hamstrings: "hamstrings",
+  calves: "calves",
+};
+
+function groupsEn(ids: string[]): string {
+  return ids.map((g) => GROUP_EN[g] ?? g).join(", ");
+}
+
+/** Wendet den Muskelgruppen-Fokus auf die Gym-Einheiten an (nur Gym). */
+function applyFocus(sessions: PlanSession[], focus: TrainingFocus | null): PlanSession[] {
+  if (!focus) return sessions;
+  const { emphasize, reduce, exclude } = focusLists(focus);
+  if (!emphasize.length && !reduce.length && !exclude.length) return sessions;
+  const eset = new Set(emphasize);
+  const rset = new Set(reduce);
+  const xset = new Set(exclude);
+  const out: PlanSession[] = [];
+  for (const session of sessions) {
+    const exercises = session.exercises
+      .filter((e) => !xset.has(exerciseGroup(e.name)))
+      .map((e) => {
+        const g = exerciseGroup(e.name);
+        let sets = e.sets;
+        if (eset.has(g)) sets += 1;
+        else if (rset.has(g)) sets = Math.max(2, sets - 1);
+        return { ...e, sets };
+      });
+    if (exercises.length) out.push({ ...session, exercises });
+  }
+  return out;
+}
 
 function repScheme(goal: string | null, exp: Experience): { sets: number; reps: string } {
   const setsBase = exp === "beginner" ? 3 : exp === "advanced" ? 4 : 3;
@@ -222,7 +301,8 @@ function buildWeeklyFocus(weeks: number): WeekFocus[] {
 
 function buildScaffold(input: PlanProfileInput, type: PlanType): PlanContent {
   const weeks = type === "gym" ? gymPlanWeeks(input.goal) : sportPlanWeeks(input.sport);
-  const sessions = type === "gym" ? buildGymSessions(input) : buildSportSessions(input);
+  const sessions =
+    type === "gym" ? applyFocus(buildGymSessions(input), input.focus) : buildSportSessions(input);
 
   let macros: PlanContent["macros"] = null;
   if (type === "gym") {
@@ -328,7 +408,13 @@ async function refineWithAI(
     `weeks=${scaffold.weeks}`,
   ].join(", ");
 
-  const prompt = `You are an experienced strength & conditioning coach. Improve the following DRAFT training plan for an athlete (${context}). Make the exercise selection specific and appropriate to the athlete's sport, goal and experience level. Keep exactly the same JSON structure and keys. Do NOT change "type", "weeks", "version" or "macros". Keep the number of sessions similar. Write ALL text (titles, focus, notes, summary, exercise names) in ${RESPONSE_LANGUAGE[locale]}. Return ONLY valid minified JSON, no markdown, no commentary.\n\nDRAFT:\n${JSON.stringify(scaffold)}`;
+  const { emphasize, reduce, exclude } = focusLists(input.focus);
+  const focusLine =
+    emphasize.length || reduce.length || exclude.length
+      ? ` Muscle-group focus (respect strictly): emphasise [${groupsEn(emphasize)}], reduce [${groupsEn(reduce)}], exclude entirely [${groupsEn(exclude)}]. Honour the exclusions, but keep the remaining plan balanced and injury-safe.`
+      : "";
+
+  const prompt = `You are an experienced strength & conditioning coach. Improve the following DRAFT training plan for an athlete (${context}). Make the exercise selection specific and appropriate to the athlete's sport, goal and experience level. Keep exactly the same JSON structure and keys. Do NOT change "type", "weeks", "version" or "macros". Keep the number of sessions similar.${focusLine} Write ALL text (titles, focus, notes, summary, exercise names) in ${RESPONSE_LANGUAGE[locale]}. Return ONLY valid minified JSON, no markdown, no commentary.\n\nDRAFT:\n${JSON.stringify(scaffold)}`;
 
   const { text } = await generateText({
     model: gateway("openai/gpt-5.6-sol"),

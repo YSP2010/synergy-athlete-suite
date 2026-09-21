@@ -97,3 +97,106 @@ export function planTypeStatus(lastGeneratedAt: string | null): PlanTypeStatus {
     nextAvailableAt: canGenerate ? null : next.toISOString(),
   };
 }
+
+// ---------- Muskelgruppen-Fokus ----------
+
+export type FocusLevel = "off" | "less" | "normal" | "focus";
+
+/** Feine Muskelgruppen, gruppiert in 6 Regionen. IDs sind i18n-Keys-Suffixe. */
+export const MUSCLE_REGIONS: { id: string; groups: string[] }[] = [
+  { id: "chest", groups: ["chest_upper", "chest_lower"] },
+  { id: "back", groups: ["back_lats", "back_upper", "back_lower"] },
+  { id: "shoulders", groups: ["delts_front", "delts_side", "delts_rear"] },
+  { id: "arms", groups: ["biceps", "triceps", "forearms"] },
+  { id: "core", groups: ["abs", "obliques"] },
+  { id: "legs", groups: ["glutes", "quads", "hamstrings", "calves"] },
+];
+
+export const ALL_MUSCLE_GROUPS: string[] = MUSCLE_REGIONS.flatMap((r) => r.groups);
+
+export interface TrainingFocus {
+  preset?: string;
+  /** Nur abweichende Gruppen speichern; fehlende = "normal". */
+  groups: Record<string, FocusLevel>;
+}
+
+export const EMPTY_FOCUS: TrainingFocus = { preset: "balanced", groups: {} };
+
+/** Vordefinierte Fokus-Vorlagen. Labels liegen in messages.ts (focus.preset.*). */
+export const FOCUS_PRESETS: { id: string; groups: Record<string, FocusLevel> }[] = [
+  { id: "balanced", groups: {} },
+  {
+    id: "hourglass",
+    groups: {
+      glutes: "focus",
+      delts_side: "focus",
+      delts_rear: "focus",
+      back_lats: "focus",
+      obliques: "less",
+    },
+  },
+  {
+    id: "upper",
+    groups: {
+      chest_upper: "focus",
+      chest_lower: "focus",
+      back_lats: "focus",
+      back_upper: "focus",
+      delts_front: "focus",
+      delts_side: "focus",
+      biceps: "focus",
+      triceps: "focus",
+    },
+  },
+  {
+    id: "lower",
+    groups: { glutes: "focus", quads: "focus", hamstrings: "focus", calves: "focus" },
+  },
+  {
+    id: "push",
+    groups: {
+      chest_upper: "focus",
+      chest_lower: "focus",
+      delts_front: "focus",
+      delts_side: "focus",
+      triceps: "focus",
+    },
+  },
+  {
+    id: "pull",
+    groups: { back_lats: "focus", back_upper: "focus", delts_rear: "focus", biceps: "focus" },
+  },
+  { id: "custom", groups: {} },
+];
+
+export function focusGroupLevel(
+  focus: TrainingFocus | null | undefined,
+  group: string,
+): FocusLevel {
+  return focus?.groups?.[group] ?? "normal";
+}
+
+/** Regionen, bei denen ALLE Untergruppen auf "off" stehen (für die Warnung). */
+export function fullyExcludedRegions(focus: TrainingFocus | null | undefined): string[] {
+  if (!focus) return [];
+  return MUSCLE_REGIONS.filter((r) => r.groups.every((g) => focus.groups?.[g] === "off")).map(
+    (r) => r.id,
+  );
+}
+
+/** Zerlegt den Fokus in Listen für Generator/KI-Prompt. */
+export function focusLists(focus: TrainingFocus | null | undefined): {
+  emphasize: string[];
+  reduce: string[];
+  exclude: string[];
+} {
+  const emphasize: string[] = [];
+  const reduce: string[] = [];
+  const exclude: string[] = [];
+  for (const [g, lvl] of Object.entries(focus?.groups ?? {})) {
+    if (lvl === "focus") emphasize.push(g);
+    else if (lvl === "less") reduce.push(g);
+    else if (lvl === "off") exclude.push(g);
+  }
+  return { emphasize, reduce, exclude };
+}

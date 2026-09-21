@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generatePlan } from "./plan-generator.server";
 import type { PlanProfileInput } from "./plan-generator.server";
-import type { Experience, PlanContent, PlanStatus, PlanType } from "./plan-types";
+import type { Experience, PlanContent, PlanStatus, PlanType, TrainingFocus } from "./plan-types";
 import { PLAN_COOLDOWN_DAYS, planTypeStatus } from "./plan-types";
 
 const GeneratePlanInput = z.object({
@@ -56,7 +56,7 @@ interface PlanDb {
 }
 
 /** profiles-Zeile inkl. experience_level (noch nicht in den generierten Typen). */
-type ProfileRow = PlanProfileInput & { id: string };
+type ProfileRow = PlanProfileInput & { id: string; training_focus: TrainingFocus | null };
 
 async function latestPlanAt(db: PlanDb, userId: string, type: PlanType): Promise<string | null> {
   const { data, error } = await db
@@ -149,6 +149,7 @@ export const generateTrainingPlan = createServerFn({ method: "POST" })
       sport_days: prof.sport_days ?? [],
       match_days: prof.match_days ?? [],
       experience_level: (prof.experience_level as Experience | null) ?? "intermediate",
+      focus: (prof.training_focus as TrainingFocus | null) ?? null,
     };
 
     // 3) Plan generieren (Hybrid: Regel-Gerüst + KI-Feinschliff)
