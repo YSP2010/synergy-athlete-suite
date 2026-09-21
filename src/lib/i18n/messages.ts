@@ -7,6 +7,7 @@ export type Locale = "de" | "en" | "uk";
  */
 export const messages: Record<Locale, Record<string, string>> = {
   de: {
+    "nav.profile": "Profil",
     "bodyscan.title": "Body-Scan (optional)",
     "bodyscan.subtitle":
       "Lade ein Foto hoch – die KI schlägt Muskelgruppen vor, die du betonen könntest. Das Foto wird nach der Analyse sofort gelöscht.",
@@ -271,6 +272,7 @@ export const messages: Record<Locale, Record<string, string>> = {
     "import.skipped.reason.other": "Sonstiges",
   },
   en: {
+    "nav.profile": "Profile",
     "bodyscan.title": "Body scan (optional)",
     "bodyscan.subtitle":
       "Upload a photo – the AI suggests muscle groups you could emphasise. The photo is deleted right after analysis.",
@@ -531,6 +533,7 @@ export const messages: Record<Locale, Record<string, string>> = {
     "import.skipped.reason.other": "Other",
   },
   uk: {
+    "nav.profile": "Профіль",
     "bodyscan.title": "Скан тіла (необов’язково)",
     "bodyscan.subtitle":
       "Завантаж фото — ШІ запропонує групи м’язів для акценту. Фото видаляється одразу після аналізу.",

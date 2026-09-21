@@ -23,6 +23,7 @@ import {
   Timer,
   TrendingUp,
   Trophy,
+  UserCircle,
   Users,
   Utensils,
   Wrench,
@@ -42,6 +43,7 @@ interface NavItem {
 
 const ATHLETE_NAV: NavItem[] = [
   { to: "/dashboard", key: "nav.dashboard", shortKey: "nav.short.home", icon: LayoutDashboard },
+  { to: "/profile", key: "nav.profile", icon: UserCircle },
   { to: "/plan", key: "nav.plan", shortKey: "nav.short.plan", icon: CalendarDays },
   { to: "/checkin", key: "nav.checkin", icon: HeartPulse },
   { to: "/matchday", key: "nav.matchday", icon: Timer },
