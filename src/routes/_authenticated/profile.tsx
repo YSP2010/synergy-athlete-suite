@@ -7,6 +7,7 @@ import { rankProgress, divisionName, PROSPECT_NAMES } from "@/lib/gamification/r
 import { sanitizeAvatar } from "@/lib/gamification/avatar";
 import { AvatarDisplay } from "@/components/gamification/AvatarDisplay";
 import { AvatarBuilder } from "@/components/gamification/AvatarBuilder";
+import { BadgeGrid } from "@/components/gamification/BadgeGrid";
 import { XpBar } from "@/components/gamification/XpBar";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -134,6 +135,8 @@ function ProfilePage() {
           onCancel={() => setEditing(false)}
         />
       )}
+
+      <BadgeGrid />
     </div>
   );
 }

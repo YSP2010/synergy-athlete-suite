@@ -132,7 +132,7 @@ export const DEFAULT_AVATAR: AvatarConfig = {
   jerseyColor: "red",
   accessory: "none",
   dicebearId: "avataaars-1",
-  presetId: "athlete-red",
+  presetId: "triathlete-teal",
 };
 
 function pick(list: { key: string }[], key: unknown, fallback: string): string {

@@ -23,6 +23,11 @@ export const DICEBEAR_GALLERY: GalleryItem[] = DB_STYLES.flatMap(([k, label]) =>
 );
 
 export const ILLUSTRATED_GALLERY: GalleryItem[] = [
+  { id: "triathlete-teal", label: "Triathletin", url: "/avatars/illustrated/triathlete-teal.webp" },
+  { id: "footballer-green", label: "Fußballer", url: "/avatars/illustrated/footballer-green.webp" },
+  { id: "hybrid-red", label: "Hybrid-Athlet", url: "/avatars/illustrated/hybrid-red.webp" },
+  { id: "runner-blonde", label: "Sprinterin", url: "/avatars/illustrated/runner-blonde.webp" },
+  { id: "cyclist-orange", label: "Radsportler", url: "/avatars/illustrated/cyclist-orange.webp" },
   { id: "athlete-red", label: "Athlet", url: "/avatars/illustrated/athlete-red.webp" },
   { id: "runner-blue", label: "Läuferin", url: "/avatars/illustrated/runner-blue.webp" },
 ];
