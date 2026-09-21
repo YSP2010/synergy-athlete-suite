@@ -8,6 +8,7 @@ import { Loader2, Dumbbell, Trophy } from "lucide-react";
 import { humanError } from "@/lib/errors";
 import { useI18n } from "@/lib/i18n";
 import { FocusPicker } from "@/components/plan/FocusPicker";
+import { BodyScanCard } from "@/components/plan/BodyScanCard";
 import { getTrainingPlanStatus, generateTrainingPlan } from "@/lib/plan.functions";
 import {
   EMPTY_FOCUS,
@@ -85,10 +86,22 @@ export function TrainingPlanCard() {
     onError: (e: Error) => toast.error(humanError(e)),
   });
 
+  const applySuggestion = (groups: string[]) => {
+    setFocus((prev) => ({
+      preset: "custom",
+      groups: {
+        ...prev.groups,
+        ...Object.fromEntries(groups.map((g) => [g, "focus" as const])),
+      },
+    }));
+  };
+
   return (
     <div className="card-elevated space-y-4 p-5">
       <h2 className="font-display text-lg font-semibold">{t("plan.card.title")}</h2>
       <p className="text-xs text-muted-foreground">{t("plan.card.subtitle")}</p>
+
+      <BodyScanCard onApply={applySuggestion} />
 
       <FocusPicker value={focus} onChange={setFocus} />
 

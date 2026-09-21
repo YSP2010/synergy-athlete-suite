@@ -7,6 +7,21 @@ export type Locale = "de" | "en" | "uk";
  */
 export const messages: Record<Locale, Record<string, string>> = {
   de: {
+    "bodyscan.title": "Body-Scan (optional)",
+    "bodyscan.subtitle":
+      "Lade ein Foto hoch – die KI schlägt Muskelgruppen vor, die du betonen könntest. Das Foto wird nach der Analyse sofort gelöscht.",
+    "bodyscan.consent":
+      "Ich bin einverstanden, dass mein Foto einmalig zur Analyse verarbeitet und danach gelöscht wird.",
+    "bodyscan.upload": "Foto auswählen",
+    "bodyscan.analyzing": "Analysiere…",
+    "bodyscan.minorBlocked": "Der Body-Scan ist für unter 16-Jährige nicht verfügbar.",
+    "bodyscan.suggestionTitle": "Vorschlag",
+    "bodyscan.apply": "In Fokus übernehmen",
+    "bodyscan.applied": "In den Fokus übernommen",
+    "bodyscan.disclaimer":
+      "Grobe Orientierung fürs Training – keine medizinische oder Körper-Bewertung.",
+    "bodyscan.errorType": "Bitte ein Bild auswählen.",
+    "bodyscan.errorSize": "Bild ist zu groß (max. 8 MB).",
     "focus.title": "Trainingsfokus",
     "focus.subtitle":
       "Betone oder reduziere gezielt Muskelgruppen. Optional – Standard ist ausgewogen.",
@@ -256,6 +271,20 @@ export const messages: Record<Locale, Record<string, string>> = {
     "import.skipped.reason.other": "Sonstiges",
   },
   en: {
+    "bodyscan.title": "Body scan (optional)",
+    "bodyscan.subtitle":
+      "Upload a photo – the AI suggests muscle groups you could emphasise. The photo is deleted right after analysis.",
+    "bodyscan.consent":
+      "I agree that my photo is processed once for analysis and deleted afterwards.",
+    "bodyscan.upload": "Choose photo",
+    "bodyscan.analyzing": "Analysing…",
+    "bodyscan.minorBlocked": "The body scan is not available for under-16s.",
+    "bodyscan.suggestionTitle": "Suggestion",
+    "bodyscan.apply": "Apply to focus",
+    "bodyscan.applied": "Applied to focus",
+    "bodyscan.disclaimer": "Rough training guidance – not a medical or body assessment.",
+    "bodyscan.errorType": "Please choose an image.",
+    "bodyscan.errorSize": "Image too large (max 8 MB).",
     "focus.title": "Training focus",
     "focus.subtitle": "Emphasise or reduce specific muscle groups. Optional – balanced by default.",
     "focus.presetLabel": "Preset",
@@ -502,6 +531,20 @@ export const messages: Record<Locale, Record<string, string>> = {
     "import.skipped.reason.other": "Other",
   },
   uk: {
+    "bodyscan.title": "Скан тіла (необов’язково)",
+    "bodyscan.subtitle":
+      "Завантаж фото — ШІ запропонує групи м’язів для акценту. Фото видаляється одразу після аналізу.",
+    "bodyscan.consent":
+      "Погоджуюсь, що моє фото обробляється один раз для аналізу й потім видаляється.",
+    "bodyscan.upload": "Обрати фото",
+    "bodyscan.analyzing": "Аналізую…",
+    "bodyscan.minorBlocked": "Скан тіла недоступний для осіб до 16 років.",
+    "bodyscan.suggestionTitle": "Пропозиція",
+    "bodyscan.apply": "Застосувати до фокуса",
+    "bodyscan.applied": "Застосовано",
+    "bodyscan.disclaimer": "Груба орієнтація для тренувань — не медична й не оцінка тіла.",
+    "bodyscan.errorType": "Будь ласка, обери зображення.",
+    "bodyscan.errorSize": "Зображення завелике (макс. 8 МБ).",
     "focus.title": "Фокус тренувань",
     "focus.subtitle":
       "Акцентуй або зменш окремі групи м’язів. Необов’язково — за замовчуванням збалансовано.",
