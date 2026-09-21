@@ -76,7 +76,7 @@ BEGIN
       (SELECT COALESCE(MAX(weight_kg), 0) FROM ex WHERE name ILIKE '%kreuzheben%' OR name ILIKE '%deadlift%' OR name ILIKE '%станова%') AS dead_mx,
       (SELECT COALESCE(SUM(sets * reps * COALESCE(weight_kg, 0)), 0) FROM ex) AS tonnage,
       (SELECT COALESCE(SUM(sets), 0) FROM ex) AS total_sets,
-      (SELECT COALESCE(MAX(distance_m), 0) FROM act) AS max_dist,
+      (SELECT COALESCE(MAX(distance_m), 0) FROM act WHERE sport LIKE '%run%') AS max_dist,
       (SELECT COALESCE(SUM(distance_m), 0) FROM act) AS total_dist,
       (SELECT COALESCE(SUM(elevation_gain_m), 0) FROM act) AS elev_total,
       (SELECT COALESCE(MAX(elevation_gain_m), 0) FROM act) AS elev_single,

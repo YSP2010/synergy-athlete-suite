@@ -66,7 +66,7 @@ BEGIN
       (SELECT COALESCE(MAX(weight_kg), 0) FROM ex WHERE name ILIKE '%kniebeuge%' OR name ILIKE '%squat%' OR name ILIKE '%присід%') AS squat_mx,
       (SELECT COALESCE(MAX(weight_kg), 0) FROM ex WHERE name ILIKE '%kreuzheben%' OR name ILIKE '%deadlift%' OR name ILIKE '%станова%') AS dead_mx,
       (SELECT COALESCE(SUM(sets * reps * COALESCE(weight_kg, 0)), 0) FROM ex) AS tonnage,
-      (SELECT COALESCE(MAX(distance_m), 0) FROM act) AS max_dist,
+      (SELECT COALESCE(MAX(distance_m), 0) FROM act WHERE sport LIKE '%run%') AS max_dist,
       (SELECT COALESCE(SUM(distance_m), 0) FROM act) AS total_dist,
       (SELECT COUNT(*) FROM public.daily_stats WHERE user_id = _uid) AS checkins,
       (SELECT COUNT(*) FROM sport WHERE kind = 'match') AS matches,
