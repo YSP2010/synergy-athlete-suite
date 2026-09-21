@@ -1,6 +1,20 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Flag, Dumbbell, Footprints, Flame, Sparkles, Lock } from "lucide-react";
+import {
+  Flag,
+  Dumbbell,
+  Footprints,
+  Timer,
+  Mountain,
+  Zap,
+  HeartPulse,
+  Flame,
+  Clock,
+  Layers,
+  Moon,
+  Sparkles,
+  Lock,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -15,7 +29,14 @@ const ICONS: Record<BadgeCategory, typeof Flag> = {
   milestone: Flag,
   strength: Dumbbell,
   endurance: Footprints,
+  tempo: Timer,
+  climbing: Mountain,
+  calories: Zap,
+  intensity: HeartPulse,
   consistency: Flame,
+  lifestyle: Clock,
+  variety: Layers,
+  recovery: Moon,
   special: Sparkles,
 };
 

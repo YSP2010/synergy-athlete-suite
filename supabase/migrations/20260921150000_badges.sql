@@ -25,6 +25,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
+#variable_conflict use_column
 DECLARE
   _uid uuid := auth.uid();
 BEGIN
