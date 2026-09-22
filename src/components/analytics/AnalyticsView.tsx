@@ -27,12 +27,13 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import {
-  buildLoadSeries,
+  buildLoadSeriesHybrid,
   weeklyVolume,
   withinDays,
   type AnalyticsActivity,
   type Thresholds,
 } from "@/lib/analytics/aggregate";
+import type { GymSessionLite, GymExerciseLite } from "@/lib/analytics/strength";
 import { acwrZone, fosterMonotony } from "@/lib/analytics/load";
 import { racePredictions } from "@/lib/analytics/predictions";
 import { bestRunEffort, computeRecords, type RecordActivity } from "@/lib/analytics/records";
@@ -120,7 +121,7 @@ export function AnalyticsView({
   const { data, isLoading } = useQuery({
     queryKey: ["analytics", userId],
     queryFn: async () => {
-      const [acts, wellness, sleep, hrv, metrics, profile] = await Promise.all([
+      const [acts, wellness, sleep, hrv, metrics, profile, gymW, gymEx] = await Promise.all([
         supabase
           .from("activities")
           .select(
@@ -161,6 +162,18 @@ export function AnalyticsView({
           .order("date", { ascending: true })
           .limit(1000),
         supabase.from("profiles").select("sex, birth_date").eq("id", userId).maybeSingle(),
+        supabase
+          .from("workouts_gym")
+          .select("id, date, session_type, duration_min, status")
+          .eq("user_id", userId)
+          .eq("status", "done")
+          .order("date", { ascending: true })
+          .limit(2000),
+        supabase
+          .from("gym_exercises")
+          .select("workout_id, sets, reps, weight_kg, rpe")
+          .eq("user_id", userId)
+          .limit(20000),
       ]);
       return {
         activities: acts.data ?? [],
@@ -169,6 +182,8 @@ export function AnalyticsView({
         hrv: hrv.data ?? [],
         metrics: metrics.data ?? [],
         profile: profile.data ?? null,
+        gymWorkouts: gymW.data ?? [],
+        gymExercises: gymEx.data ?? [],
       };
     },
   });
@@ -196,7 +211,19 @@ export function AnalyticsView({
     };
 
     const activities = data.activities as unknown as AnalyticsActivity[];
-    const series = withinDays(buildLoadSeries(activities, thresholds), days);
+    const exByWorkout = new Map<string, GymExerciseLite[]>();
+    for (const e of data.gymExercises) {
+      const arr = exByWorkout.get(e.workout_id) ?? [];
+      arr.push({ sets: e.sets, reps: e.reps, weight_kg: e.weight_kg, rpe: e.rpe });
+      exByWorkout.set(e.workout_id, arr);
+    }
+    const gymSessions: GymSessionLite[] = data.gymWorkouts.map((w) => ({
+      date: w.date,
+      session_type: w.session_type,
+      duration_min: w.duration_min,
+      exercises: exByWorkout.get(w.id) ?? [],
+    }));
+    const series = withinDays(buildLoadSeriesHybrid(activities, gymSessions, thresholds), days);
     const last = series[series.length - 1] ?? null;
     const weekly = withinDays(
       weeklyVolume(activities).map((w) => ({ ...w, date: w.week })),
@@ -359,6 +386,9 @@ export function AnalyticsView({
               explainAria={explainAria}
             />
           </div>
+          {zone ? (
+            <p className="text-xs text-muted-foreground">{t(`analytics.acwr.rec.${zone}`)}</p>
+          ) : null}
           {!view.series.length && (
             <EmptyHint text={t("analytics.empty.overview")} noDataLabel={t("analytics.noData")} />
           )}
@@ -372,7 +402,9 @@ export function AnalyticsView({
                 {t("analytics.load.title")}
                 <Explain text={t("analytics.load.explain")} aria={explainAria} />
               </CardTitle>
-              <CardDescription>{t("analytics.load.desc")}</CardDescription>
+              <CardDescription>
+                {t("analytics.load.desc")} · {t("analytics.load.hybridNote")}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {view.series.length ? (

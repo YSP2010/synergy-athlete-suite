@@ -12,6 +12,7 @@ import {
   type LoadPoint,
   type Sex,
 } from "./load";
+import { gymDailyLoads, type GymSessionLite } from "./strength";
 
 export interface AnalyticsActivity {
   id: string;
@@ -85,6 +86,19 @@ export function dailyLoads(activities: AnalyticsActivity[], t: Thresholds): Dail
 /** Vollständige Belastungs-Zeitreihe (CTL/ATL/TSB/ACWR). */
 export function buildLoadSeries(activities: AnalyticsActivity[], t: Thresholds): LoadPoint[] {
   return loadSeries(dailyLoads(activities, t));
+}
+
+/**
+ * Wie buildLoadSeries, aber inklusive Kraftlast aus Gym-Sessions – eine
+ * gemeinsame Hybrid-Form-Kurve über Ausdauer und Kraft. Gleiche Tage werden
+ * in loadSeries automatisch summiert.
+ */
+export function buildLoadSeriesHybrid(
+  activities: AnalyticsActivity[],
+  gymSessions: GymSessionLite[],
+  t: Thresholds,
+): LoadPoint[] {
+  return loadSeries([...dailyLoads(activities, t), ...gymDailyLoads(gymSessions)]);
 }
 
 export interface WeeklyVolume {

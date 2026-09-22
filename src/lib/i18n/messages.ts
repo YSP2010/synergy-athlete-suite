@@ -186,7 +186,15 @@ export const messages: Record<Locale, Record<string, string>> = {
     "analytics.load.explain":
       "CTL = Fitness (42 Tage), ATL = Ermüdung (7 Tage), TSB = Form. Ein Formtief nach harten Wochen ist normal, dauerhaft unter −30 nicht.",
     "analytics.load.desc": "Belastungsverlauf im gewählten Zeitraum",
+    "analytics.load.hybridNote": "inkl. Kraft- und Ausdauerbelastung",
     "analytics.empty.load": "Keine Belastungsdaten im Zeitraum.",
+    "analytics.acwr.rec.low":
+      "Deine Belastung liegt unter dem Schnitt – Raum für mehr Umfang oder Intensität.",
+    "analytics.acwr.rec.optimal": "Belastung im optimalen Bereich – so weitermachen.",
+    "analytics.acwr.rec.elevated":
+      "Belastung erhöht – auf gute Erholung achten und große Sprünge vermeiden.",
+    "analytics.acwr.rec.high":
+      "Belastung deutlich über dem Schnitt – Deload oder leichtere Tage einplanen.",
 
     "analytics.volume.title": "Wochenvolumen",
     "analytics.volume.explain":
@@ -449,7 +457,15 @@ export const messages: Record<Locale, Record<string, string>> = {
     "analytics.load.explain":
       "CTL = fitness (42 days), ATL = fatigue (7 days), TSB = form. A dip after hard weeks is normal, staying below −30 is not.",
     "analytics.load.desc": "Load over the selected period",
+    "analytics.load.hybridNote": "incl. strength and endurance load",
     "analytics.empty.load": "No load data in this period.",
+    "analytics.acwr.rec.low":
+      "Your load is below your average — room for more volume or intensity.",
+    "analytics.acwr.rec.optimal": "Load is in the optimal range — keep it up.",
+    "analytics.acwr.rec.elevated":
+      "Load is elevated — prioritise recovery and avoid big jumps.",
+    "analytics.acwr.rec.high":
+      "Load is well above average — plan a deload or easier days.",
 
     "analytics.volume.title": "Weekly volume",
     "analytics.volume.explain":
@@ -713,7 +729,15 @@ export const messages: Record<Locale, Record<string, string>> = {
     "analytics.load.explain":
       "CTL = форма (42 дні), ATL = втома (7 днів), TSB = свіжість. Спад після важких тижнів — нормально, постійно нижче −30 — ні.",
     "analytics.load.desc": "Динаміка навантаження за вибраний період",
+    "analytics.load.hybridNote": "вкл. силове та витривалісне навантаження",
     "analytics.empty.load": "Немає даних навантаження за цей період.",
+    "analytics.acwr.rec.low":
+      "Навантаження нижче середнього — є простір для більшого обсягу чи інтенсивності.",
+    "analytics.acwr.rec.optimal": "Навантаження в оптимальному діапазоні — так тримати.",
+    "analytics.acwr.rec.elevated":
+      "Навантаження підвищене — подбай про відновлення й уникай різких стрибків.",
+    "analytics.acwr.rec.high":
+      "Навантаження значно вище середнього — заплануй розвантаження або легші дні.",
 
     "analytics.volume.title": "Тижневий обсяг",
     "analytics.volume.explain":

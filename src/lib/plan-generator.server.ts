@@ -18,6 +18,7 @@ import type {
   WeekFocus,
 } from "./plan-types";
 import { focusLists, gymPlanWeeks, sportPlanWeeks } from "./plan-types";
+import type { PlanRecovery, RecoveryState } from "./plan-recovery";
 
 const RESPONSE_LANGUAGE: Record<PlanLocale, string> = {
   de: "German",
@@ -180,17 +181,18 @@ function repScheme(goal: string | null, exp: Experience): { sets: number; reps: 
   }
 }
 
-function buildGymSessions(input: PlanProfileInput): PlanSession[] {
+function buildGymSessions(input: PlanProfileInput, loadFactor = 1): PlanSession[] {
   const days = (input.gym_days ?? []).length || 3;
   const split = gymSplit(days);
   const { sets, reps } = repScheme(input.goal, input.experience_level ?? "intermediate");
+  const scale = (n: number) => Math.max(2, Math.round(n * loadFactor));
   return split.map((title, i) => ({
     day: `Einheit ${i + 1}`,
     title: `Gym · ${title}`,
     focus: title,
     exercises: (GYM_EXERCISES[title] ?? GYM_EXERCISES["Ganzkörper A"]).map((name, idx) => ({
       name,
-      sets: idx === 0 ? sets + 1 : sets,
+      sets: idx === 0 ? scale(sets + 1) : scale(sets),
       reps,
     })),
   }));
@@ -277,7 +279,47 @@ function buildSportSessions(input: PlanProfileInput): PlanSession[] {
 
 // ---------- Wochenphasen ----------
 
-function buildWeeklyFocus(weeks: number): WeekFocus[] {
+/** Volumen-Faktor auf die Startsätze je aktuellem Erholungszustand. */
+function loadFactor(state?: RecoveryState): number {
+  switch (state) {
+    case "overreached":
+      return 0.85;
+    case "fatigued":
+      return 0.95;
+    case "fresh":
+      return 1.05;
+    default:
+      return 1;
+  }
+}
+
+/** Notiz zum aktuellen Formstand (deutsch; KI-Schritt übersetzt bei Bedarf). */
+const RECOVERY_NOTE: Record<RecoveryState, string> = {
+  overreached:
+    "Aktueller Formstand: stark ermüdet – die erste Woche ist als Entlastung angelegt und das Startvolumen reduziert. Achte besonders auf Schlaf und Regeneration.",
+  fatigued:
+    "Aktueller Formstand: leicht ermüdet – das Startvolumen ist zu Beginn etwas reduziert.",
+  fresh: "Aktueller Formstand: frisch/erholt – ein etwas höheres Startvolumen ist möglich.",
+  balanced: "Aktueller Formstand: ausgeglichen – normale Progression.",
+  unknown: "",
+};
+
+const BASE_NOTES = [
+  "Vor jeder Einheit 8–10 min Aufwärmen.",
+  "Progression wöchentlich anpassen (Last, Wiederholungen oder Umfang).",
+  "Bei schlechter Erholung eine Einheit durch Mobility/Regeneration ersetzen.",
+];
+
+/** Basis-Hinweise, bei bekanntem Formstand um eine Recovery-Notiz ergänzt. */
+function planNotes(recovery?: PlanRecovery): string[] {
+  if (recovery && recovery.state !== "unknown" && RECOVERY_NOTE[recovery.state]) {
+    return [RECOVERY_NOTE[recovery.state], ...BASE_NOTES];
+  }
+  return [...BASE_NOTES];
+}
+
+function buildWeeklyFocus(weeks: number, state?: RecoveryState): WeekFocus[] {
+  const startDeload = state === "overreached" || state === "fatigued";
   const out: WeekFocus[] = [];
   for (let w = 1; w <= weeks; w++) {
     let phase = "Aufbau";
@@ -285,6 +327,9 @@ function buildWeeklyFocus(weeks: number): WeekFocus[] {
     if (w === weeks) {
       phase = "Deload";
       focus = "Entlastung: Volumen ca. −40 %, Technik & Regeneration";
+    } else if (startDeload && w === 1) {
+      phase = "Entlastung";
+      focus = "Reduziertes Volumen zum Einstieg – aktueller Formstand erfordert Erholung.";
     } else if (w <= Math.max(1, Math.round(weeks * 0.25))) {
       phase = "Grundlage";
       focus = "Technik festigen, moderate Lasten, Gewöhnung";
@@ -299,10 +344,17 @@ function buildWeeklyFocus(weeks: number): WeekFocus[] {
 
 // ---------- Gerüst zusammenbauen ----------
 
-function buildScaffold(input: PlanProfileInput, type: PlanType): PlanContent {
+function buildScaffold(
+  input: PlanProfileInput,
+  type: PlanType,
+  recovery?: PlanRecovery,
+): PlanContent {
   const weeks = type === "gym" ? gymPlanWeeks(input.goal) : sportPlanWeeks(input.sport);
+  const factor = loadFactor(recovery?.state);
   const sessions =
-    type === "gym" ? applyFocus(buildGymSessions(input), input.focus) : buildSportSessions(input);
+    type === "gym"
+      ? applyFocus(buildGymSessions(input, factor), input.focus)
+      : buildSportSessions(input);
 
   let macros: PlanContent["macros"] = null;
   if (type === "gym") {
@@ -333,14 +385,10 @@ function buildScaffold(input: PlanProfileInput, type: PlanType): PlanContent {
     experience: input.experience_level ?? "intermediate",
     weeks,
     summary,
-    weekly_focus: buildWeeklyFocus(weeks),
+    weekly_focus: buildWeeklyFocus(weeks, recovery?.state),
     sessions,
     macros,
-    notes: [
-      "Vor jeder Einheit 8–10 min Aufwärmen.",
-      "Progression wöchentlich anpassen (Last, Wiederholungen oder Umfang).",
-      "Bei schlechter Erholung eine Einheit durch Mobility/Regeneration ersetzen.",
-    ],
+    notes: planNotes(recovery),
     generated_by: "rules",
     generated_at: new Date().toISOString(),
   };
@@ -397,6 +445,7 @@ async function refineWithAI(
   input: PlanProfileInput,
   key: string,
   locale: PlanLocale,
+  recovery?: PlanRecovery,
 ): Promise<PlanContent> {
   const gateway = createLovableAiGatewayProvider(key);
   const context = [
@@ -406,6 +455,7 @@ async function refineWithAI(
     `goal=${scaffold.goal ?? "n/a"}`,
     `experience=${scaffold.experience}`,
     `weeks=${scaffold.weeks}`,
+    `recovery=${recovery?.state ?? "n/a"}`,
   ].join(", ");
 
   const { emphasize, reduce, exclude } = focusLists(input.focus);
@@ -414,7 +464,14 @@ async function refineWithAI(
       ? ` Muscle-group focus (respect strictly): emphasise [${groupsEn(emphasize)}], reduce [${groupsEn(reduce)}], exclude entirely [${groupsEn(exclude)}]. Honour the exclusions, but keep the remaining plan balanced and injury-safe.`
       : "";
 
-  const prompt = `You are an experienced strength & conditioning coach. Improve the following DRAFT training plan for an athlete (${context}). Make the exercise selection specific and appropriate to the athlete's sport, goal and experience level. Keep exactly the same JSON structure and keys. Do NOT change "type", "weeks", "version" or "macros". Keep the number of sessions similar.${focusLine} Write ALL text (titles, focus, notes, summary, exercise names) in ${RESPONSE_LANGUAGE[locale]}. Return ONLY valid minified JSON, no markdown, no commentary.\n\nDRAFT:\n${JSON.stringify(scaffold)}`;
+  const recoveryLine =
+    recovery && (recovery.state === "fatigued" || recovery.state === "overreached")
+      ? ` The athlete is currently ${recovery.state}: keep the first 1–2 weeks conservative (lower volume, more recovery) and progress more gradually.`
+      : recovery && recovery.state === "fresh"
+        ? " The athlete is currently fresh/well recovered: a slightly higher starting volume is acceptable."
+        : "";
+
+  const prompt = `You are an experienced strength & conditioning coach. Improve the following DRAFT training plan for an athlete (${context}). Make the exercise selection specific and appropriate to the athlete's sport, goal and experience level. Keep exactly the same JSON structure and keys. Do NOT change "type", "weeks", "version" or "macros". Keep the number of sessions similar.${focusLine}${recoveryLine} Write ALL text (titles, focus, notes, summary, exercise names) in ${RESPONSE_LANGUAGE[locale]}. Return ONLY valid minified JSON, no markdown, no commentary.\n\nDRAFT:\n${JSON.stringify(scaffold)}`;
 
   const { text } = await generateText({
     model: gateway("openai/gpt-5.6-sol"),
@@ -459,12 +516,13 @@ export async function generatePlan(
   input: PlanProfileInput,
   type: PlanType,
   locale: PlanLocale = "de",
+  recovery?: PlanRecovery,
 ): Promise<PlanContent> {
-  const scaffold = buildScaffold(input, type);
+  const scaffold = buildScaffold(input, type, recovery);
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) return scaffold;
   try {
-    return await refineWithAI(scaffold, input, key, locale);
+    return await refineWithAI(scaffold, input, key, locale, recovery);
   } catch (e) {
     console.error("[plan] AI refinement failed, using rule-based scaffold:", e);
     return scaffold;

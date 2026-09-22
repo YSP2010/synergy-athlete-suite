@@ -1,10 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 import { generatePlan } from "./plan-generator.server";
 import type { PlanProfileInput } from "./plan-generator.server";
 import type { Experience, PlanContent, PlanStatus, PlanType, TrainingFocus } from "./plan-types";
 import { PLAN_COOLDOWN_DAYS, planTypeStatus } from "./plan-types";
+import { computePlanRecovery, UNKNOWN_RECOVERY, type PlanRecovery } from "./plan-recovery";
+import type { AnalyticsActivity, Thresholds } from "./analytics/aggregate";
+import type { GymSessionLite, GymExerciseLite } from "./analytics/strength";
 
 const GeneratePlanInput = z.object({
   type: z.enum(["gym", "sport"]),
@@ -69,6 +74,83 @@ async function latestPlanAt(db: PlanDb, userId: string, type: PlanType): Promise
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as { created_at: string }[];
   return rows.length ? rows[0].created_at : null;
+}
+
+/**
+ * Serverseitiger Erholungs-Snapshot (hybrid: Ausdauer + Kraft) für die
+ * adaptive Plangenerierung. Nutzt denselben Last-Code wie /analytics.
+ */
+async function fetchPlanRecovery(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<PlanRecovery> {
+  const since = new Date(Date.now() - 60 * 86_400_000).toISOString().slice(0, 10);
+  const [acts, gymW, gymEx, metrics, wellness, profile] = await Promise.all([
+    supabase
+      .from("activities")
+      .select(
+        "id, sport, started_at, duration_s, moving_duration_s, distance_m, avg_hr, avg_speed_mps, normalized_power_w, avg_power_w",
+      )
+      .eq("user_id", userId)
+      .eq("route_only", false)
+      .gte("started_at", since)
+      .order("started_at", { ascending: true })
+      .limit(500),
+    supabase
+      .from("workouts_gym")
+      .select("id, date, session_type, duration_min, status")
+      .eq("user_id", userId)
+      .eq("status", "done")
+      .gte("date", since)
+      .order("date", { ascending: true })
+      .limit(400),
+    supabase
+      .from("gym_exercises")
+      .select("workout_id, sets, reps, weight_kg, rpe")
+      .eq("user_id", userId)
+      .limit(8000),
+    supabase
+      .from("user_metrics")
+      .select("date, training_readiness, lactate_threshold_hr, lactate_threshold_speed_mps, ftp_w")
+      .eq("user_id", userId)
+      .order("date", { ascending: false })
+      .limit(1),
+    supabase
+      .from("wellness_daily")
+      .select("resting_hr")
+      .eq("user_id", userId)
+      .order("date", { ascending: false })
+      .limit(1),
+    supabase.from("profiles").select("sex").eq("id", userId).maybeSingle(),
+  ]);
+
+  const m = metrics.data?.[0] ?? null;
+  const w = wellness.data?.[0] ?? null;
+  const thresholds: Thresholds = {
+    maxHr: m?.lactate_threshold_hr ? Math.round(m.lactate_threshold_hr / 0.9) : null,
+    restHr: w?.resting_hr ?? null,
+    lthr: m?.lactate_threshold_hr ?? null,
+    thresholdSpeedMps: m?.lactate_threshold_speed_mps ?? null,
+    ftpW: m?.ftp_w ?? null,
+    cssMps: null,
+    sex: (profile.data?.sex ?? null) as Thresholds["sex"],
+  };
+
+  const activities = (acts.data ?? []) as unknown as AnalyticsActivity[];
+  const exByWorkout = new Map<string, GymExerciseLite[]>();
+  for (const e of gymEx.data ?? []) {
+    const arr = exByWorkout.get(e.workout_id) ?? [];
+    arr.push({ sets: e.sets, reps: e.reps, weight_kg: e.weight_kg, rpe: e.rpe });
+    exByWorkout.set(e.workout_id, arr);
+  }
+  const gymSessions: GymSessionLite[] = (gymW.data ?? []).map((g) => ({
+    date: g.date,
+    session_type: g.session_type,
+    duration_min: g.duration_min,
+    exercises: exByWorkout.get(g.id) ?? [],
+  }));
+
+  return computePlanRecovery(activities, gymSessions, thresholds, m?.training_readiness ?? null);
 }
 
 /** Cooldown-Status je Plantyp – für die Einstellungen-UI. */
@@ -152,8 +234,16 @@ export const generateTrainingPlan = createServerFn({ method: "POST" })
       focus: (prof.training_focus as TrainingFocus | null) ?? null,
     };
 
-    // 3) Plan generieren (Hybrid: Regel-Gerüst + KI-Feinschliff)
-    const plan = await generatePlan(input, type, data.locale ?? "de");
+    // 2b) Aktuellen Erholungszustand ermitteln (hybrid: Ausdauer + Kraft)
+    let recovery: PlanRecovery = UNKNOWN_RECOVERY;
+    try {
+      recovery = await fetchPlanRecovery(supabase, userId);
+    } catch (e) {
+      console.error("[plan] recovery fetch failed, ignoring:", e);
+    }
+
+    // 3) Plan generieren (Hybrid: Regel-Gerüst + KI-Feinschliff, erholungsbewusst)
+    const plan = await generatePlan(input, type, data.locale ?? "de", recovery);
 
     // 4) Bisherigen aktiven Plan desselben Typs deaktivieren
     const { error: deactErr } = await db
