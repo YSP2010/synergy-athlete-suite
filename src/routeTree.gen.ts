@@ -40,6 +40,7 @@ import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedEquipmentRouteImport } from './routes/_authenticated/equipment'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCheckinRouteImport } from './routes/_authenticated/checkin'
+import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -219,6 +220,11 @@ const AuthenticatedCheckinRoute = AuthenticatedCheckinRouteImport.update({
   path: '/checkin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedChallengesRoute = AuthenticatedChallengesRouteImport.update({
+  id: '/challenges',
+  path: '/challenges',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -328,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/challenges': typeof AuthenticatedChallengesRoute
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipment': typeof AuthenticatedEquipmentRoute
@@ -379,6 +386,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/challenges': typeof AuthenticatedChallengesRoute
   '/checkin': typeof AuthenticatedCheckinRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipment': typeof AuthenticatedEquipmentRoute
@@ -432,6 +440,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
+  '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
   '/_authenticated/checkin': typeof AuthenticatedCheckinRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/equipment': typeof AuthenticatedEquipmentRoute
@@ -485,6 +494,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/analytics'
+    | '/challenges'
     | '/checkin'
     | '/dashboard'
     | '/equipment'
@@ -536,6 +546,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/analytics'
+    | '/challenges'
     | '/checkin'
     | '/dashboard'
     | '/equipment'
@@ -588,6 +599,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/analytics'
+    | '/_authenticated/challenges'
     | '/_authenticated/checkin'
     | '/_authenticated/dashboard'
     | '/_authenticated/equipment'
@@ -872,6 +884,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCheckinRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/challenges': {
+      id: '/_authenticated/challenges'
+      path: '/challenges'
+      fullPath: '/challenges'
+      preLoaderRoute: typeof AuthenticatedChallengesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/analytics': {
       id: '/_authenticated/analytics'
       path: '/analytics'
@@ -1010,6 +1029,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
+  AuthenticatedChallengesRoute: typeof AuthenticatedChallengesRoute
   AuthenticatedCheckinRoute: typeof AuthenticatedCheckinRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEquipmentRoute: typeof AuthenticatedEquipmentRoute
@@ -1046,6 +1066,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
+  AuthenticatedChallengesRoute: AuthenticatedChallengesRoute,
   AuthenticatedCheckinRoute: AuthenticatedCheckinRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEquipmentRoute: AuthenticatedEquipmentRoute,
