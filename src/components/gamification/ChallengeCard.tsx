@@ -9,6 +9,10 @@ import {
   Flame,
   Target,
   Check,
+  Waves,
+  Zap,
+  Activity,
+  Timer,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { XpBar } from "@/components/gamification/XpBar";
@@ -29,6 +33,10 @@ const ICONS: Record<string, typeof Target> = {
   Medal,
   Flame,
   Target,
+  Waves,
+  Zap,
+  Activity,
+  Timer,
 };
 
 const UI = {
