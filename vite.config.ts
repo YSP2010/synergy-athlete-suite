@@ -7,6 +7,30 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 import { VitePWA } from "vite-plugin-pwa";
+import type { Plugin } from "vite";
+import { sep } from "node:path";
+
+// Windows-Fix für @lovable.dev/mcp-js: Das Plugin vergleicht in `configResolved`
+// `config.root` (von Vite mit "/" normalisiert) gegen `path.resolve()`-Ausgaben
+// (auf Windows mit "\") ohne zu normalisieren und bricht deshalb den lokalen
+// Build auf Windows ab. Wir reichen dem Plugin eine `root` im OS-Trenner durch.
+// No-op auf POSIX (sep === "/"), d. h. der Lovable-/CI-Build bleibt unverändert.
+function windowsMcpPathFix(plugin: Plugin): Plugin {
+  const hook = plugin.configResolved;
+  if (sep === "/" || typeof hook !== "function") return plugin;
+  plugin.configResolved = function (config) {
+    const patched = new Proxy(config, {
+      get(target, prop, receiver) {
+        if (prop === "root" && typeof target.root === "string") {
+          return target.root.split("/").join(sep);
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+    });
+    return hook.call(this, patched);
+  };
+  return plugin;
+}
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
@@ -35,7 +59,7 @@ export default defineConfig({
       ),
     },
     plugins: [
-      mcpPlugin(),
+      windowsMcpPathFix(mcpPlugin()),
       VitePWA({
         strategies: "generateSW",
         registerType: "autoUpdate",

@@ -6,6 +6,7 @@ import { generateProgressInsight } from "@/lib/insights.functions";
 import { Button } from "@/components/ui/button";
 import { QueryError } from "@/components/ui/query-error";
 import { TrainingTipCard } from "@/components/ai/TrainingTipCard";
+import { RecoveryDrivers } from "@/components/insights/RecoveryDrivers";
 import { WEEKDAY_LONG, isoDow } from "@/lib/dates";
 import { humanError } from "@/lib/errors";
 import { toast } from "sonner";
@@ -142,6 +143,8 @@ function InsightsPage() {
       </div>
 
       <TrainingTipCard />
+
+      <RecoveryDrivers />
 
       <div>
         <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
