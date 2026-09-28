@@ -12,12 +12,31 @@ import {
 
 type RecoveryMetric = "readiness" | "hrv" | "restingHr";
 
+// daily_stats inkl. Lifestyle-Spalten (noch nicht in den generierten Typen –
+// Migration 20260928120000). Cast beim Lesen.
+interface StatRow {
+  date: string;
+  sleep_hours: number | null;
+  sleep_quality: number | null;
+  soreness: number | null;
+  stress: number | null;
+  mood: number | null;
+  caffeine: number | null;
+  alcohol: number | null;
+  late_meal: number | null;
+  screen_before_bed: number | null;
+}
+
 const FACTOR_LABEL: Record<FactorKey, string> = {
   sleepHours: "Schlafdauer",
   sleepQuality: "Schlafqualität",
   soreness: "Muskelkater",
   stress: "Stress",
   mood: "Stimmung",
+  caffeine: "Koffein",
+  alcohol: "Alkohol",
+  lateMeal: "Späte Mahlzeit",
+  screenBeforeBed: "Bildschirm vor dem Schlaf",
 };
 
 const STRENGTH_LABEL: Record<RecoveryDriver["strength"], string> = {
@@ -54,7 +73,7 @@ export function RecoveryDrivers() {
       const [stats, hrv, metrics, wellness] = await Promise.all([
         supabase
           .from("daily_stats")
-          .select("date, sleep_hours, sleep_quality, soreness, stress, mood")
+          .select("*")
           .eq("user_id", uid)
           .gte("date", since),
         supabase
@@ -97,7 +116,8 @@ export function RecoveryDrivers() {
       if (w.resting_hr != null) rhrByDate.set(w.date, Number(w.resting_hr));
     }
 
-    const statDates = data.stats.map((s) => s.date);
+    const statRows = data.stats as unknown as StatRow[];
+    const statDates = statRows.map((s) => s.date);
     const overlap = (m: Map<string, number>) =>
       statDates.reduce((c, d) => c + (m.has(d) ? 1 : 0), 0);
     const candidates: { metric: RecoveryMetric; map: Map<string, number>; count: number }[] = [
@@ -109,7 +129,7 @@ export function RecoveryDrivers() {
     const best = candidates[0]!;
     if (best.count < MIN_DAYS) return { metric: null, drivers: [] as RecoveryDriver[], samples: 0 };
 
-    const rows: DailyFactorRow[] = data.stats.map((s) => {
+    const rows: DailyFactorRow[] = statRows.map((s) => {
       const raw = best.map.get(s.date) ?? null;
       // Ruhepuls invertieren, damit überall "höher = bessere Erholung" gilt.
       const recovery = raw == null ? null : best.metric === "restingHr" ? -raw : raw;
@@ -120,6 +140,10 @@ export function RecoveryDrivers() {
         soreness: s.soreness ?? null,
         stress: s.stress ?? null,
         mood: s.mood ?? null,
+        caffeine: s.caffeine ?? null,
+        alcohol: s.alcohol ?? null,
+        lateMeal: s.late_meal ?? null,
+        screenBeforeBed: s.screen_before_bed ?? null,
         recovery,
       };
     });

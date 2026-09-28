@@ -47,6 +47,25 @@ const SCALE_LABELS = {
   mood: ["Schlecht", "Meh", "Okay", "Gut", "Top"],
 };
 
+const AMOUNT_LABELS = ["Keine", "Wenig", "Mittel", "Viel"];
+
+// daily_stats-Zeile inkl. Lifestyle-Spalten (noch nicht in den generierten
+// Supabase-Typen enthalten – Migration 20260928120000). Bis zur Neugenerierung
+// gezielt getypter Cast statt any (analog training_focus/ai_tip_log).
+interface CheckinRow {
+  weight_kg: number | null;
+  sleep_hours: number | null;
+  sleep_quality: number | null;
+  soreness: number | null;
+  stress: number | null;
+  mood: number | null;
+  notes: string | null;
+  caffeine: number | null;
+  alcohol: number | null;
+  late_meal: number | null;
+  screen_before_bed: number | null;
+}
+
 const EMPTY_FORM = {
   weight_kg: "",
   sleep_hours: "8",
@@ -54,6 +73,10 @@ const EMPTY_FORM = {
   soreness: 2,
   stress: 2,
   mood: 3,
+  caffeine: 0,
+  alcohol: 0,
+  late_meal: 0,
+  screen_before_bed: 0,
   notes: "",
 };
 
@@ -75,7 +98,7 @@ function CheckinPage() {
         .eq("user_id", u.user.id)
         .eq("date", date)
         .maybeSingle();
-      return data;
+      return (data as unknown as CheckinRow | null) ?? null;
     },
   });
 
@@ -89,6 +112,10 @@ function CheckinPage() {
         soreness: existing.soreness ?? 2,
         stress: existing.stress ?? 2,
         mood: existing.mood ?? 3,
+        caffeine: existing.caffeine ?? 0,
+        alcohol: existing.alcohol ?? 0,
+        late_meal: existing.late_meal ?? 0,
+        screen_before_bed: existing.screen_before_bed ?? 0,
         notes: existing.notes ?? "",
       });
     } else {
@@ -109,11 +136,15 @@ function CheckinPage() {
         soreness: f.soreness,
         stress: f.stress,
         mood: f.mood,
+        caffeine: f.caffeine,
+        alcohol: f.alcohol,
+        late_meal: f.late_meal,
+        screen_before_bed: f.screen_before_bed,
         notes: f.notes || null,
       };
       const { error } = await supabase
         .from("daily_stats")
-        .upsert(payload, { onConflict: "user_id,date" });
+        .upsert(payload as never, { onConflict: "user_id,date" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -196,6 +227,32 @@ function CheckinPage() {
             goodHigh
           />
 
+          <div className="space-y-4 border-t border-border pt-4">
+            <div className="text-xs uppercase tracking-widest text-muted-foreground">
+              Lifestyle (optional)
+            </div>
+            <AmountRow
+              label="Koffein"
+              value={f.caffeine}
+              onChange={(v) => setF({ ...f, caffeine: v })}
+            />
+            <AmountRow
+              label="Alkohol"
+              value={f.alcohol}
+              onChange={(v) => setF({ ...f, alcohol: v })}
+            />
+            <AmountRow
+              label="Späte Mahlzeit"
+              value={f.late_meal}
+              onChange={(v) => setF({ ...f, late_meal: v })}
+            />
+            <AmountRow
+              label="Bildschirm vor dem Schlaf"
+              value={f.screen_before_bed}
+              onChange={(v) => setF({ ...f, screen_before_bed: v })}
+            />
+          </div>
+
           <div>
             <Label>Notiz</Label>
             <Textarea
@@ -257,6 +314,47 @@ function ScaleRow({
               )}
             >
               {n}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function AmountRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <Label>{label}</Label>
+        <span className="text-xs text-muted-foreground">
+          {AMOUNT_LABELS[value] ?? AMOUNT_LABELS[0]}
+        </span>
+      </div>
+      <div className="flex gap-1.5">
+        {[0, 1, 2, 3].map((n) => {
+          const active = n === value;
+          return (
+            <button
+              key={n}
+              type="button"
+              onClick={() => onChange(n)}
+              className={cn(
+                "h-11 flex-1 rounded-lg border text-xs font-semibold transition",
+                active
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "border-border bg-elevated text-muted-foreground",
+              )}
+            >
+              {AMOUNT_LABELS[n]}
             </button>
           );
         })}

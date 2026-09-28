@@ -26,6 +26,10 @@ describe("recoveryDrivers", () => {
       soreness: null,
       stress: null,
       mood: null,
+      caffeine: null,
+      alcohol: null,
+      lateMeal: null,
+      screenBeforeBed: null,
       recovery: rec,
     }));
   }

@@ -4,7 +4,16 @@
  * Reine Funktionen – die Datenbeschaffung passiert in der Komponente.
  */
 
-export type FactorKey = "sleepHours" | "sleepQuality" | "soreness" | "stress" | "mood";
+export type FactorKey =
+  | "sleepHours"
+  | "sleepQuality"
+  | "soreness"
+  | "stress"
+  | "mood"
+  | "caffeine"
+  | "alcohol"
+  | "lateMeal"
+  | "screenBeforeBed";
 
 export const FACTOR_KEYS: FactorKey[] = [
   "sleepHours",
@@ -12,6 +21,10 @@ export const FACTOR_KEYS: FactorKey[] = [
   "soreness",
   "stress",
   "mood",
+  "caffeine",
+  "alcohol",
+  "lateMeal",
+  "screenBeforeBed",
 ];
 
 export interface DailyFactorRow {
@@ -21,6 +34,10 @@ export interface DailyFactorRow {
   soreness: number | null;
   stress: number | null;
   mood: number | null;
+  caffeine: number | null;
+  alcohol: number | null;
+  lateMeal: number | null;
+  screenBeforeBed: number | null;
   /** Gewählte Erholungsmetrik des Tages – höher = besser. */
   recovery: number | null;
 }
