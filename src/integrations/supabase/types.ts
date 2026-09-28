@@ -246,6 +246,87 @@ export type Database = {
           },
         ]
       }
+      ai_tip_log: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      body_scans: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      challenges: {
+        Row: {
+          active_from: string | null
+          active_to: string | null
+          category: string
+          difficulty: string
+          focus: string | null
+          id: string
+          key: string
+          metric: string | null
+          scope: string
+          sort: number
+          target_value: number | null
+          xp_reward: number
+        }
+        Insert: {
+          active_from?: string | null
+          active_to?: string | null
+          category: string
+          difficulty: string
+          focus?: string | null
+          id?: string
+          key: string
+          metric?: string | null
+          scope: string
+          sort?: number
+          target_value?: number | null
+          xp_reward: number
+        }
+        Update: {
+          active_from?: string | null
+          active_to?: string | null
+          category?: string
+          difficulty?: string
+          focus?: string | null
+          id?: string
+          key?: string
+          metric?: string | null
+          scope?: string
+          sort?: number
+          target_value?: number | null
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           chat_id: string
@@ -507,11 +588,15 @@ export type Database = {
       }
       daily_stats: {
         Row: {
+          alcohol: number | null
+          caffeine: number | null
           created_at: string
           date: string
           id: string
+          late_meal: number | null
           mood: number | null
           notes: string | null
+          screen_before_bed: number | null
           sleep_hours: number | null
           sleep_quality: number | null
           soreness: number | null
@@ -521,11 +606,15 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          alcohol?: number | null
+          caffeine?: number | null
           created_at?: string
           date: string
           id?: string
+          late_meal?: number | null
           mood?: number | null
           notes?: string | null
+          screen_before_bed?: number | null
           sleep_hours?: number | null
           sleep_quality?: number | null
           soreness?: number | null
@@ -535,11 +624,15 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          alcohol?: number | null
+          caffeine?: number | null
           created_at?: string
           date?: string
           id?: string
+          late_meal?: number | null
           mood?: number | null
           notes?: string | null
+          screen_before_bed?: number | null
           sleep_hours?: number | null
           sleep_quality?: number | null
           soreness?: number | null
@@ -1155,9 +1248,12 @@ export type Database = {
       profiles: {
         Row: {
           allergies: string[] | null
+          avatar: Json
           birth_date: string | null
           created_at: string
           diet_style: string | null
+          experience_level: Database["public"]["Enums"]["experience_level"]
+          first_training_at: string | null
           goal: Database["public"]["Enums"]["goal_type"] | null
           gym_days: number[] | null
           height_cm: number | null
@@ -1176,14 +1272,19 @@ export type Database = {
           sport: string | null
           sport_days: number[] | null
           timezone: string | null
+          total_xp: number
+          training_focus: Json
           updated_at: string
           weight_kg: number | null
         }
         Insert: {
           allergies?: string[] | null
+          avatar?: Json
           birth_date?: string | null
           created_at?: string
           diet_style?: string | null
+          experience_level?: Database["public"]["Enums"]["experience_level"]
+          first_training_at?: string | null
           goal?: Database["public"]["Enums"]["goal_type"] | null
           gym_days?: number[] | null
           height_cm?: number | null
@@ -1202,14 +1303,19 @@ export type Database = {
           sport?: string | null
           sport_days?: number[] | null
           timezone?: string | null
+          total_xp?: number
+          training_focus?: Json
           updated_at?: string
           weight_kg?: number | null
         }
         Update: {
           allergies?: string[] | null
+          avatar?: Json
           birth_date?: string | null
           created_at?: string
           diet_style?: string | null
+          experience_level?: Database["public"]["Enums"]["experience_level"]
+          first_training_at?: string | null
           goal?: Database["public"]["Enums"]["goal_type"] | null
           gym_days?: number[] | null
           height_cm?: number | null
@@ -1228,6 +1334,8 @@ export type Database = {
           sport?: string | null
           sport_days?: number[] | null
           timezone?: string | null
+          total_xp?: number
+          training_focus?: Json
           updated_at?: string
           weight_kg?: number | null
         }
@@ -1653,6 +1761,110 @@ export type Database = {
           },
         ]
       }
+      training_plans: {
+        Row: {
+          active: boolean
+          created_at: string
+          goal: string | null
+          id: string
+          plan: Json
+          type: Database["public"]["Enums"]["training_plan_type"]
+          updated_at: string
+          user_id: string
+          weeks: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          goal?: string | null
+          id?: string
+          plan?: Json
+          type: Database["public"]["Enums"]["training_plan_type"]
+          updated_at?: string
+          user_id: string
+          weeks: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          goal?: string | null
+          id?: string
+          plan?: Json
+          type?: Database["public"]["Enums"]["training_plan_type"]
+          updated_at?: string
+          user_id?: string
+          weeks?: number
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_key: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_key: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_key?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_challenges: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          confirmed_manually: boolean
+          created_at: string
+          id: string
+          period_start: string
+          progress_value: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          confirmed_manually?: boolean
+          created_at?: string
+          id?: string
+          period_start: string
+          progress_value?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          confirmed_manually?: boolean
+          created_at?: string
+          id?: string
+          period_start?: string
+          progress_value?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_metrics: {
         Row: {
           acute_load: number | null
@@ -1914,12 +2126,41 @@ export type Database = {
         }
         Relationships: []
       }
+      xp_events: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          source_id: string
+          source_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          source_id: string
+          source_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          source_id?: string
+          source_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      claim_challenge: { Args: { _key: string }; Returns: undefined }
       coach_can_view_athlete: { Args: { _user_id: string }; Returns: boolean }
+      compute_and_store_xp: { Args: { _uid: string }; Returns: undefined }
       course_leaderboard: {
         Args: { _course_id: string }
         Returns: {
@@ -2011,10 +2252,46 @@ export type Database = {
           team_name: string
         }[]
       }
+      season_focus: {
+        Args: { _quarter: number; _year: number }
+        Returns: string
+      }
+      sync_my_badges: {
+        Args: never
+        Returns: {
+          badge_key: string
+          earned_at: string
+        }[]
+      }
+      sync_my_challenges: {
+        Args: never
+        Returns: {
+          category: string
+          confirmed_manually: boolean
+          difficulty: string
+          focus: string
+          key: string
+          metric: string
+          period_start: string
+          progress_value: number
+          scope: string
+          status: string
+          target_value: number
+          xp_reward: number
+        }[]
+      }
+      sync_my_xp: {
+        Args: never
+        Returns: {
+          first_training_at: string
+          total_xp: number
+        }[]
+      }
     }
     Enums: {
       activity_source: "file" | "garmin" | "manual"
       chat_type: "direct" | "team"
+      experience_level: "beginner" | "intermediate" | "advanced"
       goal_type: "muscle_gain" | "maintain" | "recomp" | "performance"
       gym_session_type:
         | "push"
@@ -2036,6 +2313,7 @@ export type Database = {
       sex_type: "male" | "female" | "other"
       sport_kind: "training" | "match"
       team_member_status: "pending" | "active" | "declined"
+      training_plan_type: "gym" | "sport"
       user_role: "athlete" | "coach"
     }
     CompositeTypes: {
@@ -2166,6 +2444,7 @@ export const Constants = {
     Enums: {
       activity_source: ["file", "garmin", "manual"],
       chat_type: ["direct", "team"],
+      experience_level: ["beginner", "intermediate", "advanced"],
       goal_type: ["muscle_gain", "maintain", "recomp", "performance"],
       gym_session_type: [
         "push",
@@ -2188,6 +2467,7 @@ export const Constants = {
       sex_type: ["male", "female", "other"],
       sport_kind: ["training", "match"],
       team_member_status: ["pending", "active", "declined"],
+      training_plan_type: ["gym", "sport"],
       user_role: ["athlete", "coach"],
     },
   },
