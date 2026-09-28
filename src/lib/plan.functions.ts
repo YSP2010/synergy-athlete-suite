@@ -169,6 +169,19 @@ export const getTrainingPlanStatus = createServerFn({ method: "POST" })
     };
   });
 
+/** Aktueller Erholungszustand (hybrid) – für die Anzeige vor der Plangenerierung. */
+export const getPlanRecovery = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<PlanRecovery> => {
+    const { supabase, userId } = context;
+    try {
+      return await fetchPlanRecovery(supabase, userId);
+    } catch (e) {
+      console.error("[plan] getPlanRecovery failed, returning unknown:", e);
+      return UNKNOWN_RECOVERY;
+    }
+  });
+
 /** Aktive Pläne des Nutzers (beide Typen) – für Anzeige auf der Plan-Seite. */
 export const listTrainingPlans = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

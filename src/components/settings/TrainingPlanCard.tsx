@@ -9,7 +9,9 @@ import { humanError } from "@/lib/errors";
 import { useI18n } from "@/lib/i18n";
 import { FocusPicker } from "@/components/plan/FocusPicker";
 import { BodyScanCard } from "@/components/plan/BodyScanCard";
-import { getTrainingPlanStatus, generateTrainingPlan } from "@/lib/plan.functions";
+import { getTrainingPlanStatus, generateTrainingPlan, getPlanRecovery } from "@/lib/plan.functions";
+import type { PlanRecovery } from "@/lib/plan-recovery";
+import { cn } from "@/lib/utils";
 import {
   EMPTY_FOCUS,
   type PlanStatus,
@@ -35,10 +37,16 @@ export function TrainingPlanCard() {
   const { t, locale } = useI18n();
   const getStatus = useServerFn(getTrainingPlanStatus);
   const generate = useServerFn(generateTrainingPlan);
+  const getRecovery = useServerFn(getPlanRecovery);
 
   const { data: status, isLoading } = useQuery({
     queryKey: ["training-plan-status"],
     queryFn: () => getStatus({ data: undefined }) as Promise<PlanStatus>,
+  });
+
+  const { data: recovery } = useQuery({
+    queryKey: ["plan-recovery"],
+    queryFn: () => getRecovery({ data: undefined }) as Promise<PlanRecovery>,
   });
 
   const { data: profileFocus } = useQuery({
@@ -100,6 +108,8 @@ export function TrainingPlanCard() {
     <div className="card-elevated space-y-4 p-5">
       <h2 className="font-display text-lg font-semibold">{t("plan.card.title")}</h2>
       <p className="text-xs text-muted-foreground">{t("plan.card.subtitle")}</p>
+
+      <RecoveryLine recovery={recovery} t={t} />
 
       <BodyScanCard onApply={applySuggestion} />
 
@@ -177,6 +187,34 @@ function PlanRow({
         {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {label}
       </Button>
+    </div>
+  );
+}
+
+const RECOVERY_DOT: Record<string, string> = {
+  fresh: "bg-[color:var(--success)]",
+  balanced: "bg-muted-foreground",
+  fatigued: "bg-[color:var(--warn)]",
+  overreached: "bg-[color:var(--danger)]",
+};
+
+/** Zeigt den aktuellen Formstand, der die nächste Plangenerierung beeinflusst. */
+function RecoveryLine({ recovery, t }: { recovery: PlanRecovery | undefined; t: TFn }) {
+  if (!recovery) return null;
+  if (recovery.state === "unknown") {
+    return <p className="text-xs text-muted-foreground">{t("plan.recovery.unknown")}</p>;
+  }
+  return (
+    <div className="flex items-start gap-2 rounded-lg border border-border bg-elevated p-3">
+      <span className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", RECOVERY_DOT[recovery.state] ?? "bg-muted-foreground")} />
+      <div className="text-xs">
+        <span className="font-medium text-foreground">
+          {t("plan.recovery.label")}: {t(`plan.recovery.name.${recovery.state}`)}
+        </span>
+        <span className="mt-0.5 block text-muted-foreground">
+          {t(`plan.recovery.effect.${recovery.state}`)}
+        </span>
+      </div>
     </div>
   );
 }
